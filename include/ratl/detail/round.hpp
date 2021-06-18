@@ -32,7 +32,7 @@ inline int32_t roundFloat32ToInt32(float32_t input) noexcept
 //#    else
 //    return static_cast<int32_t>(vgetq_lane_f32(vreinterpretq_f32_m128(_mm_round_ps(a, _MM_FROUND_CUR_DIRECTION)), 0));
 //#    endif
-//#else
+#else
     return static_cast<int32_t>(std::lrint(input));
 #endif
 }
