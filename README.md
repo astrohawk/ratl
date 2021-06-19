@@ -4,7 +4,14 @@ Ratl (pronounced rattle) is a C++ header-only library that is designed to help w
 data. It does this by providing clear and unambiguous types to hold and represent audio data as well as fast and easy
 ways to convert audio data between these various types.
 
-## Getting Started
-
 ## Features
+
+Support for:
+1. 16 bit, 24 bit, and 32 bit integer, and 32 bit floating point samples
+1. Host byte order and network byte order samples
+1. Interleaved and non-interleaved audio buffers
+1. Optional sample dithering when converting any samples to 16 bit integer samples or when converting floating point
+   samples to integer samples
+
+## Getting Started
 
