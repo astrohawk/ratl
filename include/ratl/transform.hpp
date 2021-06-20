@@ -65,7 +65,7 @@ public:
             // Input and output have same number of channels, so blit samples
 
             return OutputIterator(
-                result.channels(), SampleTransformer{dither_generator_}(first.base(), last.base(), result.base()));
+                SampleTransformer{dither_generator_}(first.base(), last.base(), result.base()), result.channels());
         }
         else
         {
@@ -121,7 +121,7 @@ public:
             // Input and output have same number of channels, so blit samples
 
             return OutputIterator(
-                result.frames(), SampleTransformer{dither_generator_}(first.base(), last.base(), result.base()));
+                SampleTransformer{dither_generator_}(first.base(), last.base(), result.base()), result.frames());
         }
         else
         {
@@ -170,7 +170,7 @@ public:
         {
             if (result.stride() == 1)
             {
-                return OutputIterator(1, sample_transformer_(first.base(), last.base(), result.base()));
+                return OutputIterator(sample_transformer_(first.base(), last.base(), result.base()), 1);
             }
             else
             {
@@ -181,7 +181,7 @@ public:
         {
             if (result.stride() == 1)
             {
-                return OutputIterator(1, sample_transformer_(first, last, result.base()));
+                return OutputIterator(sample_transformer_(first, last, result.base()), 1);
             }
             else
             {
@@ -244,7 +244,7 @@ public:
     {
         if (result.stride() == 1)
         {
-            return OutputIterator(1, sample_transformer_(first.base(), last.base(), result.base()));
+            return OutputIterator(sample_transformer_(first.base(), last.base(), result.base()), 1);
         }
         else
         {
@@ -303,7 +303,7 @@ public:
         {
             if (result.stride() == 1)
             {
-                return OutputIterator(1, sample_transformer_(first.base(), last.base(), result.base()));
+                return OutputIterator(sample_transformer_(first.base(), last.base(), result.base()), 1);
             }
             else
             {
@@ -314,7 +314,7 @@ public:
         {
             if (result.stride() == 1)
             {
-                return OutputIterator(1, sample_transformer_(first, last, result.base()));
+                return OutputIterator(sample_transformer_(first, last, result.base()), 1);
             }
             else
             {
@@ -377,7 +377,7 @@ public:
     {
         if (result.stride() == 1)
         {
-            return OutputIterator(1, sample_transformer_(first.base(), last.base(), result.base()));
+            return OutputIterator(sample_transformer_(first.base(), last.base(), result.base()), 1);
         }
         else
         {

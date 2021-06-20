@@ -36,13 +36,13 @@ public:
     using reference = frame_type;
 
 private:
-    sample_value_pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
     size_type channels_ = 0;
 
 public:
     InterleavedIterator() noexcept = default;
 
-    InterleavedIterator(size_type channels, sample_value_pointer data) noexcept : data_(data), channels_(channels) {}
+    InterleavedIterator(sample_pointer data, size_type channels) noexcept : data_(data), channels_(channels) {}
 
     InterleavedIterator(const InterleavedIterator& other) noexcept = default;
 
@@ -55,17 +55,17 @@ public:
 
     inline reference operator*() const noexcept
     {
-        return reference(channels_, data_);
+        return reference(data_, channels_);
     }
 
     inline pointer operator->() const noexcept
     {
-        return pointer(reference(channels_, data_));
+        return pointer(reference(data_, channels_));
     }
 
     inline reference operator[](difference_type n) const noexcept
     {
-        return reference(channels_, data_ + (n * channels_));
+        return reference(data_ + (n * channels_), channels_);
     }
 
     inline InterleavedIterator& operator++() noexcept
@@ -160,7 +160,7 @@ public:
         return (x.data_ - y.data_) / static_cast<typename InterleavedIterator::difference_type>(x.channels_);
     }
 
-    inline sample_value_pointer base() const noexcept
+    inline sample_pointer base() const noexcept
     {
         return data_;
     }

@@ -120,15 +120,27 @@ private:
 };
 
 static_assert(std::is_trivial<Sample<int16_t>>::value, "Sample<int16_t> is not a trivial type");
+static_assert(
+    std::is_trivially_default_constructible<Sample<int16_t>>::value,
+    "Sample<int16_t> is not a trivially default constructible type");
 static_assert(std::is_trivially_copyable<Sample<int16_t>>::value, "Sample<int16_t> is not a trivially copyable type");
 static_assert(std::is_standard_layout<Sample<int16_t>>::value, "Sample<int16_t> is not a standard layout type");
 static_assert(std::is_trivial<Sample<int24_t>>::value, "Sample<int24_t> is not a trivial type");
+static_assert(
+    std::is_trivially_default_constructible<Sample<int24_t>>::value,
+    "Sample<int24_t> is not a trivially default constructible type");
 static_assert(std::is_trivially_copyable<Sample<int24_t>>::value, "Sample<int24_t> is not a trivially copyable type");
 static_assert(std::is_standard_layout<Sample<int24_t>>::value, "Sample<int24_t> is not a standard layout type");
 static_assert(std::is_trivial<Sample<int32_t>>::value, "Sample<int32_t> is not a trivial type");
+static_assert(
+    std::is_trivially_default_constructible<Sample<int32_t>>::value,
+    "Sample<int32_t> is not a trivially default constructible type");
 static_assert(std::is_trivially_copyable<Sample<int32_t>>::value, "Sample<int32_t> is not a trivially copyable type");
 static_assert(std::is_standard_layout<Sample<int32_t>>::value, "Sample<int32_t> is not a standard layout type");
 static_assert(std::is_trivial<Sample<float32_t>>::value, "Sample<float32_t> is not a trivial type");
+static_assert(
+    std::is_trivially_default_constructible<Sample<float32_t>>::value,
+    "Sample<float32_t> is not a trivially default constructible type");
 static_assert(
     std::is_trivially_copyable<Sample<float32_t>>::value, "Sample<float32_t> is not a trivially copyable type");
 static_assert(std::is_standard_layout<Sample<float32_t>>::value, "Sample<float32_t> is not a standard layout type");

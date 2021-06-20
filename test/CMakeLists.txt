@@ -1,10 +1,9 @@
 
-project(test)
-
 if (UNIX AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     add_compile_options($<$<CONFIG:DEBUG>:-fsanitize=address> $<$<CONFIG:DEBUG>:-fsanitize=undefined>)
     add_link_options($<$<CONFIG:DEBUG>:-fsanitize=address>)
 endif ()
+
 
 add_executable(test_int24
         test_int24.cpp

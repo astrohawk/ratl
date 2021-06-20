@@ -6,6 +6,8 @@
 // ratl includes
 #include <ratl/detail/frame_iterator.hpp>
 #include <ratl/detail/sample_span.hpp>
+#include <ratl/network_sample.hpp>
+#include <ratl/sample.hpp>
 
 namespace ratl
 {
@@ -42,7 +44,7 @@ public:
 
     using super_type::super_type;
 
-    size_type channels() const noexcept
+    inline size_type channels() const noexcept
     {
         return super_type::samples();
     }

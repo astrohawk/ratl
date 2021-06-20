@@ -98,11 +98,17 @@ public:
 
 static_assert(std::is_trivial<NetworkSample<int16_t>>::value, "NetworkSample<int16_t> is not a trivial type");
 static_assert(
+    std::is_trivially_default_constructible<NetworkSample<int16_t>>::value,
+    "NetworkSample<int16_t> is not a trivially default constructible type");
+static_assert(
     std::is_trivially_copyable<NetworkSample<int16_t>>::value,
     "NetworkSample<int16_t> is not a trivially copyable type");
 static_assert(
     std::is_standard_layout<NetworkSample<int16_t>>::value, "NetworkSample<int16_t> is not a standard layout type");
 static_assert(std::is_trivial<NetworkSample<int24_t>>::value, "NetworkSample<int24_t> is not a trivial type");
+static_assert(
+    std::is_trivially_default_constructible<NetworkSample<int24_t>>::value,
+    "NetworkSample<int24_t> is not a trivially default constructible type");
 static_assert(
     std::is_trivially_copyable<NetworkSample<int24_t>>::value,
     "NetworkSample<int24_t> is not a trivially copyable type");
@@ -110,11 +116,17 @@ static_assert(
     std::is_standard_layout<NetworkSample<int24_t>>::value, "NetworkSample<int24_t> is not a standard layout type");
 static_assert(std::is_trivial<NetworkSample<int32_t>>::value, "NetworkSample<int32_t> is not a trivial type");
 static_assert(
+    std::is_trivially_default_constructible<NetworkSample<int32_t>>::value,
+    "NetworkSample<int32_t> is not a trivially default constructible type");
+static_assert(
     std::is_trivially_copyable<NetworkSample<int32_t>>::value,
     "NetworkSample<int32_t> is not a trivially copyable type");
 static_assert(
     std::is_standard_layout<NetworkSample<int32_t>>::value, "NetworkSample<int32_t> is not a standard layout type");
 static_assert(std::is_trivial<NetworkSample<float32_t>>::value, "NetworkSample<float32_t> is not a trivial type");
+static_assert(
+    std::is_trivially_default_constructible<NetworkSample<float32_t>>::value,
+    "NetworkSample<float32_t> is not a trivially default constructible type");
 static_assert(
     std::is_trivially_copyable<NetworkSample<float32_t>>::value,
     "NetworkSample<float32_t> is not a trivially copyable type");

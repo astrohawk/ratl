@@ -10,8 +10,7 @@ Support for:
 1. 16 bit, 24 bit, and 32 bit integer, and 32 bit floating point samples
 1. Host byte order and network byte order samples
 1. Interleaved and non-interleaved audio buffers
-1. Optional sample dithering when converting any samples to 16 bit integer samples or when converting floating point
-   samples to integer samples
+1. Optional sample dithering
 
 ## Getting Started
 

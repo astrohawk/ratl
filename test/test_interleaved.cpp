@@ -285,7 +285,7 @@ TYPED_TEST(TypedTypical, ZeroInitialised)
     auto data = this->buffer_.data();
     for (size_t i = 0; i < this->buffer_.samples(); ++i)
     {
-        EXPECT_EQ(data[i], 0);
+        EXPECT_EQ(data[i].get(), 0);
     }
 }
 
@@ -674,11 +674,12 @@ class Allocate : public TypicalInterleavedBase<SampleType>
 protected:
     using super_type = TypicalInterleavedBase<SampleType>;
     using sample_type = typename super_type::sample_type;
+    using sample = ratl::Sample<sample_type>;
 
-    class Allocator : public ratl::Allocator<sample_type>
+    class Allocator : public ratl::Allocator<sample>
     {
     public:
-        using super_type = ratl::Allocator<sample_type>;
+        using super_type = ratl::Allocator<sample>;
 
         using size_type = typename super_type::size_type;
         using difference_type = typename super_type::difference_type;
@@ -761,7 +762,7 @@ protected:
         pointer p_;
     };
 
-    using Interleaved = ratl::BasicInterleaved<ratl::Sample<sample_type>, Allocator>;
+    using Interleaved = ratl::BasicInterleaved<sample, Allocator>;
 };
 
 TYPED_TEST_SUITE(Allocate, PossibleSampleTypes, );
@@ -830,7 +831,7 @@ TYPED_TEST(RawReadWrite, Read)
 
     for (size_t i = 0; i < this->buffer_.samples(); ++i)
     {
-        EXPECT_EQ(this->buffer_.data()[i], 1);
+        EXPECT_EQ(this->buffer_.data()[i].get(), 1);
     }
 }
 

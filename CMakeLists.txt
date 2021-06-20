@@ -5,9 +5,6 @@ project(ratl)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-enable_testing()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 
@@ -17,47 +14,79 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
 add_definitions(-DRATL_HAS_XSIMD)
 add_subdirectory(third_party)
 
-add_subdirectory(test)
-add_subdirectory(benchmark)
-add_subdirectory(examples)
-
-set(ratl_INCLUDE_DIR include)
-set(ratl_HEADERS
-        ${ratl_INCLUDE_DIR}/ratl/ratl.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/batch_convert.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/batch_creator.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/batch_sample_converter.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/batch_sample_transform.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/batch_traits.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/channel_iterator.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/config.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/frame_iterator.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/interleaved_iterator.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/operator_arrow_proxy.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/sample_converter.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/sample_transform.hpp
-        ${ratl_INCLUDE_DIR}/ratl/detail/types.hpp
-        ${ratl_INCLUDE_DIR}/ratl/allocator.hpp
-        ${ratl_INCLUDE_DIR}/ratl/channel_span.hpp
-        ${ratl_INCLUDE_DIR}/ratl/convert.hpp
-        ${ratl_INCLUDE_DIR}/ratl/frame_span.hpp
-        ${ratl_INCLUDE_DIR}/ratl/interleaved.hpp
-        ${ratl_INCLUDE_DIR}/ratl/interleaved_span.hpp
-        ${ratl_INCLUDE_DIR}/ratl/network_sample.hpp
-        ${ratl_INCLUDE_DIR}/ratl/sample.hpp
-        ${ratl_INCLUDE_DIR}/ratl/sample_traits.hpp
-        ${ratl_INCLUDE_DIR}/ratl/sample_type_limits.hpp
-        ${ratl_INCLUDE_DIR}/ratl/transform.hpp
-        ${ratl_INCLUDE_DIR}/ratl/type_traits.hpp
+set(RATL_INCLUDE_DIR include)
+set(RATL_HEADERS
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_base_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_convert.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_creator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_dither_generator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_endianness.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_rand.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_round.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_sample_converter.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_sample_fix.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_sample_transform.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/batch_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/cast.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/channel_iterator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/config.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/dither_generator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/endianness.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/frame_iterator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/interleaved_iterator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/intrin.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/noninterleaved_iterator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/operator_arrow_proxy.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/rand.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/round.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/sample_converter.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/sample_iterator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/sample_span.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/sample_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/sample_transform.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/type_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/types.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/xsimd.hpp
+        ${RATL_INCLUDE_DIR}/ratl/allocator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/channel_span.hpp
+        ${RATL_INCLUDE_DIR}/ratl/convert.hpp
+        ${RATL_INCLUDE_DIR}/ratl/dither_generator.hpp
+        ${RATL_INCLUDE_DIR}/ratl/frame_span.hpp
+        ${RATL_INCLUDE_DIR}/ratl/int24.hpp
+        ${RATL_INCLUDE_DIR}/ratl/interleaved.hpp
+        ${RATL_INCLUDE_DIR}/ratl/interleaved_span.hpp
+        ${RATL_INCLUDE_DIR}/ratl/network_sample.hpp
+        ${RATL_INCLUDE_DIR}/ratl/noninterleaved.hpp
+        ${RATL_INCLUDE_DIR}/ratl/noninterleaved_span.hpp
+        ${RATL_INCLUDE_DIR}/ratl/ratl.hpp
+        ${RATL_INCLUDE_DIR}/ratl/sample.hpp
+        ${RATL_INCLUDE_DIR}/ratl/sample_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/sample_type_limits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/transform.hpp
+        ${RATL_INCLUDE_DIR}/ratl/types.hpp
+        ${RATL_INCLUDE_DIR}/ratl/uint24.hpp
         )
-file(GLOB_RECURSE ratl_HEADERS_GLOB RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${ratl_INCLUDE_DIR}/*.hpp)
-source_group("ratl" FILES ${ratl_HEADERS_GLOB})
 
 add_library(ratl INTERFACE)
-
 target_link_libraries(ratl INTERFACE
         xsimd
         )
 target_include_directories(ratl INTERFACE
-        ${ratl_INCLUDE_DIR}
+        ${RATL_INCLUDE_DIR}
         )
+
+option(BUILD_TESTS "Build tests" OFF)
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif ()
+
+option(BUILD_BENCHMARKS "Build benchmarks" OFF)
+if (BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
+endif ()
+
+option(BUILD_EXAMPLES "Build examples" OFF)
+if (BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif ()

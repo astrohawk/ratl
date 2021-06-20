@@ -6,6 +6,8 @@
 // ratl includes
 #include <ratl/detail/channel_iterator.hpp>
 #include <ratl/detail/sample_span.hpp>
+#include <ratl/network_sample.hpp>
+#include <ratl/sample.hpp>
 
 namespace ratl
 {

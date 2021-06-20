@@ -32,20 +32,9 @@ private:
         return batch_type{input[I].get()...};
     }
 
-    template<std::size_t... I>
-    static inline batch_type load_unaligned_impl(SampleType* input, std::index_sequence<I...>) noexcept
-    {
-        return batch_type{input[I]...};
-    }
-
 public:
     template<typename Iterator>
     static inline batch_type load_unaligned(Iterator input) noexcept
-    {
-        return load_unaligned_impl(input, std::make_index_sequence<BatchSize>{});
-    }
-
-    static inline batch_type load_unaligned(SampleType* input) noexcept
     {
         return load_unaligned_impl(input, std::make_index_sequence<BatchSize>{});
     }
@@ -56,14 +45,6 @@ public:
         for (std::size_t i = 0; i < BatchSize; ++i)
         {
             output[i].get() = static_cast<SampleType>(input[i]);
-        }
-    }
-
-    static inline void store_unaligned(const batch_type& input, SampleType* output) noexcept
-    {
-        for (std::size_t i = 0; i < BatchSize; ++i)
-        {
-            output[i] = static_cast<SampleType>(input[i]);
         }
     }
 };
@@ -80,21 +61,9 @@ private:
         return batch_type{networkToNetworkUnderlyingCast<SampleType>(input[I].get())...};
     }
 
-    template<std::size_t... I>
-    static inline batch_type load_unaligned_impl(
-        NetworkSampleValueType_t<SampleType>* input, std::index_sequence<I...>) noexcept
-    {
-        return batch_type{networkToNetworkUnderlyingCast<SampleType>(input[I])...};
-    }
-
 public:
     template<typename Iterator>
     static inline batch_type load_unaligned(Iterator input) noexcept
-    {
-        return load_unaligned_impl(input, std::make_index_sequence<BatchSize>{});
-    }
-
-    static inline batch_type load_unaligned(NetworkSampleValueType_t<SampleType>* input) noexcept
     {
         return load_unaligned_impl(input, std::make_index_sequence<BatchSize>{});
     }
@@ -108,20 +77,40 @@ public:
                 static_cast<NetworkSampleValueUnderlyingType_t<SampleType>>(input[i]));
         }
     }
-
-    static inline void store_unaligned(const batch_type& input, NetworkSampleValueType_t<SampleType>* output) noexcept
-    {
-        for (std::size_t i = 0; i < BatchSize; ++i)
-        {
-            output[i] = networkUnderlyingToNetworkCast<SampleType>(
-                static_cast<NetworkSampleValueUnderlyingType_t<SampleType>>(input[i]));
-        }
-    }
 };
 
 template<class Sample>
 struct BatchCreator : public BaseBatchCreator<Sample>
 {
+};
+
+// The load_unaligned and store_unaligned overloads for the specific sample types technically rely on undefined
+// behaviour when performing the reinterpret_cast but this is a price we are currently willing to pay in order to get
+// the corresponding performance boost
+
+template<>
+struct BatchCreator<Sample<int16_t>> : public BaseBatchCreator<Sample<int16_t>>
+{
+    using base = typename BatchCreator::BaseBatchCreator;
+    using batch_type = base::batch_type;
+
+    using base::load_unaligned;
+    using base::store_unaligned;
+
+    static inline batch_type load_unaligned(Sample<int16_t>* input) noexcept
+    {
+        return batch_type(reinterpret_cast<int16_t*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline batch_type load_unaligned(const Sample<int16_t>* input) noexcept
+    {
+        return batch_type(reinterpret_cast<const int16_t*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline void store_unaligned(const batch_type& input, Sample<int16_t>* output) noexcept
+    {
+        input.store_unaligned(reinterpret_cast<int16_t*>(output));
+    }
 };
 
 template<>
@@ -133,14 +122,19 @@ struct BatchCreator<Sample<int32_t>> : public BaseBatchCreator<Sample<int32_t>>
     using base::load_unaligned;
     using base::store_unaligned;
 
-    static inline batch_type load_unaligned(int32_t* input) noexcept
+    static inline batch_type load_unaligned(Sample<int32_t>* input) noexcept
     {
-        return batch_type(input, xsimd::unaligned_mode{});
+        return batch_type(reinterpret_cast<int32_t*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline void store_unaligned(const batch_type& input, int32_t* output) noexcept
+    static inline batch_type load_unaligned(const Sample<int32_t>* input) noexcept
     {
-        input.store_unaligned(output);
+        return batch_type(reinterpret_cast<const int32_t*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline void store_unaligned(const batch_type& input, Sample<int32_t>* output) noexcept
+    {
+        input.store_unaligned(reinterpret_cast<int32_t*>(output));
     }
 };
 
@@ -153,14 +147,46 @@ struct BatchCreator<Sample<float32_t>> : public BaseBatchCreator<Sample<float32_
     using base::load_unaligned;
     using base::store_unaligned;
 
-    static inline batch_type load_unaligned(float32_t* input) noexcept
+    static inline batch_type load_unaligned(Sample<float32_t>* input) noexcept
     {
-        return batch_type(input, xsimd::unaligned_mode{});
+        return batch_type(reinterpret_cast<float32_t*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline void store_unaligned(const batch_type& input, float32_t* output) noexcept
+    static inline batch_type load_unaligned(const Sample<float32_t>* input) noexcept
     {
-        input.store_unaligned(output);
+        return batch_type(reinterpret_cast<const float32_t*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline void store_unaligned(const batch_type& input, Sample<float32_t>* output) noexcept
+    {
+        input.store_unaligned(reinterpret_cast<float32_t*>(output));
+    }
+};
+
+template<>
+struct BatchCreator<NetworkSample<int16_t>> : public BaseBatchCreator<NetworkSample<int16_t>>
+{
+    using base = typename BatchCreator::BaseBatchCreator;
+    using batch_type = base::batch_type;
+
+    using base::load_unaligned;
+    using base::store_unaligned;
+
+    static inline batch_type load_unaligned(NetworkSample<int16_t>* input) noexcept
+    {
+        return batch_type(
+            reinterpret_cast<NetworkSampleValueUnderlyingType_t<int16_t>*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline batch_type load_unaligned(const NetworkSample<int16_t>* input) noexcept
+    {
+        return batch_type(
+            reinterpret_cast<const NetworkSampleValueUnderlyingType_t<int16_t>*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline void store_unaligned(const batch_type& input, NetworkSample<int16_t>* output) noexcept
+    {
+        input.store_unaligned(reinterpret_cast<NetworkSampleValueUnderlyingType_t<int16_t>*>(output));
     }
 };
 
@@ -173,14 +199,21 @@ struct BatchCreator<NetworkSample<int32_t>> : public BaseBatchCreator<NetworkSam
     using base::load_unaligned;
     using base::store_unaligned;
 
-    static inline batch_type load_unaligned(NetworkSampleValueType_t<int32_t>* input) noexcept
+    static inline batch_type load_unaligned(NetworkSample<int32_t>* input) noexcept
     {
-        return batch_type(reinterpret_cast<const uint32_t*>(input), xsimd::unaligned_mode{});
+        return batch_type(
+            reinterpret_cast<NetworkSampleValueUnderlyingType_t<int32_t>*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline void store_unaligned(const batch_type& input, NetworkSampleValueType_t<int32_t>* output) noexcept
+    static inline batch_type load_unaligned(const NetworkSample<int32_t>* input) noexcept
     {
-        input.store_unaligned(reinterpret_cast<uint32_t*>(output));
+        return batch_type(
+            reinterpret_cast<const NetworkSampleValueUnderlyingType_t<int32_t>*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline void store_unaligned(const batch_type& input, NetworkSample<int32_t>* output) noexcept
+    {
+        input.store_unaligned(reinterpret_cast<NetworkSampleValueUnderlyingType_t<int32_t>*>(output));
     }
 };
 
@@ -193,14 +226,21 @@ struct BatchCreator<NetworkSample<float32_t>> : public BaseBatchCreator<NetworkS
     using base::load_unaligned;
     using base::store_unaligned;
 
-    static inline batch_type load_unaligned(NetworkSampleValueType_t<float32_t>* input) noexcept
+    static inline batch_type load_unaligned(NetworkSample<float32_t>* input) noexcept
     {
-        return batch_type(reinterpret_cast<const uint32_t*>(input), xsimd::unaligned_mode{});
+        return batch_type(
+            reinterpret_cast<NetworkSampleValueUnderlyingType_t<float32_t>*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline void store_unaligned(const batch_type& input, NetworkSampleValueType_t<float32_t>* output) noexcept
+    static inline batch_type load_unaligned(const NetworkSample<float32_t>* input) noexcept
     {
-        input.store_unaligned(reinterpret_cast<uint32_t*>(output));
+        return batch_type(
+            reinterpret_cast<const NetworkSampleValueUnderlyingType_t<float32_t>*>(input), xsimd::unaligned_mode{});
+    }
+
+    static inline void store_unaligned(const batch_type& input, NetworkSample<float32_t>* output) noexcept
+    {
+        input.store_unaligned(reinterpret_cast<NetworkSampleValueUnderlyingType_t<float32_t>*>(output));
     }
 };
 

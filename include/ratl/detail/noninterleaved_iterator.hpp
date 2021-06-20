@@ -36,13 +36,13 @@ public:
     using reference = frame_type;
 
 private:
-    sample_value_pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
     size_type frames_ = 0;
 
 public:
     NoninterleavedIterator() noexcept = default;
 
-    NoninterleavedIterator(size_type frames, sample_value_pointer data) noexcept : data_(data), frames_(frames) {}
+    NoninterleavedIterator(sample_pointer data, size_type frames) noexcept : data_(data), frames_(frames) {}
 
     NoninterleavedIterator(const NoninterleavedIterator& other) noexcept = default;
 
@@ -55,17 +55,17 @@ public:
 
     inline reference operator*() const noexcept
     {
-        return reference(frames_, data_);
+        return reference(data_, frames_);
     }
 
     inline pointer operator->() const noexcept
     {
-        return pointer(reference(frames_, data_));
+        return pointer(reference(data_, frames_));
     }
 
     inline reference operator[](difference_type n) const noexcept
     {
-        return reference(frames_, data_ + (n * frames_));
+        return reference(data_ + (n * frames_), frames_);
     }
 
     inline NoninterleavedIterator& operator++() noexcept
@@ -161,7 +161,7 @@ public:
         return (x.data_ - y.data_) / static_cast<typename NoninterleavedIterator::difference_type>(x.frames_);
     }
 
-    inline sample_value_pointer base() const noexcept
+    inline sample_pointer base() const noexcept
     {
         return data_;
     }

@@ -36,13 +36,13 @@ public:
     using reference = sample_reference;
 
 private:
-    sample_value_pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
     size_type stride_ = 0;
 
 public:
     SampleIterator() noexcept = default;
 
-    SampleIterator(size_type stride, sample_value_pointer data) noexcept : data_(data), stride_(stride) {}
+    SampleIterator(sample_pointer data, size_type stride) noexcept : data_(data), stride_(stride) {}
 
     SampleIterator(const SampleIterator& other) noexcept = default;
 
@@ -55,17 +55,17 @@ public:
 
     inline reference operator*() const noexcept
     {
-        return reinterpret_cast<reference>(*data_);
+        return *data_;
     }
 
     inline pointer operator->() const noexcept
     {
-        return reinterpret_cast<pointer>(data_);
+        return data_;
     }
 
     inline reference operator[](difference_type n) const noexcept
     {
-        return reinterpret_cast<reference>(data_[n * stride_]);
+        return data_[n * stride_];
     }
 
     inline SampleIterator& operator++() noexcept
@@ -159,7 +159,7 @@ public:
         return (x.data_ - y.data_) / static_cast<typename SampleIterator::difference_type>(x.stride_);
     }
 
-    inline sample_value_pointer base() const noexcept
+    inline sample_pointer base() const noexcept
     {
         return data_;
     }
@@ -185,12 +185,12 @@ public:
     using reference = sample_reference;
 
 private:
-    sample_value_pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
 
 public:
     SampleIterator() noexcept = default;
 
-    explicit SampleIterator(sample_value_pointer data) noexcept : data_(data) {}
+    explicit SampleIterator(sample_pointer data) noexcept : data_(data) {}
 
     SampleIterator(const SampleIterator& other) noexcept = default;
 
@@ -203,17 +203,17 @@ public:
 
     inline reference operator*() const noexcept
     {
-        return reinterpret_cast<reference>(*data_);
+        return *data_;
     }
 
     inline pointer operator->() const noexcept
     {
-        return reinterpret_cast<pointer>(data_);
+        return data_;
     }
 
     inline reference operator[](difference_type n) const noexcept
     {
-        return reinterpret_cast<reference>(data_[n]);
+        return data_[n];
     }
 
     inline SampleIterator& operator++() noexcept
@@ -307,7 +307,7 @@ public:
         return x.data_ - y.data_;
     }
 
-    inline sample_value_pointer base() const noexcept
+    inline sample_pointer base() const noexcept
     {
         return data_;
     }

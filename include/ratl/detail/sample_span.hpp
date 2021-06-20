@@ -20,6 +20,10 @@ template<class Sample, bool Contiguous, template<class, bool> class Iterator>
 class SampleSpan;
 
 template<class Sample, template<class, bool> class Iterator>
+inline bool operator==(
+    const SampleSpan<Sample, false, Iterator>& a, const SampleSpan<Sample, false, Iterator>& b) noexcept;
+
+template<class Sample, template<class, bool> class Iterator>
 class SampleSpan<Sample, false, Iterator>
 {
 public:
@@ -49,14 +53,14 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 private:
-    sample_value_pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
     size_type samples_ = 0;
     size_type stride_ = 0;
 
 public:
     SampleSpan() noexcept = default;
 
-    SampleSpan(size_type samples, size_type stride, sample_value_pointer data) noexcept :
+    SampleSpan(sample_pointer data, size_type samples, size_type stride) noexcept :
         data_(data), samples_(samples), stride_(stride)
     {
     }
@@ -76,141 +80,141 @@ public:
         return *this;
     }
 
-    void swap(SampleSpan& other) noexcept;
+    inline void swap(SampleSpan& other) noexcept;
 
-    bool operator==(const SampleSpan& other) const noexcept;
-
-    bool operator!=(const SampleSpan& other) const noexcept
-    {
-        return !(*this == other);
-    }
-
-    sample_value_pointer data() noexcept
+    inline sample_pointer data() noexcept
     {
         return data_;
     }
 
-    const sample_value_pointer data() const noexcept
+    inline const sample_pointer data() const noexcept
     {
         return data_;
     }
 
-    size_type stride() const noexcept
+    inline size_type stride() const noexcept
     {
         return stride_;
     }
 
-    bool empty() const noexcept
+    inline bool empty() const noexcept
     {
         return samples_ == 0;
     }
 
-    reference operator[](size_type n)
+    inline reference operator[](size_type n)
     {
-        return reinterpret_cast<reference>(data_[n * stride_]);
+        return data_[n * stride_];
     }
 
-    const_reference operator[](size_type n) const
+    inline const_reference operator[](size_type n) const
     {
-        return reinterpret_cast<const_reference>(data_[n * stride_]);
+        return data_[n * stride_];
     }
 
-    reference at(size_type n);
+    inline reference at(size_type n);
 
-    const_reference at(size_type n) const;
+    inline const_reference at(size_type n) const;
 
-    reference front()
+    inline reference front()
     {
-        return reinterpret_cast<reference>(*data_);
+        return *data_;
     }
 
-    const_reference front() const
+    inline const_reference front() const
     {
-        return reinterpret_cast<const_reference>(*data_);
+        return *data_;
     }
 
-    reference back()
+    inline reference back()
     {
-        return reinterpret_cast<reference>(*(data_ + (samples_ * (stride_ - 1))));
+        return *(data_ + (samples_ * (stride_ - 1)));
     }
 
-    const_reference back() const
+    inline const_reference back() const
     {
-        return reinterpret_cast<const_reference>(*(data_ + (samples_ * (stride_ - 1))));
+        return *(data_ + (samples_ * (stride_ - 1)));
     }
 
     // iterators
-    iterator begin() noexcept
+    inline iterator begin() noexcept
     {
-        return iterator(stride_, data_);
+        return iterator(data_, stride_);
     }
 
-    const_iterator begin() const noexcept
+    inline const_iterator begin() const noexcept
     {
-        return const_iterator(stride_, data_);
+        return const_iterator(data_, stride_);
     }
 
-    iterator end() noexcept
+    inline iterator end() noexcept
     {
-        return iterator(stride_, data_ + (samples_ * stride_));
+        return iterator(data_ + (samples_ * stride_), stride_);
     }
 
-    const_iterator end() const noexcept
+    inline const_iterator end() const noexcept
     {
-        return const_iterator(stride_, data_ + (samples_ * stride_));
+        return const_iterator(data_ + (samples_ * stride_), stride_);
     }
 
     // reverse iterators
-    reverse_iterator rbegin() noexcept
+    inline reverse_iterator rbegin() noexcept
     {
         return reverse_iterator(end());
     }
 
-    const_reverse_iterator rbegin() const noexcept
+    inline const_reverse_iterator rbegin() const noexcept
     {
         return const_reverse_iterator(end());
     }
 
-    reverse_iterator rend() noexcept
+    inline reverse_iterator rend() noexcept
     {
         return reverse_iterator(begin());
     }
 
-    const_reverse_iterator rend() const noexcept
+    inline const_reverse_iterator rend() const noexcept
     {
         return const_reverse_iterator(begin());
     }
 
     // const iterators
-    const_iterator cbegin() const noexcept
+    inline const_iterator cbegin() const noexcept
     {
         return begin();
     }
 
-    const_iterator cend() const noexcept
+    inline const_iterator cend() const noexcept
     {
         return end();
     }
 
-    const_reverse_iterator crbegin() const noexcept
+    inline const_reverse_iterator crbegin() const noexcept
     {
         return rbegin();
     }
 
-    const_reverse_iterator crend() const noexcept
+    inline const_reverse_iterator crend() const noexcept
     {
         return rend();
     }
 
+    friend bool operator==<>(const SampleSpan& a, const SampleSpan& b) noexcept;
+
+    friend inline bool operator!=(const SampleSpan& a, const SampleSpan& b) noexcept
+    {
+        return !(a == b);
+    }
+
 protected:
-    size_type samples() const noexcept
+    inline size_type samples() const noexcept
     {
         return samples_;
     }
 };
 
 template<class Sample, template<class, bool> class Iterator>
-void SampleSpan<Sample, false, Iterator>::swap(SampleSpan& other) noexcept
+inline void SampleSpan<Sample, false, Iterator>::swap(SampleSpan& other) noexcept
 {
     std::swap(samples_, other.samples_);
     std::swap(stride_, other.stride_);
@@ -218,24 +222,46 @@ void SampleSpan<Sample, false, Iterator>::swap(SampleSpan& other) noexcept
 }
 
 template<class Sample, template<class, bool> class Iterator>
-bool SampleSpan<Sample, false, Iterator>::operator==(const SampleSpan& other) const noexcept
+inline typename SampleSpan<Sample, false, Iterator>::reference SampleSpan<Sample, false, Iterator>::at(size_type n)
 {
-    if ((samples_ == other.samples_) && (stride_ == other.stride_))
+    if (n >= samples_)
     {
-        if (data_ == other.data_)
+        throw std::out_of_range("ChannelSpan");
+    }
+    return data_[n];
+}
+
+template<class Sample, template<class, bool> class Iterator>
+inline typename SampleSpan<Sample, false, Iterator>::const_reference SampleSpan<Sample, false, Iterator>::at(
+    size_type n) const
+{
+    if (n >= samples_)
+    {
+        throw std::out_of_range("ChannelSpan");
+    }
+    return data_[n];
+}
+
+template<class Sample, template<class, bool> class Iterator>
+inline bool operator==(
+    const SampleSpan<Sample, false, Iterator>& a, const SampleSpan<Sample, false, Iterator>& b) noexcept
+{
+    if ((a.samples_ == b.samples_) && (a.stride_ == b.stride_))
+    {
+        if (a.data_ == b.data_)
         {
             return true;
         }
-        if (stride_ == 1)
+        if (a.stride_ == 1)
         {
-            if (std::equal(data_, data_ + samples_, other.data_))
+            if (std::equal(a.data_, a.data_ + a.samples_, b.data_))
             {
                 return true;
             }
         }
         else
         {
-            if (std::equal(begin(), end(), other.begin()))
+            if (std::equal(a.begin(), a.end(), b.begin()))
             {
                 return true;
             }
@@ -245,24 +271,8 @@ bool SampleSpan<Sample, false, Iterator>::operator==(const SampleSpan& other) co
 }
 
 template<class Sample, template<class, bool> class Iterator>
-typename SampleSpan<Sample, false, Iterator>::reference SampleSpan<Sample, false, Iterator>::at(size_type n)
-{
-    if (n >= samples_)
-    {
-        throw std::out_of_range("ChannelSpan");
-    }
-    return data_[n];
-}
-
-template<class Sample, template<class, bool> class Iterator>
-typename SampleSpan<Sample, false, Iterator>::const_reference SampleSpan<Sample, false, Iterator>::at(size_type n) const
-{
-    if (n >= samples_)
-    {
-        throw std::out_of_range("ChannelSpan");
-    }
-    return data_[n];
-}
+inline bool operator==(
+    const SampleSpan<Sample, true, Iterator>& a, const SampleSpan<Sample, true, Iterator>& b) noexcept;
 
 template<class Sample, template<class, bool> class Iterator>
 class SampleSpan<Sample, true, Iterator>
@@ -295,177 +305,160 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 private:
-    sample_value_pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
     size_type samples_ = 0;
 
 public:
     SampleSpan() noexcept = default;
 
-    SampleSpan(size_type samples, sample_value_pointer data) noexcept : data_(data), samples_(samples) {}
+    SampleSpan(sample_pointer data, size_type samples) noexcept : data_(data), samples_(samples) {}
 
     SampleSpan(const SampleSpan& other) noexcept = default;
 
     SampleSpan& operator=(const SampleSpan& other) noexcept = default;
 
-    void swap(SampleSpan& other) noexcept;
+    inline void swap(SampleSpan& other) noexcept;
 
-    bool operator==(const SampleSpan& other) const noexcept;
-
-    bool operator!=(const SampleSpan& other) const noexcept
-    {
-        return !(*this == other);
-    }
-
-    sample_value_pointer data() noexcept
+    inline sample_pointer data() noexcept
     {
         return data_;
     }
 
-    const sample_value_pointer data() const noexcept
+    inline const sample_pointer data() const noexcept
     {
         return data_;
     }
 
-    size_type stride() const noexcept
+    inline size_type stride() const noexcept
     {
         return 1;
     }
 
-    bool empty() const noexcept
+    inline bool empty() const noexcept
     {
         return samples_ == 0;
     }
 
-    reference operator[](size_type n) noexcept
+    inline reference operator[](size_type n) noexcept
     {
-        return reinterpret_cast<reference>(data_[n]);
+        return data_[n];
     }
 
-    const_reference operator[](size_type n) const noexcept
+    inline const_reference operator[](size_type n) const noexcept
     {
-        return reinterpret_cast<const_reference>(data_[n]);
+        return data_[n];
     }
 
-    reference at(size_type n);
+    inline reference at(size_type n);
 
-    const_reference at(size_type n) const;
+    inline const_reference at(size_type n) const;
 
-    reference front() noexcept
+    inline reference front() noexcept
     {
-        return reinterpret_cast<reference>(*data_);
+        return *data_;
     }
 
-    const_reference front() const noexcept
+    inline const_reference front() const noexcept
     {
-        return reinterpret_cast<const_reference>(*data_);
+        return *data_;
     }
 
-    reference back() noexcept
+    inline reference back() noexcept
     {
-        return reinterpret_cast<reference>(*(data_ - 1));
+        return *(data_ - 1);
     }
 
-    const_reference back() const noexcept
+    inline const_reference back() const noexcept
     {
-        return reinterpret_cast<const_reference>(*(data_ - 1));
+        return *(data_ - 1);
     }
 
     // iterators
-    iterator begin() noexcept
+    inline iterator begin() noexcept
     {
         return iterator(data_);
     }
 
-    const_iterator begin() const noexcept
+    inline const_iterator begin() const noexcept
     {
         return const_iterator(data_);
     }
 
-    iterator end() noexcept
+    inline iterator end() noexcept
     {
         return iterator(data_ + samples_);
     }
 
-    const_iterator end() const noexcept
+    inline const_iterator end() const noexcept
     {
         return const_iterator(data_ + samples_);
     }
 
     // reverse iterators
-    reverse_iterator rbegin() noexcept
+    inline reverse_iterator rbegin() noexcept
     {
         return reverse_iterator(end());
     }
 
-    const_reverse_iterator rbegin() const noexcept
+    inline const_reverse_iterator rbegin() const noexcept
     {
         return const_reverse_iterator(end());
     }
 
-    reverse_iterator rend() noexcept
+    inline reverse_iterator rend() noexcept
     {
         return reverse_iterator(begin());
     }
 
-    const_reverse_iterator rend() const noexcept
+    inline const_reverse_iterator rend() const noexcept
     {
         return const_reverse_iterator(begin());
     }
 
     // const iterators
-    const_iterator cbegin() const noexcept
+    inline const_iterator cbegin() const noexcept
     {
         return begin();
     }
 
-    const_iterator cend() const noexcept
+    inline const_iterator cend() const noexcept
     {
         return end();
     }
 
-    const_reverse_iterator crbegin() const noexcept
+    inline const_reverse_iterator crbegin() const noexcept
     {
         return rbegin();
     }
 
-    const_reverse_iterator crend() const noexcept
+    inline const_reverse_iterator crend() const noexcept
     {
         return rend();
     }
 
+    friend bool operator==<>(const SampleSpan& a, const SampleSpan& b) noexcept;
+
+    friend inline bool operator!=(const SampleSpan& a, const SampleSpan& b) noexcept
+    {
+        return !(a == b);
+    }
+
 protected:
-    size_type samples() const noexcept
+    inline size_type samples() const noexcept
     {
         return samples_;
     }
 };
 
 template<class Sample, template<class, bool> class Iterator>
-bool SampleSpan<Sample, true, Iterator>::operator==(const SampleSpan& other) const noexcept
-{
-    if (samples_ == other.samples_)
-    {
-        if (data_ == other.data_)
-        {
-            return true;
-        }
-        if (std::equal(data_, data_ + samples_, other.data_))
-        {
-            return true;
-        }
-    }
-    return false;
-}
-
-template<class Sample, template<class, bool> class Iterator>
-void SampleSpan<Sample, true, Iterator>::swap(SampleSpan& other) noexcept
+inline void SampleSpan<Sample, true, Iterator>::swap(SampleSpan& other) noexcept
 {
     std::swap(data_, other.data_);
     std::swap(samples_, other.samples_);
 }
 
 template<class Sample, template<class, bool> class Iterator>
-typename SampleSpan<Sample, true, Iterator>::reference SampleSpan<Sample, true, Iterator>::at(size_type n)
+inline typename SampleSpan<Sample, true, Iterator>::reference SampleSpan<Sample, true, Iterator>::at(size_type n)
 {
     if (n >= samples_)
     {
@@ -475,13 +468,32 @@ typename SampleSpan<Sample, true, Iterator>::reference SampleSpan<Sample, true, 
 }
 
 template<class Sample, template<class, bool> class Iterator>
-typename SampleSpan<Sample, true, Iterator>::const_reference SampleSpan<Sample, true, Iterator>::at(size_type n) const
+inline typename SampleSpan<Sample, true, Iterator>::const_reference SampleSpan<Sample, true, Iterator>::at(
+    size_type n) const
 {
     if (n >= samples_)
     {
         throw std::out_of_range("FrameSpan");
     }
     return data_[n];
+}
+
+template<class Sample, template<class, bool> class Iterator>
+inline bool operator==(
+    const SampleSpan<Sample, true, Iterator>& a, const SampleSpan<Sample, true, Iterator>& b) noexcept
+{
+    if (a.samples_ == b.samples_)
+    {
+        if (a.data_ == b.data_)
+        {
+            return true;
+        }
+        if (std::equal(a.data_, a.data_ + a.samples_, b.data_))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 } // namespace ratl

@@ -13,7 +13,7 @@
 
 namespace ratl
 {
-template<class Sample, class Allocator = ratl::Allocator<typename Sample::value_type>>
+template<class Sample, class Allocator = ratl::Allocator<Sample>>
 class BasicNoninterleaved : public BasicNoninterleavedSpan<Sample>
 {
 private:
@@ -58,11 +58,11 @@ private:
 
 public:
     static_assert(
-        std::is_same<sample_value_type, typename allocator_type::value_type>::value,
-        "Allocator::value_type must be same type as value_type");
+        std::is_same<sample, typename allocator_type::value_type>::value,
+        "Allocator::value_type must be same type as Sample");
     static_assert(
-        std::is_same<sample_value_pointer, typename alloc_traits::pointer>::value,
-        "Allocator::pointer must be same type as value_type*");
+        std::is_same<sample_pointer, typename alloc_traits::pointer>::value,
+        "Allocator::pointer must be same type as Sample*");
 
     BasicNoninterleaved() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) {}
 
@@ -117,6 +117,7 @@ public:
 private:
     void allocate()
     {
+        // we don't need to default construct the samples as sample types are trivially default constructible
         super_type::set_pointer(alloc_.allocate(this->samples()));
     }
 
@@ -173,7 +174,7 @@ private:
 
 template<class Sample, class Allocator>
 BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(size_type channels, size_type frames) :
-    super_type(channels, frames, nullptr)
+    super_type(nullptr, channels, frames)
 {
     if (this->samples() > 0)
     {
@@ -185,7 +186,7 @@ BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(size_type channels, 
 template<class Sample, class Allocator>
 BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(
     size_type channels, size_type frames, const allocator_type& alloc) :
-    super_type(channels, frames, nullptr), alloc_(alloc)
+    super_type(nullptr, channels, frames), alloc_(alloc)
 {
     if (this->samples() > 0)
     {
