@@ -70,6 +70,11 @@ public:
     {
     }
 
+    BasicInterleavedSpan(unsigned char* data, size_type channels, size_type frames) noexcept :
+        BasicInterleavedSpan(reinterpret_cast<sample_pointer>(data), channels, frames)
+    {
+    }
+
     BasicInterleavedSpan(const BasicInterleavedSpan& other) noexcept :
         data_(other.data_), channels_(other.channels_), frames_(other.frames_)
     {

@@ -65,6 +65,11 @@ public:
     {
     }
 
+    SampleSpan(unsigned char* data, size_type samples, size_type stride) noexcept :
+        SampleSpan(reinterpret_cast<sample_pointer>(data), samples, stride)
+    {
+    }
+
     SampleSpan(const SampleSpan& other) noexcept = default;
 
     SampleSpan(const SampleSpan<Sample, true, Iterator>& other) noexcept :
@@ -312,6 +317,11 @@ public:
     SampleSpan() noexcept = default;
 
     SampleSpan(sample_pointer data, size_type samples) noexcept : data_(data), samples_(samples) {}
+
+    SampleSpan(unsigned char* data, size_type samples) noexcept :
+        SampleSpan(reinterpret_cast<sample_pointer>(data), samples)
+    {
+    }
 
     SampleSpan(const SampleSpan& other) noexcept = default;
 
