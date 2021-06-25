@@ -172,7 +172,7 @@ private:
 
 template<class Sample, class Allocator>
 BasicInterleaved<Sample, Allocator>::BasicInterleaved(size_type channels, size_type frames) :
-    super_type(nullptr, channels, frames)
+    super_type(channels, frames)
 {
     if (this->samples() > 0)
     {
@@ -184,7 +184,7 @@ BasicInterleaved<Sample, Allocator>::BasicInterleaved(size_type channels, size_t
 template<class Sample, class Allocator>
 BasicInterleaved<Sample, Allocator>::BasicInterleaved(
     size_type channels, size_type frames, const allocator_type& alloc) :
-    super_type(nullptr, channels, frames), alloc_(alloc)
+    super_type(channels, frames), alloc_(alloc)
 {
     if (this->samples() > 0)
     {

@@ -71,7 +71,7 @@ public:
     }
 
     BasicInterleavedSpan(unsigned char* data, size_type channels, size_type frames) noexcept :
-        BasicInterleavedSpan(reinterpret_cast<sample_pointer>(data), channels, frames)
+        data_(reinterpret_cast<sample_pointer>(data)), channels_(channels), frames_(frames)
     {
     }
 
@@ -243,6 +243,11 @@ public:
     }
 
 protected:
+    BasicInterleavedSpan(size_type channels, size_type frames) noexcept :
+        data_(nullptr), channels_(channels), frames_(frames)
+    {
+    }
+
     inline void set_pointer(sample_pointer begin) noexcept
     {
         data_ = begin;
