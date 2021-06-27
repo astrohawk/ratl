@@ -26,14 +26,15 @@ def plot_spectrums():
 
     x_axis = numpy.linspace(0, int(ratl_pybind.samplerate() / 2), num_freq)
     plt.plot(x_axis, spectrum_db(ratl_pybind.reference_double_sine()))
-    plt.plot(x_axis, spectrum_db(ratl_pybind.test_int_sine()))
+    plt.plot(x_axis, spectrum_db(ratl_pybind.reference_int16_sine()))
+    plt.plot(x_axis, spectrum_db(ratl_pybind.dither_int16_sine()))
     plt.xlim(x_axis[0], x_axis[-1])
     plt.ylim(top=0)
     plt.show()
 
 
 def main():
-    # plot_pdfs()
+    plot_pdfs()
     plot_spectrums()
 
 

@@ -82,81 +82,9 @@ PYBIND11_MODULE(ratl_pybind, m)
             return samples;
         });
     m.def(
-        "reference_int_sine",
+        "reference_int16_sine",
         []()
         {
-            std::vector<int32_t> input(FrameSize);
-            double scaler = 1 << 31;
-            double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
-            for (std::size_t i = 0; i < input.size(); ++i)
-            {
-                auto sample = Amplitude * sine(static_cast<double>(i) / samples_per_cycle);
-                input[i] = static_cast<int32_t>(std::lround(sample * scaler));
-            }
-
-            std::vector<double> samples(FrameSize);
-            for (std::size_t i = 0; i < input.size(); ++i)
-            {
-                samples[i] = static_cast<double>(input[i]) / scaler;
-            }
-            return samples;
-        });
-    m.def(
-        "dither_int16_sine",
-        []()
-        {
-            ratl::DitherGenerator dither_generator;
-
-            std::vector<int32_t> input(FrameSize);
-            double scaler = (1 << 15) - ratl::DitherGenerator::MaxFloat32;
-            double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
-            for (std::size_t i = 0; i < input.size(); ++i)
-            {
-                auto sample = Amplitude * sine(static_cast<double>(i) / samples_per_cycle);
-                auto scaled_sample = sample * scaler;
-                input[i] = static_cast<int32_t>(std::lround(scaled_sample + dither_generator.generateFloat32()));
-            }
-
-            std::vector<double> samples(FrameSize);
-            for (std::size_t i = 0; i < input.size(); ++i)
-            {
-                samples[i] = static_cast<double>(input[i]) / scaler;
-            }
-            return samples;
-        });
-    m.def(
-        "noise_shaped_dither_int16_sine",
-        []()
-        {
-            ratl::DitherGenerator dither_generator;
-
-            std::vector<int32_t> input(FrameSize);
-            double scaler = (1 << 15) - ratl::DitherGenerator::MaxFloat32;
-            double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
-            double error = 0;
-            double weight = 0.8;
-            for (std::size_t i = 0; i < input.size(); ++i)
-            {
-                auto sample = Amplitude * sine(static_cast<double>(i) / samples_per_cycle);
-                auto scaled_sample = sample * scaler;
-                input[i] = static_cast<int32_t>(
-                    std::lround(scaled_sample + dither_generator.generateFloat32() + (weight * error)));
-                error = scaled_sample - static_cast<double>(input[i]);
-            }
-
-            std::vector<double> samples(FrameSize);
-            for (std::size_t i = 0; i < input.size(); ++i)
-            {
-                samples[i] = static_cast<double>(input[i]) / scaler;
-            }
-            return samples;
-        });
-    m.def(
-        "test_int_sine",
-        []()
-        {
-            ratl::DitherGenerator dither_generator;
-
             ratl::Interleaved<ratl::float32_t> input(1, FrameSize);
             double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
             for (std::size_t i = 0; i < input.frames(); ++i)
@@ -166,10 +94,10 @@ PYBIND11_MODULE(ratl_pybind, m)
             }
 
             ratl::Interleaved<ratl::int32_t> temp1(1, FrameSize);
-            ratl::transform(input.begin(), input.end(), temp1.begin(), dither_generator);
+            ratl::transform(input.begin(), input.end(), temp1.begin());
 
             ratl::Interleaved<ratl::int16_t> temp2(1, FrameSize);
-            ratl::transform(temp1.begin(), temp1.end(), temp2.begin(), dither_generator);
+            ratl::transform(temp1.begin(), temp1.end(), temp2.begin());
 
             ratl::Interleaved<ratl::float32_t> output(1, FrameSize);
             ratl::transform(temp2.begin(), temp2.end(), output.begin());
@@ -180,5 +108,35 @@ PYBIND11_MODULE(ratl_pybind, m)
                 samples[i] = output.channel(0)[i].get();
             }
             return samples;
+        });
+    m.def(
+        "dither_int16_sine",
+        []()
+        {
+          ratl::DitherGenerator dither_generator;
+
+          ratl::Interleaved<ratl::float32_t> input(1, FrameSize);
+          double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
+          for (std::size_t i = 0; i < input.frames(); ++i)
+          {
+              input.channel(0)[i].get() =
+                  static_cast<float>(Amplitude * sine(static_cast<double>(i) / samples_per_cycle));
+          }
+
+          ratl::Interleaved<ratl::int32_t> temp1(1, FrameSize);
+          ratl::transform(input.begin(), input.end(), temp1.begin(), dither_generator);
+
+          ratl::Interleaved<ratl::int16_t> temp2(1, FrameSize);
+          ratl::transform(temp1.begin(), temp1.end(), temp2.begin(), dither_generator);
+
+          ratl::Interleaved<ratl::float32_t> output(1, FrameSize);
+          ratl::transform(temp2.begin(), temp2.end(), output.begin(), dither_generator);
+
+          std::vector<float> samples(FrameSize);
+          for (std::size_t i = 0; i < samples.size(); ++i)
+          {
+              samples[i] = output.channel(0)[i].get();
+          }
+          return samples;
         });
 }
