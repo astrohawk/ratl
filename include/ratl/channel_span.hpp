@@ -20,9 +20,6 @@ public:
     using sample_traits = typename super_type::sample_traits;
     using sample = typename super_type::sample;
     using const_sample = typename super_type::const_sample;
-    using sample_type = typename super_type::sample_type;
-    using sample_value_type = typename super_type::sample_value_type;
-    using sample_value_pointer = typename super_type::sample_value_pointer;
     using sample_pointer = typename super_type::sample_pointer;
     using sample_const_pointer = typename super_type::sample_const_pointer;
     using sample_reference = typename super_type::sample_reference;
@@ -51,7 +48,14 @@ template<class SampleType, bool Contiguous = false>
 using ChannelSpan = BasicChannelSpan<Sample<SampleType>, Contiguous>;
 
 template<class SampleType, bool Contiguous = false>
+using ConstChannelSpan = BasicChannelSpan<typename detail::SampleTraits<Sample<SampleType>>::const_sample, Contiguous>;
+
+template<class SampleType, bool Contiguous = false>
 using NetworkChannelSpan = BasicChannelSpan<NetworkSample<SampleType>, Contiguous>;
+
+template<class SampleType, bool Contiguous = false>
+using ConstNetworkChannelSpan =
+    BasicChannelSpan<typename detail::SampleTraits<NetworkSample<SampleType>>::const_sample, Contiguous>;
 
 } // namespace ratl
 

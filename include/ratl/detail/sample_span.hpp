@@ -12,6 +12,7 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/frame_iterator.hpp>
+#include <ratl/detail/types.hpp>
 #include <ratl/sample.hpp>
 
 namespace ratl
@@ -30,16 +31,13 @@ public:
     using sample_traits = detail::SampleTraits<Sample>;
     using sample = typename sample_traits::sample;
     using const_sample = typename sample_traits::const_sample;
-    using sample_type = typename sample_traits::sample_type;
-    using sample_value_type = typename sample_traits::value_type;
-    using sample_value_pointer = typename sample_traits::value_pointer;
     using sample_pointer = typename sample_traits::pointer;
     using sample_const_pointer = typename sample_traits::const_pointer;
     using sample_reference = typename sample_traits::reference;
     using sample_const_reference = typename sample_traits::const_reference;
 
-    using size_type = typename sample_traits::size_type;
-    using difference_type = typename sample_traits::difference_type;
+    using size_type = detail::types::size_type;
+    using difference_type = detail::types::difference_type;
 
     using value_type = sample;
     using pointer = sample_pointer;
@@ -282,21 +280,17 @@ inline bool operator==(
 template<class Sample, template<class, bool> class Iterator>
 class SampleSpan<Sample, true, Iterator>
 {
-protected:
+public:
     using sample_traits = detail::SampleTraits<Sample>;
     using sample = typename sample_traits::sample;
     using const_sample = typename sample_traits::const_sample;
-    using sample_type = typename sample_traits::sample_type;
-    using sample_value_type = typename sample_traits::value_type;
-    using sample_value_pointer = typename sample_traits::value_pointer;
     using sample_pointer = typename sample_traits::pointer;
     using sample_const_pointer = typename sample_traits::const_pointer;
     using sample_reference = typename sample_traits::reference;
     using sample_const_reference = typename sample_traits::const_reference;
 
-public:
-    using size_type = typename sample_traits::size_type;
-    using difference_type = typename sample_traits::difference_type;
+    using size_type = detail::types::size_type;
+    using difference_type = detail::types::difference_type;
 
     using value_type = sample;
     using pointer = sample_pointer;

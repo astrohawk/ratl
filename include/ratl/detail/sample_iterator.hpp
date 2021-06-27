@@ -7,6 +7,7 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/sample_traits.hpp>
+#include <ratl/detail/types.hpp>
 #include <ratl/sample.hpp>
 
 namespace ratl
@@ -21,28 +22,26 @@ class SampleIterator<Tag, Sample, false>
 {
     using sample_traits = SampleTraits<Sample>;
     using sample = typename sample_traits::sample;
-    using sample_value_type = typename sample_traits::value_type;
-    using sample_value_pointer = typename sample_traits::value_pointer;
     using sample_pointer = typename sample_traits::pointer;
     using sample_reference = typename sample_traits::reference;
 
-    using size_type = typename sample_traits::size_type;
+    using size_type = detail::types::size_type;
 
 public:
     using iterator_category = std::random_access_iterator_tag;
     using value_type = sample;
-    using difference_type = typename sample_traits::difference_type;
+    using difference_type = detail::types::difference_type;
     using pointer = sample_pointer;
     using reference = sample_reference;
 
 private:
-    sample_pointer data_ = nullptr;
+    pointer data_ = nullptr;
     size_type stride_ = 0;
 
 public:
     SampleIterator() noexcept = default;
 
-    SampleIterator(sample_pointer data, size_type stride) noexcept : data_(data), stride_(stride) {}
+    SampleIterator(pointer data, size_type stride) noexcept : data_(data), stride_(stride) {}
 
     SampleIterator(const SampleIterator& other) noexcept = default;
 
@@ -159,7 +158,7 @@ public:
         return (x.data_ - y.data_) / static_cast<typename SampleIterator::difference_type>(x.stride_);
     }
 
-    inline sample_pointer base() const noexcept
+    inline pointer base() const noexcept
     {
         return data_;
     }
@@ -170,27 +169,25 @@ class SampleIterator<Tag, Sample, true>
 {
     using sample_traits = SampleTraits<Sample>;
     using sample = typename sample_traits::sample;
-    using sample_value_type = typename sample_traits::value_type;
-    using sample_value_pointer = typename sample_traits::value_pointer;
     using sample_pointer = typename sample_traits::pointer;
     using sample_reference = typename sample_traits::reference;
 
-    using size_type = typename sample_traits::size_type;
+    using size_type = detail::types::size_type;
 
 public:
     using iterator_category = std::random_access_iterator_tag;
     using value_type = sample;
-    using difference_type = typename sample_traits::difference_type;
+    using difference_type = detail::types::difference_type;
     using pointer = sample_pointer;
     using reference = sample_reference;
 
 private:
-    sample_pointer data_ = nullptr;
+    pointer data_ = nullptr;
 
 public:
     SampleIterator() noexcept = default;
 
-    explicit SampleIterator(sample_pointer data) noexcept : data_(data) {}
+    explicit SampleIterator(pointer data) noexcept : data_(data) {}
 
     SampleIterator(const SampleIterator& other) noexcept = default;
 
@@ -307,7 +304,7 @@ public:
         return x.data_ - y.data_;
     }
 
-    inline sample_pointer base() const noexcept
+    inline pointer base() const noexcept
     {
         return data_;
     }

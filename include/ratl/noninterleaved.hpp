@@ -26,9 +26,6 @@ public:
     using sample_traits = typename super_type::sample_traits;
     using sample = typename sample_traits::sample;
     using const_sample = typename sample_traits::const_sample;
-    using sample_type = typename super_type::sample_type;
-    using sample_value_type = typename super_type::sample_value_type;
-    using sample_value_pointer = typename super_type::sample_value_pointer;
     using sample_pointer = typename super_type::sample_pointer;
     using sample_const_pointer = typename super_type::sample_const_pointer;
     using sample_reference = typename super_type::sample_reference;
@@ -179,7 +176,7 @@ BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(size_type channels, 
     if (this->samples() > 0)
     {
         allocate();
-        std::fill_n(this->data(), this->samples(), sample_value_type{});
+        std::fill_n(this->data(), this->samples(), sample{});
     }
 }
 
@@ -191,7 +188,7 @@ BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(
     if (this->samples() > 0)
     {
         allocate();
-        std::fill_n(this->data(), this->samples(), sample_value_type{});
+        std::fill_n(this->data(), this->samples(), sample{});
     }
 }
 

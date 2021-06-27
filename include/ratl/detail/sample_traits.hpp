@@ -7,7 +7,6 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/type_traits.hpp>
-#include <ratl/detail/types.hpp>
 
 namespace ratl
 {
@@ -58,17 +57,11 @@ struct SampleTraits
 
     /*
      * value_type
-     * The type of the primitive representation in memory. This will be the same
+     * The type of the underlying representation in memory. This will be the same
      * as sample_type for ratl::Sample, but will be an opaque type for
      * ratl::NetworkSample.
      */
-    using value_type = typename sample::value_type;
-
-    /*
-     * value_pointer
-     * A pointer to the representation in memory, i.e. a pointer to value_type.
-     */
-    using value_pointer = value_type*;
+    using underlying_type = typename sample::value_type;
 
     /*
      * pointer, const_pointer, reference and const_reference
@@ -78,11 +71,6 @@ struct SampleTraits
     using const_pointer = const_sample*;
     using reference = sample&;
     using const_reference = const_sample&;
-
-    using size_type = detail::types::size_type;
-    using difference_type = detail::types::difference_type;
-
-    using is_arithmetic = std::is_arithmetic<value_type>;
 };
 
 } // namespace detail

@@ -11,6 +11,7 @@
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/interleaved_iterator.hpp>
 #include <ratl/detail/operator_arrow_proxy.hpp>
+#include <ratl/detail/types.hpp>
 #include <ratl/frame_span.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
@@ -30,21 +31,20 @@ public:
     using sample_traits = detail::SampleTraits<Sample>;
     using sample = typename sample_traits::sample;
     using const_sample = typename sample_traits::const_sample;
-    using sample_type = typename sample_traits::sample_type;
-    using sample_value_type = typename sample_traits::value_type;
-    using sample_value_pointer = typename sample_traits::value_pointer;
     using sample_pointer = typename sample_traits::pointer;
     using sample_const_pointer = typename sample_traits::const_pointer;
     using sample_reference = typename sample_traits::reference;
     using sample_const_reference = typename sample_traits::const_reference;
 
-    using frame_type = BasicFrameSpan<sample, true>;
-    using const_frame_type = BasicFrameSpan<const_sample, true>;
     using channel_type = BasicChannelSpan<sample, false>;
     using const_channel_type = BasicChannelSpan<const_sample, false>;
+    using frame_type = BasicFrameSpan<sample, true>;
+    using const_frame_type = BasicFrameSpan<const_sample, true>;
 
-    using size_type = typename sample_traits::size_type;
-    using difference_type = typename sample_traits::difference_type;
+    using char_pointer = std::conditional_t<std::is_const<sample>::value, const unsigned char*, unsigned char*>;
+
+    using size_type = detail::types::size_type;
+    using difference_type = detail::types::difference_type;
 
     using value_type = frame_type;
     using pointer = detail::operator_arrow_proxy<value_type>;
@@ -70,7 +70,7 @@ public:
     {
     }
 
-    BasicInterleavedSpan(unsigned char* data, size_type channels, size_type frames) noexcept :
+    BasicInterleavedSpan(char_pointer data, size_type channels, size_type frames) noexcept :
         data_(reinterpret_cast<sample_pointer>(data)), channels_(channels), frames_(frames)
     {
     }
@@ -310,7 +310,14 @@ template<class SampleType>
 using InterleavedSpan = BasicInterleavedSpan<Sample<SampleType>>;
 
 template<class SampleType>
+using ConstInterleavedSpan = BasicInterleavedSpan<typename detail::SampleTraits<Sample<SampleType>>::const_sample>;
+
+template<class SampleType>
 using NetworkInterleavedSpan = BasicInterleavedSpan<NetworkSample<SampleType>>;
+
+template<class SampleType>
+using ConstNetworkInterleavedSpan =
+    BasicInterleavedSpan<typename detail::SampleTraits<NetworkSample<SampleType>>::const_sample>;
 
 } // namespace ratl
 

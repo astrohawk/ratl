@@ -32,8 +32,8 @@ buffer of host-order 32-bit floats:
 ```cpp
 std::size_t channels = 4;
 std::size_t frames = 32;
-unsigned char* data = read(sizeof(ratl::int24_t) * channels * frames);
-ratl::NetworkInterleavedSpan<ratl::int24_t> input(data, channels, frames);
+const unsigned char* data = read(sizeof(ratl::int24_t) * channels * frames);
+ratl::ConstNetworkInterleavedSpan<ratl::int24_t> input(data, channels, frames);
 ratl::Noninterleaved<ratl::float32_t> output(channels, frames);
 for (std::size_t i = 0; i < channels; ++i)
 {
