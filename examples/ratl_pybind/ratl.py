@@ -25,9 +25,9 @@ def plot_spectrums():
         return magnitude_db
 
     x_axis = numpy.linspace(0, int(ratl_pybind.samplerate() / 2), num_freq)
-    plt.plot(x_axis, spectrum_db(ratl_pybind.reference_double_sine()))
-    plt.plot(x_axis, spectrum_db(ratl_pybind.reference_int16_sine()))
-    plt.plot(x_axis, spectrum_db(ratl_pybind.dither_int16_sine()))
+    plt.plot(x_axis, spectrum_db(ratl_pybind.reference_double_tone()))
+    plt.plot(x_axis, spectrum_db(ratl_pybind.reference_int16_tone()))
+    plt.plot(x_axis, spectrum_db(ratl_pybind.dither_int16_tone()))
     plt.xlim(x_axis[0], x_axis[-1])
     plt.ylim(top=0)
     plt.show()

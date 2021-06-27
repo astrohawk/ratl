@@ -32,6 +32,8 @@ static constexpr double Amplitude = 0.8;
 
 PYBIND11_MODULE(ratl_pybind, m)
 {
+    static constexpr auto tone = sine;
+
     m.def(
         "triangular_pdf",
         []()
@@ -60,29 +62,29 @@ PYBIND11_MODULE(ratl_pybind, m)
         "samplerate",
         []()
         {
-          return SampleRate;
+            return SampleRate;
         });
     m.def(
         "num_samples",
         []()
         {
-          return FrameSize;
+            return FrameSize;
         });
     m.def(
-        "reference_double_sine",
+        "reference_double_tone",
         []()
         {
             std::vector<double> samples(FrameSize);
             double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
             for (std::size_t i = 0; i < samples.size(); ++i)
             {
-                samples[i] = Amplitude * sine(static_cast<double>(i) / samples_per_cycle);
+                samples[i] = Amplitude * tone(static_cast<double>(i) / samples_per_cycle);
             }
 
             return samples;
         });
     m.def(
-        "reference_int16_sine",
+        "reference_int16_tone",
         []()
         {
             ratl::Interleaved<ratl::float32_t> input(1, FrameSize);
@@ -90,7 +92,7 @@ PYBIND11_MODULE(ratl_pybind, m)
             for (std::size_t i = 0; i < input.frames(); ++i)
             {
                 input.channel(0)[i].get() =
-                    static_cast<float>(Amplitude * sine(static_cast<double>(i) / samples_per_cycle));
+                    static_cast<float>(Amplitude * tone(static_cast<double>(i) / samples_per_cycle));
             }
 
             ratl::Interleaved<ratl::int32_t> temp1(1, FrameSize);
@@ -110,33 +112,33 @@ PYBIND11_MODULE(ratl_pybind, m)
             return samples;
         });
     m.def(
-        "dither_int16_sine",
+        "dither_int16_tone",
         []()
         {
-          ratl::DitherGenerator dither_generator;
+            ratl::DitherGenerator dither_generator;
 
-          ratl::Interleaved<ratl::float32_t> input(1, FrameSize);
-          double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
-          for (std::size_t i = 0; i < input.frames(); ++i)
-          {
-              input.channel(0)[i].get() =
-                  static_cast<float>(Amplitude * sine(static_cast<double>(i) / samples_per_cycle));
-          }
+            ratl::Interleaved<ratl::float32_t> input(1, FrameSize);
+            double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
+            for (std::size_t i = 0; i < input.frames(); ++i)
+            {
+                input.channel(0)[i].get() =
+                    static_cast<float>(Amplitude * tone(static_cast<double>(i) / samples_per_cycle));
+            }
 
-          ratl::Interleaved<ratl::int32_t> temp1(1, FrameSize);
-          ratl::transform(input.begin(), input.end(), temp1.begin(), dither_generator);
+            ratl::Interleaved<ratl::int32_t> temp1(1, FrameSize);
+            ratl::transform(input.begin(), input.end(), temp1.begin(), dither_generator);
 
-          ratl::Interleaved<ratl::int16_t> temp2(1, FrameSize);
-          ratl::transform(temp1.begin(), temp1.end(), temp2.begin(), dither_generator);
+            ratl::Interleaved<ratl::int16_t> temp2(1, FrameSize);
+            ratl::transform(temp1.begin(), temp1.end(), temp2.begin(), dither_generator);
 
-          ratl::Interleaved<ratl::float32_t> output(1, FrameSize);
-          ratl::transform(temp2.begin(), temp2.end(), output.begin(), dither_generator);
+            ratl::Interleaved<ratl::float32_t> output(1, FrameSize);
+            ratl::transform(temp2.begin(), temp2.end(), output.begin(), dither_generator);
 
-          std::vector<float> samples(FrameSize);
-          for (std::size_t i = 0; i < samples.size(); ++i)
-          {
-              samples[i] = output.channel(0)[i].get();
-          }
-          return samples;
+            std::vector<float> samples(FrameSize);
+            for (std::size_t i = 0; i < samples.size(); ++i)
+            {
+                samples[i] = output.channel(0)[i].get();
+            }
+            return samples;
         });
 }
