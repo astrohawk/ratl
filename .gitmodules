@@ -10,6 +10,3 @@
 [submodule "third_party/xsimd"]
 	path = third_party/xsimd
 	url = https://github.com/xtensor-stack/xsimd.git
-[submodule "third_party/Gist"]
-	path = third_party/Gist
-	url = https://github.com/adamstark/Gist.git
