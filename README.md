@@ -40,3 +40,19 @@ for (std::size_t i = 0; i < channels; ++i)
     ratl::transform(input.channel(i).begin(), input.channel(i).end(), output.channel(i).begin());
 }
 ```
+
+## Types
+
+### Samples
+
+`ratl` has support for host byte order and network byte order 16-bit, 24-bit, and 32-bit integer, and 32-bit floating point samples.
+
+### Buffers
+
+#### Channel Buffer
+
+#### Frame Buffer
+
+#### Interleaved Buffer
+
+#### Non-interleaved buffer
