@@ -3,6 +3,8 @@
 
 namespace ratl
 {
+namespace test
+{
 // int16
 
 class ConvertInt16 : public ::testing::Test
@@ -365,7 +367,7 @@ TEST(Convert, CustomConverterFunctor)
     EXPECT_EQ(result, ratl::Sample<float32_t>{float_output});
 }
 
-using PossibleOutputSampleTypes = ::testing::Types<int16_t, int24_t, int32_t>;
+// ConvertFloat32Correct
 
 template<typename OutputSampleTypeArg>
 class ConvertFloat32Correct : public ::testing::Test
@@ -396,7 +398,7 @@ protected:
     };
 };
 
-TYPED_TEST_SUITE(ConvertFloat32Correct, PossibleOutputSampleTypes, );
+TYPED_TEST_SUITE(ConvertFloat32Correct, PossibleIntSampleTypes, );
 
 TYPED_TEST(ConvertFloat32Correct, Typical)
 {
@@ -416,17 +418,89 @@ TYPED_TEST(ConvertFloat32Correct, Typical)
     }
 }
 
+// ConvertFloat32Transparent
+
+template<class SampleTypeArg>
+class ConvertFloat32Transparent : public ::testing::Test
+{
+protected:
+    using SampleType = SampleTypeArg;
+
+    static constexpr long min()
+    {
+        return ratl::SampleTypeLimits<SampleType>::min;
+    }
+
+    static constexpr long max()
+    {
+        return ratl::SampleTypeLimits<SampleType>::max;
+    }
+};
+
+using ConvertFloat32TransparentTypes = ::testing::Types<int16_t, int24_t>;
+
+TYPED_TEST_SUITE(ConvertFloat32Transparent, ConvertFloat32TransparentTypes, );
+
+TYPED_TEST(ConvertFloat32Transparent, Typical)
+{
+    using SampleType = typename TestFixture::SampleType;
+    using Sample = ratl::Sample<SampleType>;
+
+    for (long long i = this->min(); i <= this->max(); ++i)
+    {
+        Sample input_sample{i};
+        auto temp_float = convert<ratl::Sample<float32_t>>(input_sample);
+        auto output_sample = convert<Sample>(temp_float);
+        EXPECT_EQ(output_sample, input_sample);
+    }
+}
+
+// ConvertFloatIntNoWrapping
+
+template<class SampleTypeArg>
+class ConvertFloatIntNoWrapping : public ::testing::Test
+{
+protected:
+    using SampleType = SampleTypeArg;
+};
+
+TYPED_TEST_SUITE(ConvertFloatIntNoWrapping, PossibleIntSampleTypes, );
+
+TYPED_TEST(ConvertFloatIntNoWrapping, Pos)
+{
+    using SampleType = typename TestFixture::SampleType;
+    using Sample = ratl::Sample<SampleType>;
+
+    for (float32_t f = 1.1; f > 0.9; f = std::nextafter(f, 0.f))
+    {
+        EXPECT_GT(convert<Sample>(ratl::Sample<float32_t>{f}), Sample{0});
+    }
+}
+
+TYPED_TEST(ConvertFloatIntNoWrapping, Neg)
+{
+    using SampleType = typename TestFixture::SampleType;
+    using Sample = ratl::Sample<SampleType>;
+
+    for (float32_t f = -1.1; f < -0.9; f = std::nextafter(f, 0.f))
+    {
+        EXPECT_LT(convert<Sample>(ratl::Sample<float32_t>{f}), Sample{0});
+    }
+}
+
+// ConvertIntInputNegativeTransparent
+
 template<typename SampleTypeCombinationArg>
-class IntInputConvertNegativeTransparent : public ::testing::Test
+class ConvertIntInputNegativeTransparent : public ::testing::Test
 {
 protected:
     using InputSampleType = typename SampleTypeCombinationArg::InputSampleType;
     using OutputSampleType = typename SampleTypeCombinationArg::OutputSampleType;
 };
 
-TYPED_TEST_SUITE(IntInputConvertNegativeTransparent, PossibleIntInputSampleTypeCombinations, );
+TYPED_TEST_SUITE(ConvertIntInputNegativeTransparent, PossibleIntInputSampleTypeCombinations, );
 
-TYPED_TEST(IntInputConvertNegativeTransparent, IntInputConvert)
+TYPED_TEST(ConvertIntInputNegativeTransparent, IntInputConvert)
 {
     using InputSample = ratl::Sample<typename TestFixture::InputSampleType>;
     using InputSampleTypeLimits = ratl::SampleTypeLimits<typename TestFixture::InputSampleType>;
@@ -446,16 +520,18 @@ TYPED_TEST(IntInputConvertNegativeTransparent, IntInputConvert)
     }
 }
 
+// ConvertFloatInputNegativeTransparent
+
 template<typename OutputSampleTypeArg>
-class FloatInputConvertNegativeTransparent : public ::testing::Test
+class ConvertFloatInputNegativeTransparent : public ::testing::Test
 {
 protected:
     using OutputSampleType = OutputSampleTypeArg;
 };
 
-TYPED_TEST_SUITE(FloatInputConvertNegativeTransparent, PossibleSampleTypes, );
+TYPED_TEST_SUITE(ConvertFloatInputNegativeTransparent, PossibleSampleTypes, );
 
-TYPED_TEST(FloatInputConvertNegativeTransparent, FloatInputConvert)
+TYPED_TEST(ConvertFloatInputNegativeTransparent, FloatInputConvert)
 {
     using InputSample = ratl::Sample<ratl::float32_t>;
     using OutputSample = ratl::Sample<typename TestFixture::OutputSampleType>;
@@ -463,7 +539,8 @@ TYPED_TEST(FloatInputConvertNegativeTransparent, FloatInputConvert)
     using OutputSampleTypeLimits = ratl::SampleTypeLimits<typename TestFixture::OutputSampleType>;
     for (std::int64_t i = 0; i < Int32SampleTypeLimits::max; ++i)
     {
-        auto sample_value = ratl::convert<InputSample>(ratl::Sample<ratl::int32_t>(static_cast<ratl::int32_t>(i))).get();
+        auto sample_value =
+            ratl::convert<InputSample>(ratl::Sample<ratl::int32_t>(static_cast<ratl::int32_t>(i))).get();
         auto positive_input = InputSample(sample_value);
         auto positive_output = ratl::convert<OutputSample>(positive_input);
         auto negative_input = InputSample(-sample_value);
@@ -475,4 +552,5 @@ TYPED_TEST(FloatInputConvertNegativeTransparent, FloatInputConvert)
     }
 }
 
+} // namespace test
 } // namespace ratl

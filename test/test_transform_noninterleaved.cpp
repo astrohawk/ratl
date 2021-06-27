@@ -3,6 +3,8 @@
 
 namespace ratl
 {
+namespace test
+{
 template<class SampleTypeCombination, template<typename InputSampleType> class NoninterleavedBaseType>
 class TransformNoninterleavedBase : public NoninterleavedBaseType<typename SampleTypeCombination::InputSampleType>
 {
@@ -69,7 +71,9 @@ TYPED_TEST(TransformNoninterleaved, Typical)
     {
         for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
         {
-            EXPECT_EQ(input_buffer[channel_num][frame_num], output_buffer[channel_num][frame_num]);
+            EXPECT_EQ(
+                ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][frame_num]),
+                input_buffer[channel_num][frame_num]);
         }
     }
 }
@@ -87,7 +91,9 @@ TYPED_TEST(TransformNoninterleaved, MoreOutputFrames)
     {
         for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
         {
-            EXPECT_EQ(input_buffer[channel_num][frame_num], output_buffer[channel_num][frame_num]);
+            EXPECT_EQ(
+                ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][frame_num]),
+                input_buffer[channel_num][frame_num]);
         }
     }
 
@@ -112,7 +118,9 @@ TYPED_TEST(TransformNoninterleaved, MoreOutputChannels)
     {
         for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
         {
-            EXPECT_EQ(input_buffer[channel_num][frame_num], output_buffer[channel_num][frame_num]);
+            EXPECT_EQ(
+                ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][frame_num]),
+                input_buffer[channel_num][frame_num]);
         }
     }
 
@@ -137,7 +145,9 @@ TYPED_TEST(TransformNoninterleaved, MoreOutputFramesMoreOutputChannels)
     {
         for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
         {
-            EXPECT_EQ(input_buffer[channel_num][frame_num], output_buffer[channel_num][frame_num]);
+            EXPECT_EQ(
+                ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][frame_num]),
+                input_buffer[channel_num][frame_num]);
         }
     }
 
@@ -173,7 +183,9 @@ TYPED_TEST(TransformNoninterleaved, ConstInputIterators)
     {
         for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
         {
-            EXPECT_EQ(input_buffer[channel_num][frame_num], output_buffer[channel_num][frame_num]);
+            EXPECT_EQ(
+                ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][frame_num]),
+                input_buffer[channel_num][frame_num]);
         }
     }
 }
@@ -199,7 +211,8 @@ TYPED_TEST(TransformFrame, Typical)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify all other output frames are still empty
@@ -226,7 +239,8 @@ TYPED_TEST(TransformFrame, MoreOutputFrames)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify all other output frames are still empty
@@ -253,7 +267,8 @@ TYPED_TEST(TransformFrame, MoreOutputChannels)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify all other output frames are still empty
@@ -283,7 +298,8 @@ TYPED_TEST(TransformFrame, MoreOutputFramesMoreOutputChannels)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify all other output frames are still empty
@@ -317,7 +333,8 @@ TYPED_TEST(TransformFrame, ConstInputIterators)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify all other output frames are still empty
@@ -351,7 +368,8 @@ TYPED_TEST(TransformChannel, Typical)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify all other output channels are still empty
@@ -378,7 +396,8 @@ TYPED_TEST(TransformChannel, MoreOutputFrames)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify all other output channels are still empty
@@ -408,7 +427,8 @@ TYPED_TEST(TransformChannel, MoreOutputChannels)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify all other output channels are still empty
@@ -435,7 +455,8 @@ TYPED_TEST(TransformChannel, MoreOutputFramesMoreOutputChannels)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify all other output channels are still empty
@@ -469,7 +490,8 @@ TYPED_TEST(TransformChannel, ConstInputIterators)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify all other output channels are still empty
@@ -500,7 +522,9 @@ TYPED_TEST(TransformNoninterleavedSingleFrame, Typical)
     // verify all samples have been copied correctly
     for (size_t channel_num = 0; channel_num < input_buffer.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_buffer[channel_num][0], output_buffer[channel_num][0]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][0]),
+            input_buffer[channel_num][0]);
     }
 }
 
@@ -515,7 +539,9 @@ TYPED_TEST(TransformNoninterleavedSingleFrame, MoreOutputFrames)
     // verify all samples have been copied correctly
     for (size_t channel_num = 0; channel_num < input_buffer.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_buffer[channel_num][0], output_buffer[channel_num][0]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][0]),
+            input_buffer[channel_num][0]);
     }
 
     // verify extra output frame is still empty
@@ -537,7 +563,9 @@ TYPED_TEST(TransformNoninterleavedSingleFrame, MoreOutputChannels)
     // verify all samples have been copied correctly
     for (size_t channel_num = 0; channel_num < input_buffer.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_buffer[channel_num][0], output_buffer[channel_num][0]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][0]),
+            input_buffer[channel_num][0]);
     }
 
     // verify extra output channel is still empty
@@ -555,7 +583,9 @@ TYPED_TEST(TransformNoninterleavedSingleFrame, MoreOutputFramesMoreOutputChannel
     // verify all samples have been copied correctly
     for (size_t channel_num = 0; channel_num < input_buffer.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_buffer[channel_num][0], output_buffer[channel_num][0]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[channel_num][0]),
+            input_buffer[channel_num][0]);
     }
 
     // verify extra output frame is still empty
@@ -590,7 +620,8 @@ TYPED_TEST(TransformFrameSingleFrame, Typical)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 }
 
@@ -608,7 +639,8 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputFrames)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify extra output frame is still empty
@@ -633,7 +665,8 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputChannels)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify all other output frames are still empty
@@ -663,7 +696,8 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputFramesMoreOutputChannels)
     // verify all channels have been copied correctly
     for (size_t channel_num = 0; channel_num < input_frame.channels(); ++channel_num)
     {
-        EXPECT_EQ(input_frame[channel_num], output_frame[channel_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_frame[channel_num]), input_frame[channel_num]);
     }
 
     // verify extra output frame is still empty
@@ -696,7 +730,7 @@ TYPED_TEST(TransformChannelSingleFrame, Typical)
     EXPECT_EQ(output_end, output_channel.end());
 
     // verify all samples have been copied correctly
-    EXPECT_EQ(input_channel[0], output_channel[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_channel[0]), input_channel[0]);
 
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
@@ -717,7 +751,7 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputFrames)
     EXPECT_EQ(output_end, output_channel.end() - 1);
 
     // verify all samples have been copied correctly
-    EXPECT_EQ(input_channel[0], output_channel[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_channel[0]), input_channel[0]);
 
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
@@ -745,7 +779,7 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputChannels)
     EXPECT_EQ(output_end, output_channel.end());
 
     // verify all samples have been copied correctly
-    EXPECT_EQ(input_channel[0], output_channel[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_channel[0]), input_channel[0]);
 
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
@@ -766,7 +800,7 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputFramesMoreOutputChannels)
     EXPECT_EQ(output_end, output_channel.end() - 1);
 
     // verify all samples have been copied correctly
-    EXPECT_EQ(input_channel[0], output_channel[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_channel[0]), input_channel[0]);
 
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
@@ -800,7 +834,8 @@ TYPED_TEST(TransformNoninterleavedSingleChannel, Typical)
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
     {
-        EXPECT_EQ(input_buffer[0][frame_num], output_buffer[0][frame_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[0][frame_num]), input_buffer[0][frame_num]);
     }
 }
 
@@ -815,7 +850,8 @@ TYPED_TEST(TransformNoninterleavedSingleChannel, MoreOutputFrames)
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
     {
-        EXPECT_EQ(input_buffer[0][frame_num], output_buffer[0][frame_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[0][frame_num]), input_buffer[0][frame_num]);
     }
 
     // verify extra output frame is still empty
@@ -833,7 +869,8 @@ TYPED_TEST(TransformNoninterleavedSingleChannel, MoreOutputChannels)
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
     {
-        EXPECT_EQ(input_buffer[0][frame_num], output_buffer[0][frame_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[0][frame_num]), input_buffer[0][frame_num]);
     }
 
     // verify extra output channel is still empty
@@ -855,7 +892,8 @@ TYPED_TEST(TransformNoninterleavedSingleChannel, MoreOutputFramesMoreOutputChann
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_buffer.frames(); ++frame_num)
     {
-        EXPECT_EQ(input_buffer[0][frame_num], output_buffer[0][frame_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_buffer[0][frame_num]), input_buffer[0][frame_num]);
     }
 
     // verify extra output frame is still empty
@@ -888,7 +926,7 @@ TYPED_TEST(TransformFrameSingleChannel, Typical)
     EXPECT_EQ(output_end, output_frame.end());
 
     // verify Sample have been copied correctly
-    EXPECT_EQ(input_frame[0], output_frame[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_frame[0]), input_frame[0]);
 
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
@@ -909,7 +947,7 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputFrames)
     EXPECT_EQ(output_end, output_frame.end());
 
     // verify Sample have been copied correctly
-    EXPECT_EQ(input_frame[0], output_frame[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_frame[0]), input_frame[0]);
 
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
@@ -930,7 +968,7 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputChannels)
     EXPECT_EQ(output_end, output_frame.end() - 1);
 
     // verify Sample have been copied correctly
-    EXPECT_EQ(input_frame[0], output_frame[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_frame[0]), input_frame[0]);
 
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
@@ -958,7 +996,7 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputFramesMoreOutputChannels)
     EXPECT_EQ(output_end, output_frame.end() - 1);
 
     // verify Sample have been copied correctly
-    EXPECT_EQ(input_frame[0], output_frame[0]);
+    EXPECT_EQ(ratl::convert<typename TestFixture::input_sample>(output_frame[0]), input_frame[0]);
 
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
@@ -995,7 +1033,8 @@ TYPED_TEST(TransformChannelSingleChannel, Typical)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 }
 
@@ -1013,7 +1052,8 @@ TYPED_TEST(TransformChannelSingleChannel, MoreOutputFrames)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify extra output frame is still empty
@@ -1034,7 +1074,8 @@ TYPED_TEST(TransformChannelSingleChannel, MoreOutputChannels)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify extra output channel is still empty
@@ -1059,7 +1100,8 @@ TYPED_TEST(TransformChannelSingleChannel, MoreOutputFramesMoreOutputChannels)
     // verify all samples have been copied correctly
     for (size_t sample_num = 0; sample_num < input_channel.samples(); ++sample_num)
     {
-        EXPECT_EQ(input_channel[sample_num], output_channel[sample_num]);
+        EXPECT_EQ(
+            ratl::convert<typename TestFixture::input_sample>(output_channel[sample_num]), input_channel[sample_num]);
     }
 
     // verify extra output frame is still empty
@@ -1073,4 +1115,5 @@ TYPED_TEST(TransformChannelSingleChannel, MoreOutputFramesMoreOutputChannels)
     }
 }
 
+} // namespace test
 } // namespace ratl

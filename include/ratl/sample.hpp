@@ -7,17 +7,15 @@
 
 // ratl includes
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/dither_generator.hpp>
-#include <ratl/detail/sample_converter.hpp>
 #include <ratl/detail/type_traits.hpp>
 
 namespace ratl
 {
-template<class Tp>
+template<class SampleType>
 class Sample final
 {
 public:
-    using sample_type = detail::SampleTypeDecay_t<Tp>;
+    using sample_type = detail::SampleTypeDecay_t<SampleType>;
 
     using value_type = sample_type;
     using reference = value_type&;
@@ -43,80 +41,95 @@ public:
     }
 
     template<class Up, class = typename std::enable_if<std::is_convertible<Up, value_type>::value>::type>
-    Sample& operator=(const Up& other) noexcept
+    constexpr Sample& operator=(const Up& other) noexcept
     {
         sample_ = other;
         return *this;
     }
 
-    template<class Up>
-    Sample(const Sample<Up>& other) noexcept : sample_(convert<Up>(other.get()))
-    {
-    }
-
-    template<class Up>
-    Sample& operator=(const Sample<Up>& other) noexcept
-    {
-        sample_ = convert<Up>(other.get());
-        return *this;
-    }
-
-    reference get() noexcept
+    inline constexpr reference get() noexcept
     {
         return sample_;
     }
 
-    const_reference get() const noexcept
+    inline constexpr const_reference get() const noexcept
     {
         return sample_;
     }
 
-    bool operator==(const Sample& other) const noexcept
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+
+    inline bool operator==(const Sample& other) const noexcept
     {
         return sample_ == other.sample_;
     }
 
-    bool operator!=(const Sample& other) const noexcept
+    inline bool operator!=(const Sample& other) const noexcept
     {
         return sample_ != other.sample_;
     }
 
-    bool operator<(const Sample& other) const noexcept
+    inline bool operator<(const Sample& other) const noexcept
     {
         return sample_ < other.sample_;
     }
 
-    bool operator<=(const Sample& other) const noexcept
+    inline bool operator<=(const Sample& other) const noexcept
     {
         return sample_ <= other.sample_;
     }
 
-    bool operator>(const Sample& other) const noexcept
+    inline bool operator>(const Sample& other) const noexcept
     {
         return sample_ > other.sample_;
     }
 
-    bool operator>=(const Sample& other) const noexcept
+    inline bool operator>=(const Sample& other) const noexcept
     {
         return sample_ >= other.sample_;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Sample& sample)
+#else
+
+    friend inline constexpr bool operator==(const Sample& x, const Sample& y) noexcept
+    {
+        return x.sample_ == y.sample_;
+    }
+
+    friend inline constexpr bool operator!=(const Sample& x, const Sample& y) noexcept
+    {
+        return x.sample_ != y.sample_;
+    }
+
+    friend inline constexpr bool operator<(const Sample& x, const Sample& y) noexcept
+    {
+        return x.sample_ < y.sample_;
+    }
+
+    friend inline constexpr bool operator<=(const Sample& x, const Sample& y) noexcept
+    {
+        return x.sample_ <= y.sample_;
+    }
+
+    friend inline constexpr bool operator>(const Sample& x, const Sample& y) noexcept
+    {
+        return x.sample_ > y.sample_;
+    }
+
+    friend inline constexpr bool operator>=(const Sample& x, const Sample& y) noexcept
+    {
+        return x.sample_ >= y.sample_;
+    }
+
+#endif
+
+    friend inline std::ostream& operator<<(std::ostream& os, const Sample& sample)
     {
         return os << sample.sample_;
     }
 
     // not private as gcc requires memcpyable types to not have any private members
     value_type sample_;
-
-private:
-    template<class Up>
-    static sample_type convert(detail::SampleTypeDecay_t<Up> other)
-    {
-        detail::NullDitherGenerator dither_generator;
-        return detail::SampleConverter<detail::SampleTypeDecay_t<Up>, sample_type, detail::NullDitherGenerator>::
-            convert(other, dither_generator);
-    }
 };
 
 static_assert(std::is_trivial<Sample<int16_t>>::value, "Sample<int16_t> is not a trivial type");

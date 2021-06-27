@@ -43,7 +43,7 @@ struct SampleConverter;
 template<class SampleType, class DitherGenerator>
 struct SampleConverter<SampleType, SampleType, DitherGenerator>
 {
-    static inline constexpr SampleType convert(SampleType sample, DitherGenerator&) noexcept
+    static inline SampleType convert(SampleType sample, DitherGenerator&) noexcept
     {
         return sample;
     }
@@ -54,7 +54,7 @@ struct SampleConverter<SampleType, SampleType, DitherGenerator>
 template<class DitherGenerator>
 struct SampleConverter<int16_t, int24_t, DitherGenerator>
 {
-    static inline constexpr int24_t convert(int32_t sample, DitherGenerator&) noexcept
+    static inline int24_t convert(int32_t sample, DitherGenerator&) noexcept
     {
         return static_cast<int24_t>(sample << 8);
     }
@@ -63,7 +63,7 @@ struct SampleConverter<int16_t, int24_t, DitherGenerator>
 template<class DitherGenerator>
 struct SampleConverter<int16_t, int32_t, DitherGenerator>
 {
-    static inline constexpr int32_t convert(int32_t sample, DitherGenerator&) noexcept
+    static inline int32_t convert(int32_t sample, DitherGenerator&) noexcept
     {
         return sample << 16;
     }
@@ -84,7 +84,7 @@ struct SampleConverter<int24_t, int16_t, DitherGenerator>
         DitherGenerator::Int16Bits > 0 ? DitherGenerator::Int16Bits - TotalShift : 0;
     static constexpr std::size_t PostDitherShift = TotalShift + PreDitherShift;
 
-    static inline constexpr int16_t convert(int32_t sample, DitherGenerator& dither_generator) noexcept
+    static inline int16_t convert(int32_t sample, DitherGenerator& dither_generator) noexcept
     {
         if (sample >= SampleInMax)
         {
@@ -102,7 +102,7 @@ constexpr int16_t SampleConverter<int24_t, int16_t, DitherGenerator>::SampleOutM
 template<class DitherGenerator>
 struct SampleConverter<int24_t, int32_t, DitherGenerator>
 {
-    static inline constexpr int32_t convert(int32_t sample, DitherGenerator&) noexcept
+    static inline int32_t convert(int32_t sample, DitherGenerator&) noexcept
     {
         return sample << 8;
     }
@@ -122,7 +122,7 @@ struct SampleConverter<int32_t, int16_t, DitherGenerator>
     static constexpr std::size_t PreDitherShift = TotalShift - DitherGenerator::Int16Bits;
     static constexpr std::size_t PostDitherShift = TotalShift - PreDitherShift;
 
-    static inline constexpr int16_t convert(int32_t sample, DitherGenerator& dither_generator) noexcept
+    static inline int16_t convert(int32_t sample, DitherGenerator& dither_generator) noexcept
     {
         if (sample >= SampleInMax)
         {
@@ -148,7 +148,7 @@ struct SampleConverter<int32_t, int24_t, DitherGenerator>
         DitherGenerator::Int16Bits > 0 ? DitherGenerator::Int16Bits - TotalShift : 0;
     static constexpr std::size_t PostDitherShift = TotalShift + PreDitherShift;
 
-    static inline constexpr int24_t convert(int32_t sample, DitherGenerator&) noexcept
+    static inline int24_t convert(int32_t sample, DitherGenerator&) noexcept
     {
         if (sample >= SampleInMax)
         {
@@ -168,7 +168,7 @@ struct SampleConverter<SampleType, float32_t, DitherGenerator>
 {
     static constexpr float32_t Scaler = FloatConvertTraits<SampleType>::Divisor;
 
-    static inline constexpr float32_t convert(SampleType sample, DitherGenerator&) noexcept
+    static inline float32_t convert(SampleType sample, DitherGenerator&) noexcept
     {
         return static_cast<float32_t>(sample) * Scaler;
     }

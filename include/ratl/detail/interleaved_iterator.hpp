@@ -117,35 +117,53 @@ public:
         return *this;
     }
 
-    friend inline bool operator==(const InterleavedIterator& x, const InterleavedIterator& y)
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+
+    inline bool operator==(const InterleavedIterator& other) const noexcept
+    {
+        return data_ == other.data_;
+    }
+
+    inline bool operator<(const InterleavedIterator& other) const noexcept
+    {
+        return data_ < other.data_;
+    }
+
+    inline bool operator<=>(const InterleavedIterator& other) const noexcept = default;
+
+#else
+
+    friend inline bool operator==(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
     {
         return x.data_ == y.data_;
     }
 
-    friend inline bool operator!=(const InterleavedIterator& x, const InterleavedIterator& y)
+    friend inline bool operator!=(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
     {
         return !(x == y);
     }
 
-    friend inline bool operator<(const InterleavedIterator& x, const InterleavedIterator& y)
+    friend inline bool operator<(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
     {
         return x.data_ < y.data_;
     }
 
-    friend inline bool operator<=(const InterleavedIterator& x, const InterleavedIterator& y)
+    friend inline bool operator<=(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
     {
         return !(x > y);
     }
 
-    friend inline bool operator>(const InterleavedIterator& x, const InterleavedIterator& y)
+    friend inline bool operator>(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
     {
         return y < x;
     }
 
-    friend inline bool operator>=(const InterleavedIterator& x, const InterleavedIterator& y)
+    friend inline bool operator>=(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
     {
         return !(x < y);
     }
+
+#endif
 
     friend inline InterleavedIterator operator+(typename InterleavedIterator::difference_type n, InterleavedIterator x)
     {

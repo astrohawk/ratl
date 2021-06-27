@@ -61,6 +61,40 @@
 #    endif
 #endif
 
+// C++ version
+// RATL_CPP_VERSION_HAS_CPP11
+// RATL_CPP_VERSION_HAS_CPP14
+// RATL_CPP_VERSION_HAS_CPP17
+// RATL_CPP_VERSION_HAS_CPP20
+
+#if defined(RATL_CPP_COMPILER_MSVC)
+#    if not defined(_MSVC_LANG)
+#        error Unsupported version of msvc; requires Visual Studio 2015 or above
+#    endif
+#    if _MSVC_LANG >= 202004L
+#        define RATL_CPP_VERSION_HAS_CPP20
+#    endif
+#    if _MSVC_LANG >= 201703L
+#        define RATL_CPP_VERSION_HAS_CPP17
+#    endif
+#    if _MSVC_LANG >= 201402L
+#        define RATL_CPP_VERSION_HAS_CPP14
+#    endif
+#elif defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
+#    if __cplusplus >= 202002L
+#        define RATL_CPP_VERSION_HAS_CPP20
+#    endif
+#    if __cplusplus >= 201703L
+#        define RATL_CPP_VERSION_HAS_CPP17
+#    endif
+#    if __cplusplus >= 201402L
+#        define RATL_CPP_VERSION_HAS_CPP14
+#    endif
+#endif
+#if !defined(RATL_CPP_VERSION_HAS_CPP14)
+#    error Unsupported C++ version; requires C++14 or greater
+#endif
+
 // endianness
 // RATL_CPP_LITTLE_ENDIAN
 // RATL_CPP_BIG_ENDIAN
@@ -89,12 +123,6 @@
 #    endif
 #endif
 
-#if defined(__has_builtin)
-#    if __has_builtin(__type_pack_element)
-#        define RATL_CPP_USE_TYPE_PACK_ELEMENT_INTRINSIC
-#    endif
-#endif
-
 // likely/unlikely
 // RATL_LIKELY(x)
 // RATL_UNLIKELY(x)
@@ -102,10 +130,7 @@
 #if defined(RATL_CPP_COMPILER_MSVC)
 #    define RATL_LIKELY(x) (x)
 #    define RATL_UNLIKELY(x) (x)
-#elif defined(RATL_CPP_COMPILER_CLANG)
-#    define RATL_LIKELY(x) (__builtin_expect((x), 1))
-#    define RATL_UNLIKELY(x) (__builtin_expect((x), 0))
-#elif defined(RATL_CPP_COMPILER_GCC)
+#elif defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
 #    define RATL_LIKELY(x) (__builtin_expect((x), 1))
 #    define RATL_UNLIKELY(x) (__builtin_expect((x), 0))
 #endif

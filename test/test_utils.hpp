@@ -7,7 +7,11 @@
 
 namespace ratl
 {
-typedef ::testing::Types<int16_t, int24_t, int32_t, float32_t> PossibleSampleTypes;
+namespace test
+{
+using PossibleSampleTypes = ::testing::Types<int16_t, int24_t, int32_t, float32_t>;
+
+using PossibleIntSampleTypes = ::testing::Types<int16_t, int24_t, int32_t>;
 
 template<class InputSampleTypeArg, class OutputSampleTypeArg>
 struct SampleTypeCombination
@@ -15,7 +19,8 @@ struct SampleTypeCombination
     using InputSampleType = InputSampleTypeArg;
     using OutputSampleType = OutputSampleTypeArg;
 };
-typedef ::testing::Types<
+
+using PossibleSampleTypeCombinations = ::testing::Types<
     SampleTypeCombination<int16_t, int16_t>,
     SampleTypeCombination<int16_t, int24_t>,
     SampleTypeCombination<int16_t, int32_t>,
@@ -31,9 +36,9 @@ typedef ::testing::Types<
     SampleTypeCombination<float32_t, int16_t>,
     SampleTypeCombination<float32_t, int24_t>,
     SampleTypeCombination<float32_t, int32_t>,
-    SampleTypeCombination<float32_t, float32_t>>
-    PossibleSampleTypeCombinations;
-typedef ::testing::Types<
+    SampleTypeCombination<float32_t, float32_t>>;
+
+using PossibleIntInputSampleTypeCombinations = ::testing::Types<
     SampleTypeCombination<int16_t, int16_t>,
     SampleTypeCombination<int16_t, int24_t>,
     SampleTypeCombination<int16_t, int32_t>,
@@ -45,8 +50,7 @@ typedef ::testing::Types<
     SampleTypeCombination<int32_t, int16_t>,
     SampleTypeCombination<int32_t, int24_t>,
     SampleTypeCombination<int32_t, int32_t>,
-    SampleTypeCombination<int32_t, float32_t>>
-    PossibleIntInputSampleTypeCombinations;
+    SampleTypeCombination<int32_t, float32_t>>;
 
 template<template<class> class BufferType, class SampleType, size_t Channels, size_t Frames>
 class InterleavedBase : public ::testing::Test
@@ -184,4 +188,5 @@ using CopyNoninterleavedBase = CopyBase<ratl::Noninterleaved, SampleType>;
 template<class SampleType>
 using MoveNoninterleavedBase = MoveBase<ratl::Noninterleaved, SampleType>;
 
+} // namespace test
 } // namespace ratl

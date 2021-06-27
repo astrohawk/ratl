@@ -2,6 +2,10 @@
 #include <gtest/gtest.h>
 #include <ratl/uint24.hpp>
 
+namespace ratl
+{
+namespace test
+{
 // Type tests
 
 TEST(ReturnTypes, Plus)
@@ -327,4 +331,7 @@ TEST(CompareZeroPos1, GreaterThanInt)
 TEST(CompareZeroPos1, GreaterThanEqualInt)
 {
     EXPECT_FALSE(ratl::uint24_t(0) >= 1);
+}
+
+}
 }

@@ -7,6 +7,8 @@
 
 namespace ratl
 {
+namespace test
+{
 template<typename SampleTypeCombinationArg>
 class IntInputBatchConvertSameAsConvert : public ::testing::Test
 {
@@ -74,6 +76,7 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputConvert)
     }
 }
 
+} // namespace test
 } // namespace ratl
 
 #endif

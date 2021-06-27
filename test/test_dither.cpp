@@ -4,6 +4,8 @@
 
 namespace ratl
 {
+namespace test
+{
 template<typename Generator>
 class DitherGeneratorTest : public testing::Test
 {
@@ -58,4 +60,5 @@ TYPED_TEST(DitherGeneratorTest, Float32Limits)
     EXPECT_LE(min, LimitMin * 0.95);
 }
 
+} // namespace test
 } // namespace ratl

@@ -49,7 +49,7 @@ public:
         std::size_t distance = std::distance(first, last);
         std::size_t vec_distance = distance - distance % BatchSize;
         InputIterator vec_last = first + vec_distance;
-        for (; first < vec_last; first += BatchSize, result += BatchSize)
+        for (; first != vec_last; first += BatchSize, result += BatchSize)
         {
             InputBatchType input = InputBatchCreator::load_unaligned(first);
             OutputBatchType output = convert(input, BatchConverter{dither_generator_});

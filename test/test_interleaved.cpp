@@ -3,6 +3,8 @@
 
 namespace ratl
 {
+namespace test
+{
 // DefaultConstructor
 
 template<class SampleType>
@@ -835,4 +837,5 @@ TYPED_TEST(RawReadWrite, Read)
     }
 }
 
+} // namespace test
 } // namespace ratl

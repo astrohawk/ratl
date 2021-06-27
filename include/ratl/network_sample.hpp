@@ -39,53 +39,43 @@ public:
 
     constexpr explicit NetworkSample(const value_type& other) noexcept : sample_(other) {}
 
-    NetworkSample& operator=(const value_type& other) noexcept
+    constexpr NetworkSample& operator=(const value_type& other) noexcept
     {
         sample_ = other;
         return *this;
     }
 
-    reference get() noexcept
+    inline constexpr reference get() noexcept
     {
         return sample_;
     }
 
-    const_reference get() const noexcept
+    inline constexpr const_reference get() const noexcept
     {
         return sample_;
     }
 
-    bool operator==(const NetworkSample& other) const noexcept
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+
+    inline constexpr bool operator==(const NetworkSample& other) const noexcept = default;
+
+    inline constexpr bool operator!=(const NetworkSample& other) const noexcept = default;
+
+#else
+
+    friend inline constexpr bool operator==(const NetworkSample& x, const NetworkSample& y) noexcept
     {
-        return sample_ == other.sample_;
+        return x.sample_ == y.sample_;
     }
 
-    bool operator!=(const NetworkSample& other) const noexcept
+    friend inline constexpr bool operator!=(const NetworkSample& x, const NetworkSample& y) noexcept
     {
-        return sample_ != other.sample_;
+        return x.sample_ != y.sample_;
     }
 
-    bool operator<(const NetworkSample& other) const noexcept
-    {
-        return sample_ < other.sample_;
-    }
+#endif
 
-    bool operator<=(const NetworkSample& other) const noexcept
-    {
-        return sample_ <= other.sample_;
-    }
-
-    bool operator>(const NetworkSample& other) const noexcept
-    {
-        return sample_ > other.sample_;
-    }
-
-    bool operator>=(const NetworkSample& other) const noexcept
-    {
-        return sample_ >= other.sample_;
-    }
-
-    friend std::ostream& operator<<(std::ostream& os, const NetworkSample& network_sample)
+    friend inline std::ostream& operator<<(std::ostream& os, const NetworkSample& network_sample)
     {
         detail::NullDitherGenerator dither_generator;
         return os << detail::NetworkToSampleConverter<SampleType, SampleType, detail::NullDitherGenerator>::convert(

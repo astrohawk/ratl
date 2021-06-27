@@ -117,35 +117,53 @@ public:
         return *this;
     }
 
-    friend inline bool operator==(const SampleIterator& x, const SampleIterator& y)
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+
+    inline bool operator==(const SampleIterator& other) const noexcept
+    {
+        return data_ == other.data_;
+    }
+
+    inline bool operator<(const SampleIterator& other) const noexcept
+    {
+        return data_ < other.data_;
+    }
+
+    inline bool operator<=>(const SampleIterator& other) const noexcept = default;
+
+#else
+
+    friend inline bool operator==(const SampleIterator& x, const SampleIterator& y) noexcept
     {
         return x.data_ == y.data_;
     }
 
-    friend inline bool operator!=(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator!=(const SampleIterator& x, const SampleIterator& y) noexcept
     {
-        return !(x == y);
+        return x.data_ != y.data_;
     }
 
-    friend inline bool operator<(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator<(const SampleIterator& x, const SampleIterator& y) noexcept
     {
         return x.data_ < y.data_;
     }
 
-    friend inline bool operator<=(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator<=(const SampleIterator& x, const SampleIterator& y) noexcept
     {
-        return !(x > y);
+        return x.data_ <= y.data_;
     }
 
-    friend inline bool operator>(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator>(const SampleIterator& x, const SampleIterator& y) noexcept
     {
-        return y < x;
+        return x.data_ > y.data_;
     }
 
-    friend inline bool operator>=(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator>=(const SampleIterator& x, const SampleIterator& y) noexcept
     {
-        return !(x < y);
+        return x.data_ >= y.data_;
     }
+
+#endif
 
     friend inline SampleIterator operator+(typename SampleIterator::difference_type n, SampleIterator x)
     {
@@ -263,6 +281,12 @@ public:
         return *this;
     }
 
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+
+    inline bool operator<=>(const SampleIterator& other) const noexcept = default;
+
+#else
+
     friend inline bool operator==(const SampleIterator& x, const SampleIterator& y)
     {
         return x.data_ == y.data_;
@@ -292,6 +316,8 @@ public:
     {
         return !(x < y);
     }
+
+#endif
 
     friend inline SampleIterator operator+(typename SampleIterator::difference_type n, SampleIterator x)
     {

@@ -49,10 +49,9 @@ public:
 #    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #    pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
-        auto high = static_cast<int32_t>(static_cast<int8_t>(storage_[2]));
         return static_cast<int32_t>(
             (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
-            (static_cast<uint32_t>(high) << 16));
+            (static_cast<uint32_t>(static_cast<int32_t>(static_cast<int8_t>(storage_[2]))) << 16));
 #if defined(RATL_CPP_COMPILER_GCC)
 #    pragma GCC diagnostic pop
 #endif
