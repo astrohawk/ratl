@@ -61,9 +61,10 @@ public:
         std::is_same<sample_pointer, typename alloc_traits::pointer>::value,
         "Allocator::pointer must be same type as Sample*");
 
-    BasicInterleaved() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) {}
+    BasicInterleaved() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
 
-    BasicInterleaved(const allocator_type& alloc) noexcept(std::is_nothrow_copy_constructible<allocator_type>::value) :
+    explicit BasicInterleaved(const allocator_type& alloc) noexcept(
+        std::is_nothrow_copy_constructible<allocator_type>::value) :
         alloc_(alloc)
     {
     }

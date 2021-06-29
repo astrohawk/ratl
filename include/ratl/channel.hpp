@@ -1,5 +1,5 @@
-#ifndef _ratl_noninterleaved_
-#define _ratl_noninterleaved_
+#ifndef _ratl_channel_
+#define _ratl_channel_
 
 // C++ Standard Library includes
 #include <iterator>
@@ -8,16 +8,16 @@
 
 // ratl includes
 #include <ratl/allocator.hpp>
+#include <ratl/channel_span.hpp>
 #include <ratl/detail/config.hpp>
-#include <ratl/noninterleaved_span.hpp>
 
 namespace ratl
 {
 template<class Sample, class Allocator = ratl::Allocator<Sample>>
-class BasicNoninterleaved : public BasicNoninterleavedSpan<Sample>
+class BasicChannel : public BasicChannelSpan<Sample, true>
 {
 private:
-    using super_type = BasicNoninterleavedSpan<Sample>;
+    using super_type = BasicChannelSpan<Sample>;
 
     using allocator_type = Allocator;
     using alloc_traits = std::allocator_traits<allocator_type>;
@@ -30,11 +30,6 @@ public:
     using sample_const_pointer = typename super_type::sample_const_pointer;
     using sample_reference = typename super_type::sample_reference;
     using sample_const_reference = typename super_type::sample_const_reference;
-
-    using frame_type = typename super_type::frame_type;
-    using const_frame_type = typename super_type::const_frame_type;
-    using channel_type = typename super_type::channel_type;
-    using const_channel_type = typename super_type::const_channel_type;
 
     using size_type = typename super_type::size_type;
     using difference_type = typename super_type::difference_type;
@@ -61,36 +56,34 @@ public:
         std::is_same<sample_pointer, typename alloc_traits::pointer>::value,
         "Allocator::pointer must be same type as Sample*");
 
-    BasicNoninterleaved() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
+    BasicChannel() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
 
-    explicit BasicNoninterleaved(const allocator_type& alloc) noexcept(
+    explicit BasicChannel(const allocator_type& alloc) noexcept(
         std::is_nothrow_copy_constructible<allocator_type>::value) :
         alloc_(alloc)
     {
     }
 
-    BasicNoninterleaved(size_type channels, size_type frames);
+    explicit BasicChannel(size_type samples);
 
-    BasicNoninterleaved(size_type channels, size_type frames, const allocator_type& alloc);
+    BasicChannel(size_type samples, const allocator_type& alloc);
 
-    BasicNoninterleaved(const BasicNoninterleaved& other);
+    BasicChannel(const BasicChannel& other);
 
-    BasicNoninterleaved(const BasicNoninterleaved& other, const allocator_type& alloc);
+    BasicChannel(const BasicChannel& other, const allocator_type& alloc);
 
-    BasicNoninterleaved(BasicNoninterleaved&& other) noexcept(
-        std::is_nothrow_move_constructible<allocator_type>::value) :
+    BasicChannel(BasicChannel&& other) noexcept(std::is_nothrow_move_constructible<allocator_type>::value) :
         super_type(std::move(other)), alloc_(std::move(other.alloc_))
     {
         other.clear_contents();
     }
 
-    BasicNoninterleaved(BasicNoninterleaved&& other, const allocator_type& alloc) :
-        super_type(std::move(other)), alloc_(alloc)
+    BasicChannel(BasicChannel&& other, const allocator_type& alloc) : super_type(std::move(other)), alloc_(alloc)
     {
         other.clear_contents();
     }
 
-    ~BasicNoninterleaved()
+    ~BasicChannel()
     {
         if (this->data() != nullptr)
         {
@@ -98,18 +91,17 @@ public:
         }
     }
 
-    BasicNoninterleaved& operator=(const BasicNoninterleaved& other);
+    BasicChannel& operator=(const BasicChannel& other);
 
-    BasicNoninterleaved& operator=(BasicNoninterleaved&& other) noexcept(
-        alloc_traits::propagate_on_container_move_assignment::value&&
-            std::is_nothrow_move_assignable<allocator_type>::value);
+    BasicChannel& operator=(BasicChannel&& other) noexcept(alloc_traits::propagate_on_container_move_assignment::value&&
+                                                               std::is_nothrow_move_assignable<allocator_type>::value);
 
     allocator_type get_allocator() const noexcept
     {
         return this->alloc_;
     }
 
-    void swap(BasicNoninterleaved& other);
+    void swap(BasicChannel& other);
 
 private:
     void allocate()
@@ -123,13 +115,13 @@ private:
         alloc_.deallocate(this->data(), this->samples());
     }
 
-    void copy_assign_alloc(const BasicNoninterleaved& other)
+    void copy_assign_alloc(const BasicChannel& other)
     {
         copy_assign_alloc(
             other, std::integral_constant<bool, alloc_traits::propagate_on_container_copy_assignment::value>());
     }
 
-    void copy_assign_alloc(const BasicNoninterleaved& other, std::true_type)
+    void copy_assign_alloc(const BasicChannel& other, std::true_type)
     {
         if (alloc_ != other.alloc_)
         {
@@ -138,14 +130,14 @@ private:
         alloc_ = other.alloc_;
     }
 
-    void copy_assign_alloc(const BasicNoninterleaved&, std::false_type) {}
+    void copy_assign_alloc(const BasicChannel&, std::false_type) {}
 
-    void move_assign(BasicNoninterleaved& other, std::true_type) noexcept(
+    void move_assign(BasicChannel& other, std::true_type) noexcept(
         std::is_nothrow_move_assignable<allocator_type>::value);
 
-    void move_assign(BasicNoninterleaved& other, std::false_type);
+    void move_assign(BasicChannel& other, std::false_type);
 
-    void move_assign_alloc(BasicNoninterleaved& other) noexcept(
+    void move_assign_alloc(BasicChannel& other) noexcept(
         !alloc_traits::propagate_on_container_move_assignment::value ||
         std::is_nothrow_move_assignable<allocator_type>::value)
     {
@@ -153,25 +145,24 @@ private:
             other, std::integral_constant<bool, alloc_traits::propagate_on_container_move_assignment::value>());
     }
 
-    void move_assign_alloc(BasicNoninterleaved& other, std::true_type) noexcept(
+    void move_assign_alloc(BasicChannel& other, std::true_type) noexcept(
         std::is_nothrow_move_assignable<allocator_type>::value)
     {
         alloc_ = std::move(other.alloc_);
     }
 
-    void move_assign_alloc(BasicNoninterleaved&, std::false_type) noexcept {}
+    void move_assign_alloc(BasicChannel&, std::false_type) noexcept {}
 
-    void swap_alloc(BasicNoninterleaved& other, std::true_type) noexcept
+    void swap_alloc(BasicChannel& other, std::true_type) noexcept
     {
         std::swap(alloc_, other.alloc_);
     }
 
-    void swap_alloc(BasicNoninterleaved&, std::false_type) noexcept {}
+    void swap_alloc(BasicChannel&, std::false_type) noexcept {}
 };
 
 template<class Sample, class Allocator>
-BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(size_type channels, size_type frames) :
-    super_type(channels, frames)
+BasicChannel<Sample, Allocator>::BasicChannel(size_type samples) : super_type(samples)
 {
     if (this->samples() > 0)
     {
@@ -181,9 +172,8 @@ BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(size_type channels, 
 }
 
 template<class Sample, class Allocator>
-BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(
-    size_type channels, size_type frames, const allocator_type& alloc) :
-    super_type(channels, frames), alloc_(alloc)
+BasicChannel<Sample, Allocator>::BasicChannel(size_type samples, const allocator_type& alloc) :
+    super_type(samples), alloc_(alloc)
 {
     if (this->samples() > 0)
     {
@@ -193,7 +183,7 @@ BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(
 }
 
 template<class Sample, class Allocator>
-BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(const BasicNoninterleaved& other) :
+BasicChannel<Sample, Allocator>::BasicChannel(const BasicChannel& other) :
     super_type(other), alloc_(alloc_traits::select_on_container_copy_construction(other.alloc_))
 {
     if (this->samples() > 0)
@@ -204,8 +194,7 @@ BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(const BasicNoninterl
 }
 
 template<class Sample, class Allocator>
-BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(
-    const BasicNoninterleaved& other, const allocator_type& alloc) :
+BasicChannel<Sample, Allocator>::BasicChannel(const BasicChannel& other, const allocator_type& alloc) :
     super_type(other), alloc_(alloc)
 {
     if (this->samples() > 0)
@@ -216,21 +205,20 @@ BasicNoninterleaved<Sample, Allocator>::BasicNoninterleaved(
 }
 
 template<class Sample, class Allocator>
-BasicNoninterleaved<Sample, Allocator>& BasicNoninterleaved<Sample, Allocator>::operator=(
-    const BasicNoninterleaved& other)
+BasicChannel<Sample, Allocator>& BasicChannel<Sample, Allocator>::operator=(const BasicChannel& other)
 {
     if (this != &other)
     {
         copy_assign_alloc(other);
-        BasicNoninterleaved(other).swap(*this);
+        BasicChannel(other).swap(*this);
     }
     return *this;
 }
 
 template<class Sample, class Allocator>
-BasicNoninterleaved<Sample, Allocator>& BasicNoninterleaved<Sample, Allocator>::operator=(
-    BasicNoninterleaved&& other) noexcept(alloc_traits::propagate_on_container_move_assignment::value&&
-                                              std::is_nothrow_move_assignable<allocator_type>::value)
+BasicChannel<Sample, Allocator>& BasicChannel<Sample, Allocator>::operator=(BasicChannel&& other) noexcept(
+    alloc_traits::propagate_on_container_move_assignment::value&&
+        std::is_nothrow_move_assignable<allocator_type>::value)
 {
     move_assign(other, std::integral_constant<bool, alloc_traits::propagate_on_container_move_assignment::value>());
     other.clear_contents();
@@ -238,14 +226,14 @@ BasicNoninterleaved<Sample, Allocator>& BasicNoninterleaved<Sample, Allocator>::
 }
 
 template<class Sample, class Allocator>
-void BasicNoninterleaved<Sample, Allocator>::swap(BasicNoninterleaved& other)
+void BasicChannel<Sample, Allocator>::swap(BasicChannel& other)
 {
     super_type::swap(other);
     swap_alloc(other, std::integral_constant<bool, alloc_traits::propagate_on_container_swap::value>());
 }
 
 template<class Sample, class Allocator>
-void BasicNoninterleaved<Sample, Allocator>::move_assign(BasicNoninterleaved& other, std::true_type) noexcept(
+void BasicChannel<Sample, Allocator>::move_assign(BasicChannel& other, std::true_type) noexcept(
     std::is_nothrow_move_assignable<allocator_type>::value)
 {
     if (this->data() != nullptr)
@@ -257,7 +245,7 @@ void BasicNoninterleaved<Sample, Allocator>::move_assign(BasicNoninterleaved& ot
 }
 
 template<class Sample, class Allocator>
-void BasicNoninterleaved<Sample, Allocator>::move_assign(BasicNoninterleaved& other, std::false_type)
+void BasicChannel<Sample, Allocator>::move_assign(BasicChannel& other, std::false_type)
 {
     if (alloc_ != other.alloc_)
     {
@@ -279,11 +267,11 @@ void BasicNoninterleaved<Sample, Allocator>::move_assign(BasicNoninterleaved& ot
 }
 
 template<class SampleType>
-using Noninterleaved = BasicNoninterleaved<Sample<SampleType>>;
+using Channel = BasicChannel<Sample<SampleType>>;
 
 template<class SampleType>
-using NetworkNoninterleaved = BasicNoninterleaved<NetworkSample<SampleType>>;
+using NetworkChannel = BasicChannel<NetworkSample<SampleType>>;
 
 } // namespace ratl
 
-#endif // _ratl_noninterleaved_
+#endif // _ratl_channel_

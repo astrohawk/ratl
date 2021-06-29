@@ -448,6 +448,13 @@ public:
     }
 
 protected:
+    explicit SampleSpan(size_type samples) noexcept : data_(nullptr), samples_(samples) {}
+
+    inline void set_pointer(sample_pointer begin) noexcept
+    {
+        data_ = begin;
+    }
+
     inline size_type samples() const noexcept
     {
         return samples_;

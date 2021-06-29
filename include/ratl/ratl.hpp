@@ -2,10 +2,12 @@
 #define _ratl_
 
 #include <ratl/allocator.hpp>
+#include <ratl/channel.hpp>
 #include <ratl/channel_span.hpp>
 #include <ratl/convert.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/dither_generator.hpp>
+#include <ratl/frame.hpp>
 #include <ratl/frame_span.hpp>
 #include <ratl/interleaved.hpp>
 #include <ratl/interleaved_span.hpp>
