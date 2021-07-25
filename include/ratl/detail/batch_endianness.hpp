@@ -58,12 +58,6 @@ struct BatchReverseEndiannessImpl<uint16_t>
             xsimd::batch<uint8_t, 16>(vrev16q_u8(xsimd::bitwise_cast<xsimd::batch<uint8_t, 16>>(input))));
     }
 #    endif
-
-//    template<class BatchNetworkSampleValueType>
-//    static inline BatchNetworkSampleValueType reverse(const BatchNetworkSampleValueType& input) noexcept
-//    {
-//        return ((input & 0xff00) >> 8) | ((input & 0x00ff) << 8);
-//    }
 };
 
 template<>
@@ -110,12 +104,6 @@ struct BatchReverseEndiannessImpl<uint24_t>
             xsimd::batch<uint8_t, 16>(vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<uint8_t, 16>>(input << 8))));
     }
 #    endif
-
-//    template<class BatchNetworkSampleValueType>
-//    static inline BatchNetworkSampleValueType reverse(const BatchNetworkSampleValueType& input) noexcept
-//    {
-//        return ((input & 0xff0000) >> 16) | (input & 0x00ff00) | ((input & 0x0000ff) << 16);
-//    }
 };
 
 template<>
@@ -162,13 +150,6 @@ struct BatchReverseEndiannessImpl<uint32_t>
             xsimd::batch<uint8_t, 16>(vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<uint8_t, 16>>(input))));
     }
 #    endif
-
-//    template<class BatchNetworkSampleValueType>
-//    static inline BatchNetworkSampleValueType reverse(const BatchNetworkSampleValueType& input) noexcept
-//    {
-//        return ((input & 0xff000000) >> 24) | ((input & 0x00ff0000) >> 8) | ((input & 0x0000ff00) << 8) |
-//               ((input & 0x000000ff) << 24);
-//    }
 };
 
 // batchReverseEndianness
