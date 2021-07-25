@@ -26,7 +26,7 @@ inline xsimd::batch<int32_t, 8> batchRoundFloat32ToInt32(const xsimd::batch<floa
 }
 #    endif
 
-#    if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION
+#    if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION && defined(XSIMD_AVX512DQ_AVAILABLE)
 inline xsimd::batch<int32_t, 16> batchRoundFloat32ToInt32(const xsimd::batch<float, 16>& x)
 {
     return _mm512_cvtps_epi32(x);

@@ -38,13 +38,16 @@
 // RATL_CPP_ARCH_X86
 // RATL_CPP_ARCH_X86_64
 // RATL_CPP_ARCH_ARM
+// RATL_CPP_ARCH_AARCH64
 
 #if defined(RATL_CPP_COMPILER_MSVC)
 #    if defined(_M_X64)
 #        define RATL_CPP_ARCH_X86_64
 #    elif defined(_M_IX86)
 #        define RATL_CPP_ARCH_X86
-#    elif defined(_M_ARM) || defined(_M_ARM64)
+#    elif defined(_M_ARM64)
+#        define RATL_CPP_ARCH_AARCH64
+#    elif defined(_M_ARM)
 #        define RATL_CPP_ARCH_ARM
 #    else
 #        error Unknown architecture
@@ -54,6 +57,8 @@
 #        define RATL_CPP_ARCH_X86_64
 #    elif defined(__i386)
 #        define RATL_CPP_ARCH_X86
+#    elif defined(__aarch64__)
+#        define RATL_CPP_ARCH_AARCH64
 #    elif defined(__arm__)
 #        define RATL_CPP_ARCH_ARM
 #    else

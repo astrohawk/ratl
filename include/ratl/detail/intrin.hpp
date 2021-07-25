@@ -6,7 +6,7 @@
 
 #if defined(RATL_CPP_ARCH_X86) || defined(RATL_CPP_ARCH_X86_64)
 #    include <immintrin.h>
-#elif defined(RATL_CPP_ARCH_ARM)
+#elif defined(RATL_CPP_ARCH_ARM) || defined(RATL_CPP_ARCH_AARCH64)
 #    include <arm_neon.h>
 #else
 #    error Unsupported architecture

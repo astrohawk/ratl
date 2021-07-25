@@ -17,39 +17,39 @@ namespace detail
 {
 static constexpr std::size_t BatchSize = std::min(XSIMD_BATCH_INT32_SIZE, XSIMD_BATCH_FLOAT_SIZE);
 
-template<class SampleType>
-struct BatchSampleValueTypeImpl;
+// HasBatchType
 
-template<>
-struct BatchSampleValueTypeImpl<int16_t>
+template<typename SampleType>
+struct HasBatchType : IsComplete<xsimd::batch<SampleType, BatchSize>>
 {
-    using type = xsimd::batch<int16_t, BatchSize>;
 };
 
-template<>
-struct BatchSampleValueTypeImpl<int24_t>
-{
-    using type = xsimd::batch<int32_t, BatchSize>;
-};
+// HasBatchType_v
 
-template<>
-struct BatchSampleValueTypeImpl<int32_t>
-{
-    using type = xsimd::batch<int32_t, BatchSize>;
-};
-
-template<>
-struct BatchSampleValueTypeImpl<float32_t>
-{
-    using type = xsimd::batch<float32_t, BatchSize>;
-};
+template<typename SampleType>
+static constexpr bool HasBatchType_v = HasBatchType<SampleType>::value;
 
 // BatchSampleValueType
 
+template<class SampleType, class = void>
+struct BatchSampleValueType;
+
 template<class SampleType>
-struct BatchSampleValueType
+struct BatchSampleValueType<SampleType, typename std::enable_if<HasBatchType_v<SampleType>>::type>
 {
-    using type = typename BatchSampleValueTypeImpl<SampleType>::type;
+    using type = xsimd::batch<SampleType, BatchSize>;
+};
+
+template<class SampleType>
+struct BatchSampleValueType<SampleType, typename std::enable_if<!HasBatchType_v<SampleType>>::type>
+{
+    using type = xsimd::batch<int32_t, BatchSize>;
+};
+
+template<>
+struct BatchSampleValueType<float32_t>
+{
+    using type = xsimd::batch<float32_t, BatchSize>;
 };
 
 template<class SampleType>
@@ -57,29 +57,21 @@ using BatchSampleValueType_t = typename BatchSampleValueType<SampleType>::type;
 
 // BatchNetworkSampleValueType
 
-template<class SampleType>
+template<class SampleType, class = void>
 struct BatchNetworkSampleValueType;
 
-template<>
-struct BatchNetworkSampleValueType<int16_t>
+template<class SampleType>
+struct BatchNetworkSampleValueType<
+    SampleType,
+    typename std::enable_if<HasBatchType_v<NetworkSampleValueUnderlyingType_t<SampleType>>>::type>
 {
-    using type = xsimd::batch<uint16_t, BatchSize>;
+    using type = xsimd::batch<NetworkSampleValueUnderlyingType_t<SampleType>, BatchSize>;
 };
 
-template<>
-struct BatchNetworkSampleValueType<int24_t>
-{
-    using type = xsimd::batch<uint32_t, BatchSize>;
-};
-
-template<>
-struct BatchNetworkSampleValueType<int32_t>
-{
-    using type = xsimd::batch<uint32_t, BatchSize>;
-};
-
-template<>
-struct BatchNetworkSampleValueType<float32_t>
+template<class SampleType>
+struct BatchNetworkSampleValueType<
+    SampleType,
+    typename std::enable_if<!HasBatchType_v<NetworkSampleValueUnderlyingType_t<SampleType>>>::type>
 {
     using type = xsimd::batch<uint32_t, BatchSize>;
 };

@@ -23,7 +23,8 @@ ratl::BasicInterleaved<Sample> generateRandomInterleaved(std::size_t num_channel
     }
 
     ratl::BasicInterleaved<Sample> input_interleaved{num_channels, num_frames};
-    ratl::transform(float_interleaved.begin(), float_interleaved.end(), input_interleaved.begin());
+    ratl::DitherGenerator dither_generator;
+    ratl::transform(float_interleaved.begin(), float_interleaved.end(), input_interleaved.begin(), dither_generator);
 
     return input_interleaved;
 }

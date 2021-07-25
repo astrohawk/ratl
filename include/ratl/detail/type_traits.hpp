@@ -15,6 +15,10 @@ namespace ratl
 {
 namespace detail
 {
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
+template<class... Ts>
+using void_t = std::void_t<Ts...>;
+#else
 template<class...>
 struct void_impl
 {
@@ -27,6 +31,24 @@ struct void_impl
  */
 template<class... Ts>
 using void_t = typename detail::void_impl<Ts...>::type;
+#endif
+
+// IsComplete
+
+template<typename Tp, class = void>
+struct IsComplete : std::false_type
+{
+};
+
+template<typename Tp>
+struct IsComplete<Tp, decltype(void(sizeof(Tp)))> : std::true_type
+{
+};
+
+// IsComplete_v
+
+template<class Tp>
+static constexpr bool IsComplete_v = IsComplete<Tp>::value;
 
 template<class SampleType>
 struct IsSampleTypeImpl : public std::false_type

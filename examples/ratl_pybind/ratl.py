@@ -21,8 +21,7 @@ def plot_spectrums():
         assert (len(audio_data) == num_samples)
         fft_out = numpy.fft.fft(audio_data * numpy.hanning(num_samples))
         magnitude = numpy.abs(fft_out[0:num_freq])
-        magnitude_db = 20 * numpy.log10(magnitude / num_freq)
-        return magnitude_db
+        return 20 * numpy.log10(magnitude / num_freq)
 
     x_axis = numpy.linspace(0, int(ratl_pybind.samplerate() / 2), num_freq)
     plt.plot(x_axis, spectrum_db(ratl_pybind.reference_double_tone()))
