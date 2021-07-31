@@ -10,6 +10,7 @@
 // ratl includes
 #include <ratl/detail/cast.hpp>
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/convert_traits.hpp>
 #include <ratl/detail/endianness.hpp>
 #include <ratl/detail/round.hpp>
 #include <ratl/detail/xsimd.hpp>
@@ -19,20 +20,6 @@ namespace ratl
 {
 namespace detail
 {
-// FloatConvertTraits
-
-template<class SampleType>
-struct FloatConvertTraits
-{
-    static constexpr float32_t Multiplier = -static_cast<float32_t>(SampleTypeLimits<SampleType>::min);
-    static constexpr float32_t Divisor = 1.f / Multiplier;
-};
-
-template<class SampleType>
-constexpr float32_t FloatConvertTraits<SampleType>::Multiplier;
-template<class SampleType>
-constexpr float32_t FloatConvertTraits<SampleType>::Divisor;
-
 // SampleConverter
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>

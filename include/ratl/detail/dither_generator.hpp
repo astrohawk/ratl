@@ -7,8 +7,8 @@
 
 // ratl includes
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/convert_traits.hpp>
 #include <ratl/detail/rand.hpp>
-#include <ratl/detail/sample_converter.hpp>
 
 namespace ratl
 {

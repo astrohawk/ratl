@@ -5,6 +5,7 @@
 #include <type_traits>
 
 // ratl includes
+#include <ratl/detail/batch_cast.hpp>
 #include <ratl/detail/batch_sample_fix.hpp>
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
@@ -184,63 +185,15 @@ inline BatchNetworkSampleValueType batchNetworkToHost(const BatchNetworkSampleVa
 #    endif
 }
 
-// BatchSampleToNetworkSampleImpl
-
-template<class SampleType>
-struct BatchSampleToNetworkSampleImpl
-{
-    static inline BatchNetworkSampleValueType_t<SampleType> convert(
-        const BatchSampleValueType_t<SampleType>& input) noexcept
-    {
-        return batchHostToNetwork<NetworkSampleValueUnderlyingType_t<SampleType>>(
-            xsimd::batch_cast<typename BatchNetworkSampleValueType_t<SampleType>::value_type>(input));
-    }
-};
-
-template<>
-struct BatchSampleToNetworkSampleImpl<float32_t>
-{
-    static inline BatchNetworkSampleValueType_t<float32_t> convert(
-        const BatchSampleValueType_t<float32_t>& input) noexcept
-    {
-        return batchHostToNetwork<NetworkSampleValueUnderlyingType_t<float32_t>>(
-            xsimd::bitwise_cast<BatchNetworkSampleValueType_t<float32_t>>(input));
-    }
-};
-
 // batchSampleToNetworkSample
 
 template<class SampleType>
 inline BatchNetworkSampleValueType_t<SampleType> batchSampleToNetworkSample(
     const BatchSampleValueType_t<SampleType>& input) noexcept
 {
-    return BatchSampleToNetworkSampleImpl<SampleType>::convert(input);
+    return batchHostToNetwork<NetworkSampleValueUnderlyingType_t<SampleType>>(
+        xsimd::bitwise_cast<BatchNetworkSampleValueType_t<SampleType>>(input));
 }
-
-// BatchNetworkSampleToSampleImpl
-
-template<class SampleType>
-struct BatchNetworkSampleToSampleImpl
-{
-    static inline BatchSampleValueType_t<SampleType> convert(
-        const BatchNetworkSampleValueType_t<SampleType>& input) noexcept
-    {
-        return batchFixNegativeSamples<SampleType>(
-            xsimd::batch_cast<typename BatchSampleValueType_t<SampleType>::value_type>(
-                batchNetworkToHost<NetworkSampleValueUnderlyingType_t<SampleType>>(input)));
-    }
-};
-
-template<>
-struct BatchNetworkSampleToSampleImpl<float32_t>
-{
-    static inline BatchSampleValueType_t<float32_t> convert(
-        const BatchNetworkSampleValueType_t<float32_t>& input) noexcept
-    {
-        return xsimd::bitwise_cast<BatchSampleValueType_t<float32_t>>(
-            batchNetworkToHost<NetworkSampleValueUnderlyingType_t<float32_t>>(input));
-    }
-};
 
 // batchNetworkSampleToSample
 
@@ -248,7 +201,8 @@ template<class SampleType>
 inline BatchSampleValueType_t<SampleType> batchNetworkSampleToSample(
     const BatchNetworkSampleValueType_t<SampleType>& input) noexcept
 {
-    return BatchNetworkSampleToSampleImpl<SampleType>::convert(input);
+    return xsimd::bitwise_cast<BatchSampleValueType_t<SampleType>>(
+        batchNetworkToHost<NetworkSampleValueUnderlyingType_t<SampleType>>(input));
 }
 
 } // namespace detail

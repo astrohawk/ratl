@@ -10,7 +10,7 @@
 #include <ratl/detail/batch_rand.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/dither_generator.hpp>
-#include <ratl/detail/sample_converter.hpp>
+#include <ratl/detail/convert_traits.hpp>
 
 namespace ratl
 {
