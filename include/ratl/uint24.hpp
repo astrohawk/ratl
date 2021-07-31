@@ -56,70 +56,70 @@ public:
 // Assignment operators
 
 template<class Up>
-uint24_t& operator+=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator+=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) + val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator-=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator-=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) - val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator*=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator*=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) * val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator/=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator/=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) / val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator%=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator%=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) % val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator&=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator&=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) & val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator|=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator|=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) | val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator^=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator^=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) ^ val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator<<=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator<<=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) << val;
     return x;
 }
 
 template<class Up>
-uint24_t& operator>>=(uint24_t& x, const Up& val) noexcept
+constexpr inline uint24_t& operator>>=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) >> val;
     return x;
@@ -127,28 +127,28 @@ uint24_t& operator>>=(uint24_t& x, const Up& val) noexcept
 
 // Increment/decrement operators
 
-uint24_t& operator++(uint24_t& x) noexcept
+constexpr inline uint24_t& operator++(uint24_t& x) noexcept
 {
     int32_t tmp = x;
     x = ++tmp;
     return x;
 }
 
-uint24_t& operator--(uint24_t& x) noexcept
+constexpr inline uint24_t& operator--(uint24_t& x) noexcept
 {
     int32_t tmp = x;
     x = --tmp;
     return x;
 }
 
-uint24_t operator++(uint24_t& x, int) noexcept
+constexpr inline uint24_t operator++(uint24_t& x, int) noexcept
 {
     uint24_t tmp = x;
     ++x;
     return tmp;
 }
 
-uint24_t operator--(uint24_t& x, int) noexcept
+constexpr inline uint24_t operator--(uint24_t& x, int) noexcept
 {
     uint24_t tmp = x;
     --x;
