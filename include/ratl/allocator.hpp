@@ -15,21 +15,12 @@ namespace ratl
 template<class Tp>
 using Allocator = XSIMD_DEFAULT_ALLOCATOR(Tp);
 
-template<class Allocator, class Tp>
-using IsAlignedAllocator = std::is_same<Allocator, XSIMD_DEFAULT_ALLOCATOR(Tp)>;
-
 #else
 
 template<class Tp>
 using Allocator = std::allocator<Tp>;
 
-template<class Allocator, class Tp>
-using IsAlignedAllocator = std::integral_constant<bool, false>;
-
 #endif
-
-template<class Allocator, class Tp>
-static constexpr bool IsAlignedAllocator_v = IsAlignedAllocator<Allocator, Tp>::value;
 
 } // namespace ratl
 

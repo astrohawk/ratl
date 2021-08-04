@@ -6,18 +6,17 @@
 
 // ratl includes
 #include <ratl/convert.hpp>
-#include <ratl/detail/batch_dither_generator.hpp>
 #include <ratl/detail/config.hpp>
 
 namespace ratl
 {
 namespace detail
 {
-template<class InputSample, class OutputSample, class DitherGenerator>
+template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
 struct SampleTransformerImpl
 {
 private:
-    using Converter = DefaultConverter<InputSample, OutputSample, DitherGenerator>;
+    using Converter = DefaultConverter<SampleConverter, InputSample, OutputSample, DitherGenerator>;
 
 public:
     explicit SampleTransformerImpl(DitherGenerator& dither_generator) : converter_{dither_generator} {}
@@ -32,8 +31,8 @@ private:
     Converter converter_;
 };
 
-template<class Sample, class DitherGenerator>
-struct SampleTransformerImpl<Sample, Sample, DitherGenerator>
+template<class SampleConverter, class Sample, class DitherGenerator>
+struct SampleTransformerImpl<SampleConverter, Sample, Sample, DitherGenerator>
 {
     explicit SampleTransformerImpl(DitherGenerator&) {}
 

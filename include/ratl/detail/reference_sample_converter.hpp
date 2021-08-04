@@ -20,12 +20,12 @@ namespace detail
 // SampleConverter
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-struct ReferenceSampleConverter;
+struct ReferenceSampleToSampleConverter;
 
 // intXX_t -> intXX_t
 
 template<class SampleType, class DitherGenerator>
-struct ReferenceSampleConverter<SampleType, SampleType, DitherGenerator>
+struct ReferenceSampleToSampleConverter<SampleType, SampleType, DitherGenerator>
 {
     static inline SampleType convert(SampleType sample, DitherGenerator&) noexcept
     {
@@ -36,7 +36,7 @@ struct ReferenceSampleConverter<SampleType, SampleType, DitherGenerator>
 // int16_t -> intXX_t
 
 template<class DitherGenerator>
-struct ReferenceSampleConverter<int16_t, int24_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<int16_t, int24_t, DitherGenerator>
 {
     static inline int24_t convert(int32_t sample, DitherGenerator&) noexcept
     {
@@ -45,7 +45,7 @@ struct ReferenceSampleConverter<int16_t, int24_t, DitherGenerator>
 };
 
 template<class DitherGenerator>
-struct ReferenceSampleConverter<int16_t, int32_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<int16_t, int32_t, DitherGenerator>
 {
     static inline int32_t convert(int32_t sample, DitherGenerator&) noexcept
     {
@@ -58,7 +58,7 @@ struct ReferenceSampleConverter<int16_t, int32_t, DitherGenerator>
 // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
 template<class DitherGenerator>
-struct ReferenceSampleConverter<int24_t, int16_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<int24_t, int16_t, DitherGenerator>
 {
     static constexpr int32_t SampleInMax = static_cast<int32_t>(0x007FFF80);
     static constexpr int16_t SampleOutMax = SampleTypeLimits<int16_t>::max;
@@ -81,10 +81,10 @@ struct ReferenceSampleConverter<int24_t, int16_t, DitherGenerator>
 };
 
 template<class DitherGenerator>
-constexpr int16_t ReferenceSampleConverter<int24_t, int16_t, DitherGenerator>::SampleOutMax;
+constexpr int16_t ReferenceSampleToSampleConverter<int24_t, int16_t, DitherGenerator>::SampleOutMax;
 
 template<class DitherGenerator>
-struct ReferenceSampleConverter<int24_t, int32_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<int24_t, int32_t, DitherGenerator>
 {
     static inline int32_t convert(int32_t sample, DitherGenerator&) noexcept
     {
@@ -97,7 +97,7 @@ struct ReferenceSampleConverter<int24_t, int32_t, DitherGenerator>
 // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
 template<class DitherGenerator>
-struct ReferenceSampleConverter<int32_t, int16_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<int32_t, int16_t, DitherGenerator>
 {
     static constexpr int32_t SampleInMax = static_cast<int32_t>(0x7FFF8000);
     static constexpr int16_t SampleOutMax = SampleTypeLimits<int16_t>::max;
@@ -119,10 +119,10 @@ struct ReferenceSampleConverter<int32_t, int16_t, DitherGenerator>
 };
 
 template<class DitherGenerator>
-constexpr int16_t ReferenceSampleConverter<int32_t, int16_t, DitherGenerator>::SampleOutMax;
+constexpr int16_t ReferenceSampleToSampleConverter<int32_t, int16_t, DitherGenerator>::SampleOutMax;
 
 template<class DitherGenerator>
-struct ReferenceSampleConverter<int32_t, int24_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<int32_t, int24_t, DitherGenerator>
 {
     static constexpr int32_t SampleInMax = static_cast<int32_t>(0x7FFFFF80);
     static constexpr int24_t SampleOutMax = SampleTypeLimits<int24_t>::max;
@@ -139,12 +139,12 @@ struct ReferenceSampleConverter<int32_t, int24_t, DitherGenerator>
 };
 
 template<class DitherGenerator>
-constexpr int24_t ReferenceSampleConverter<int32_t, int24_t, DitherGenerator>::SampleOutMax;
+constexpr int24_t ReferenceSampleToSampleConverter<int32_t, int24_t, DitherGenerator>::SampleOutMax;
 
 // intXX_t -> float32_t
 
 template<class SampleType, class DitherGenerator>
-struct ReferenceSampleConverter<SampleType, float32_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<SampleType, float32_t, DitherGenerator>
 {
     static constexpr float32_t Scaler = FloatConvertTraits<SampleType>::Divisor;
 
@@ -159,7 +159,7 @@ struct ReferenceSampleConverter<SampleType, float32_t, DitherGenerator>
 // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
 template<class SampleType, class DitherGenerator>
-struct ReferenceSampleConverter<float32_t, SampleType, DitherGenerator>
+struct ReferenceSampleToSampleConverter<float32_t, SampleType, DitherGenerator>
 {
 private:
     static constexpr float32_t SampleInMax =
@@ -186,16 +186,16 @@ public:
 };
 
 template<class SampleType, class DitherGenerator>
-constexpr SampleType ReferenceSampleConverter<float32_t, SampleType, DitherGenerator>::SampleOutMax;
+constexpr SampleType ReferenceSampleToSampleConverter<float32_t, SampleType, DitherGenerator>::SampleOutMax;
 template<class SampleType, class DitherGenerator>
-constexpr SampleType ReferenceSampleConverter<float32_t, SampleType, DitherGenerator>::SampleOutMin;
+constexpr SampleType ReferenceSampleToSampleConverter<float32_t, SampleType, DitherGenerator>::SampleOutMin;
 
 // float32_t -> float32_t
 // This is required as SampleConverter<float32_t, SampleType> is more specific than
 // SampleConverter<SampleType, SampleType>
 
 template<class DitherGenerator>
-struct ReferenceSampleConverter<float32_t, float32_t, DitherGenerator>
+struct ReferenceSampleToSampleConverter<float32_t, float32_t, DitherGenerator>
 {
     static inline float32_t convert(float32_t sample, DitherGenerator&) noexcept
     {
@@ -206,13 +206,13 @@ struct ReferenceSampleConverter<float32_t, float32_t, DitherGenerator>
 // SampleToNetworkConverter
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-struct ReferenceSampleToNetworkConverter
+struct ReferenceSampleToNetworkSampleConverter
 {
     static inline NetworkSampleValueType_t<OutputSampleType> convert(
         InputSampleType sample, DitherGenerator& dither_generator) noexcept
     {
-        return ReferenceSampleToNetworkConverter<OutputSampleType, OutputSampleType, DitherGenerator>::convert(
-            ReferenceSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>::convert(
+        return ReferenceSampleToNetworkSampleConverter<OutputSampleType, OutputSampleType, DitherGenerator>::convert(
+            ReferenceSampleToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>::convert(
                 sample, dither_generator),
             dither_generator);
     }
@@ -221,7 +221,7 @@ struct ReferenceSampleToNetworkConverter
 // XX_t -> XX_t
 
 template<class SampleType, class DitherGenerator>
-struct ReferenceSampleToNetworkConverter<SampleType, SampleType, DitherGenerator>
+struct ReferenceSampleToNetworkSampleConverter<SampleType, SampleType, DitherGenerator>
 {
     static inline NetworkSampleValueType_t<SampleType> convert(SampleType sample, DitherGenerator&) noexcept
     {
@@ -232,13 +232,13 @@ struct ReferenceSampleToNetworkConverter<SampleType, SampleType, DitherGenerator
 // SampleToNetworkConverter
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-struct ReferenceNetworkToSampleConverter
+struct ReferenceNetworkSampleToSampleConverter
 {
     static inline OutputSampleType convert(
         NetworkSampleValueType_t<InputSampleType> sample, DitherGenerator& dither_generator) noexcept
     {
-        return ReferenceSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>::convert(
-            ReferenceNetworkToSampleConverter<InputSampleType, InputSampleType, DitherGenerator>::convert(
+        return ReferenceSampleToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>::convert(
+            ReferenceNetworkSampleToSampleConverter<InputSampleType, InputSampleType, DitherGenerator>::convert(
                 sample, dither_generator),
             dither_generator);
     }
@@ -247,12 +247,27 @@ struct ReferenceNetworkToSampleConverter
 // XX_t -> XX_t
 
 template<class SampleType, class DitherGenerator>
-struct ReferenceNetworkToSampleConverter<SampleType, SampleType, DitherGenerator>
+struct ReferenceNetworkSampleToSampleConverter<SampleType, SampleType, DitherGenerator>
 {
     static inline SampleType convert(NetworkSampleValueType_t<SampleType> sample, DitherGenerator&) noexcept
     {
         return networkSampleToSample<SampleType>(sample);
     }
+};
+
+struct ReferenceSampleConverter
+{
+    template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+    using SampleToSampleConverter =
+        ReferenceSampleToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+
+    template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+    using SampleToNetworkSampleConverter =
+        ReferenceSampleToNetworkSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+
+    template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+    using NetworkSampleToSampleConverter =
+        ReferenceNetworkSampleToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 };
 
 } // namespace detail

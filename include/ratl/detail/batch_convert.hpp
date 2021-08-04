@@ -5,8 +5,6 @@
 #include <type_traits>
 
 // ratl includes
-#include <ratl/detail/batch_dither_generator.hpp>
-#include <ratl/detail/batch_reference_sample_converter.hpp>
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/network_sample.hpp>
@@ -18,11 +16,11 @@ namespace ratl
 {
 namespace detail
 {
-template<class InputSample, class OutputSample, class DitherGenerator>
+template<class BatchSampleConverter, class InputSample, class OutputSample, class DitherGenerator>
 class BatchConverterImpl;
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-class BatchConverterImpl<Sample<InputSampleType>, Sample<OutputSampleType>, DitherGenerator>
+template<class BatchSampleConverter, class InputSampleType, class OutputSampleType, class DitherGenerator>
+class BatchConverterImpl<BatchSampleConverter, Sample<InputSampleType>, Sample<OutputSampleType>, DitherGenerator>
 {
 private:
     using InputSample = Sample<InputSampleType>;
@@ -31,22 +29,27 @@ private:
     using InputBatchSampleValueType = BatchSampleType_t<InputSample>;
     using OutputBatchSampleValueType = BatchSampleType_t<OutputSample>;
 
-    using SampleConverter = BatchReferenceSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using BatchSampleToSampleConverter = typename BatchSampleConverter::
+        template BatchSampleToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit BatchConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
 
     inline OutputBatchSampleValueType operator()(const InputBatchSampleValueType& input) const noexcept
     {
-        return SampleConverter::convert(input, dither_generator_);
+        return BatchSampleToSampleConverter::convert(input, dither_generator_);
     }
 
 private:
     DitherGenerator& dither_generator_;
 };
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-class BatchConverterImpl<Sample<InputSampleType>, NetworkSample<OutputSampleType>, DitherGenerator>
+template<class BatchSampleConverter, class InputSampleType, class OutputSampleType, class DitherGenerator>
+class BatchConverterImpl<
+    BatchSampleConverter,
+    Sample<InputSampleType>,
+    NetworkSample<OutputSampleType>,
+    DitherGenerator>
 {
 private:
     using InputSample = Sample<InputSampleType>;
@@ -55,22 +58,27 @@ private:
     using InputBatchSampleValueType = BatchSampleType_t<InputSample>;
     using OutputBatchSampleValueType = BatchSampleType_t<OutputSample>;
 
-    using SampleConverter = BatchReferenceSampleToNetworkConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using BatchSampleToNetworkSampleConverter = typename BatchSampleConverter::
+        template BatchSampleToNetworkSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit BatchConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
 
     inline OutputBatchSampleValueType operator()(const InputBatchSampleValueType& input) const noexcept
     {
-        return SampleConverter::convert(input, dither_generator_);
+        return BatchSampleToNetworkSampleConverter::convert(input, dither_generator_);
     }
 
 private:
     DitherGenerator& dither_generator_;
 };
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-class BatchConverterImpl<NetworkSample<InputSampleType>, Sample<OutputSampleType>, DitherGenerator>
+template<class BatchSampleConverter, class InputSampleType, class OutputSampleType, class DitherGenerator>
+class BatchConverterImpl<
+    BatchSampleConverter,
+    NetworkSample<InputSampleType>,
+    Sample<OutputSampleType>,
+    DitherGenerator>
 {
 private:
     using InputSample = NetworkSample<InputSampleType>;
@@ -79,22 +87,24 @@ private:
     using InputBatchSampleValueType = BatchSampleType_t<InputSample>;
     using OutputBatchSampleValueType = BatchSampleType_t<OutputSample>;
 
-    using SampleConverter = BatchReferenceNetworkToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using BatchNetworkSampleToSampleConverter = typename BatchSampleConverter::
+        template BatchNetworkSampleToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit BatchConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
 
     inline OutputBatchSampleValueType operator()(const InputBatchSampleValueType& input) const noexcept
     {
-        return SampleConverter::convert(input, dither_generator_);
+        return BatchNetworkSampleToSampleConverter::convert(input, dither_generator_);
     }
 
 private:
     DitherGenerator& dither_generator_;
 };
 
-template<class InputSample, class OutputSample, class DitherGenerator>
+template<class BatchSampleConverter, class InputSample, class OutputSample, class DitherGenerator>
 using DefaultBatchConverter = BatchConverterImpl<
+    BatchSampleConverter,
     std::remove_cv_t<std::remove_reference_t<InputSample>>,
     std::remove_cv_t<std::remove_reference_t<OutputSample>>,
     DitherGenerator>;

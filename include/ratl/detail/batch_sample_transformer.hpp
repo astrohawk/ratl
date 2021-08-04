@@ -21,7 +21,7 @@ namespace detail
 {
 #if defined(RATL_HAS_XSIMD)
 
-template<class InputSample, class OutputSample, class DitherGenerator>
+template<class BatchSampleConverter, class InputSample, class OutputSample, class DitherGenerator>
 struct BatchSampleTransformerImpl
 {
 private:
@@ -37,8 +37,8 @@ private:
     static constexpr std::size_t BatchSize = InputBatchType::size;
     static_assert(BatchSize == OutputBatchType::size, "Input and output batch size are not equal");
 
-    using BatchConverter = DefaultBatchConverter<InputSample, OutputSample, DitherGenerator>;
-    using SampleTransformer = SampleTransformerImpl<InputSample, OutputSample, DitherGenerator>;
+    using BatchConverter = DefaultBatchConverter<BatchSampleConverter, InputSample, OutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerImpl<BatchSampleConverter, InputSample, OutputSample, DitherGenerator>;
 
 public:
     explicit BatchSampleTransformerImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
@@ -62,11 +62,11 @@ private:
     DitherGenerator& dither_generator_;
 };
 
-template<class Sample, class DitherGenerator>
-struct BatchSampleTransformerImpl<Sample, Sample, DitherGenerator>
+template<class BatchSampleConverter, class Sample, class DitherGenerator>
+struct BatchSampleTransformerImpl<BatchSampleConverter, Sample, Sample, DitherGenerator>
 {
 private:
-    using SampleTransformer = SampleTransformerImpl<Sample, Sample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerImpl<BatchSampleConverter, Sample, Sample, DitherGenerator>;
 
 public:
     explicit BatchSampleTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
@@ -83,8 +83,8 @@ private:
 
 #else
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-using BatchSampleTransformerImpl = SampleTransformerImpl<InputSample, OutputSample, DitherGenerator>;
+template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
+using BatchSampleTransformerImpl = SampleTransformerImpl<SampleConverter, InputSample, OutputSample, DitherGenerator>;
 
 #endif
 } // namespace detail

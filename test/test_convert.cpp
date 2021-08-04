@@ -344,8 +344,8 @@ TEST(Converter, Test)
 {
     using TestDitherGenerator = ratl::detail::NullDitherGenerator;
     TestDitherGenerator dither_generator;
-    auto converter =
-        ratl::detail::DefaultConverter<ratl::Sample<int16_t>, ratl::Sample<float32_t>, TestDitherGenerator>{
+    auto converter = ratl::detail::
+        DefaultConverter<ReferenceSampleConverter, ratl::Sample<int16_t>, ratl::Sample<float32_t>, TestDitherGenerator>{
             dither_generator};
     uint32_t output = 0x3e11a000;
     float32_t float_output;

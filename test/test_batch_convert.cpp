@@ -41,15 +41,15 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputBatchConvert)
             batch_refrence_output[j - i] = ratl::convert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
-        auto batch_convert_output = ratl::detail::BatchSampleConverter<
+        auto batch_convert_output = ratl::detail::BatchReferenceSampleToSampleConverter<
             typename TestFixture::InputSampleType,
             typename TestFixture::OutputSampleType,
             TestDitherGenerator>::convert(batch_input, dither_generator);
         for (std::size_t j = 0; j < ratl::detail::BatchSize; ++j)
         {
-            EXPECT_EQ(
-                static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]),
-                static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]));
+            auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
+            auto convert_output = static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]);
+            EXPECT_EQ(convert_output, refrence_output);
         }
     }
 }
@@ -78,17 +78,17 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputNetworkOutputBatchConvert)
                     ratl::convert<OutputSample>(InputSample(sample_value)).get());
         }
         TestDitherGenerator dither_generator;
-        auto batch_convert_output = ratl::detail::BatchSampleToNetworkConverter<
+        auto batch_convert_output = ratl::detail::BatchReferenceSampleToNetworkSampleConverter<
             typename TestFixture::InputSampleType,
             typename TestFixture::OutputSampleType,
             TestDitherGenerator>::convert(batch_input, dither_generator);
         for (std::size_t j = 0; j < ratl::detail::BatchSize; ++j)
         {
-            EXPECT_EQ(
-                static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
-                    batch_convert_output[j]),
-                static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
-                    batch_refrence_output[j]));
+            auto refrence_output = static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
+                batch_refrence_output[j]);
+            auto convert_output = static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
+                batch_convert_output[j]);
+            EXPECT_EQ(convert_output, refrence_output);
         }
     }
 }
@@ -117,15 +117,15 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputNetworkInputBatchConvert)
             batch_refrence_output[j - i] = ratl::convert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
-        auto batch_convert_output = ratl::detail::BatchNetworkToSampleConverter<
+        auto batch_convert_output = ratl::detail::BatchReferenceNetworkSampleToSampleConverter<
             typename TestFixture::InputSampleType,
             typename TestFixture::OutputSampleType,
             TestDitherGenerator>::convert(batch_input, dither_generator);
         for (std::size_t j = 0; j < ratl::detail::BatchSize; ++j)
         {
-            EXPECT_EQ(
-                static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]),
-                static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]));
+            auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
+            auto convert_output = static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]);
+            EXPECT_EQ(convert_output, refrence_output);
         }
     }
 }
@@ -162,14 +162,15 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputConvert)
             batch_refrence_output[j - i] = ratl::convert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
-        auto batch_convert_output = ratl::detail::
-            BatchSampleConverter<ratl::float32_t, typename TestFixture::OutputSampleType, TestDitherGenerator>::convert(
-                batch_input, dither_generator);
+        auto batch_convert_output = ratl::detail::BatchReferenceSampleToSampleConverter<
+            ratl::float32_t,
+            typename TestFixture::OutputSampleType,
+            TestDitherGenerator>::convert(batch_input, dither_generator);
         for (std::size_t j = 0; j < ratl::detail::BatchSize; ++j)
         {
-            EXPECT_EQ(
-                static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]),
-                static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]));
+            auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
+            auto convert_output = static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]);
+            EXPECT_EQ(convert_output, refrence_output);
         }
     }
 }
@@ -199,17 +200,17 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputNetworkOutputConvert)
                     ratl::convert<OutputSample>(InputSample(sample_value)).get());
         }
         TestDitherGenerator dither_generator;
-        auto batch_convert_output = ratl::detail::BatchSampleToNetworkConverter<
+        auto batch_convert_output = ratl::detail::BatchReferenceSampleToNetworkSampleConverter<
             ratl::float32_t,
             typename TestFixture::OutputSampleType,
             TestDitherGenerator>::convert(batch_input, dither_generator);
         for (std::size_t j = 0; j < ratl::detail::BatchSize; ++j)
         {
-            EXPECT_EQ(
-                static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
-                    batch_convert_output[j]),
-                static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
-                    batch_refrence_output[j]));
+            auto refrence_output = static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
+                batch_refrence_output[j]);
+            auto convert_output = static_cast<ratl::detail::NetworkSampleValueUnderlyingType_t<typename TestFixture::OutputSampleType>>(
+                batch_convert_output[j]);
+            EXPECT_EQ(convert_output, refrence_output);
         }
     }
 }
@@ -238,15 +239,15 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputNetworkInputConvert)
             batch_refrence_output[j - i] = ratl::convert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
-        auto batch_convert_output = ratl::detail::BatchNetworkToSampleConverter<
+        auto batch_convert_output = ratl::detail::BatchReferenceNetworkSampleToSampleConverter<
             ratl::float32_t,
             typename TestFixture::OutputSampleType,
             TestDitherGenerator>::convert(batch_input, dither_generator);
         for (std::size_t j = 0; j < ratl::detail::BatchSize; ++j)
         {
-            EXPECT_EQ(
-                static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]),
-                static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]));
+            auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
+            auto convert_output = static_cast<typename TestFixture::OutputSampleType>(batch_convert_output[j]);
+            EXPECT_EQ(convert_output, refrence_output);
         }
     }
 }

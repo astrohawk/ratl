@@ -6,6 +6,7 @@
 #include <type_traits>
 
 // ratl includes
+#include <ratl/detail/cast.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/type_traits.hpp>
 
@@ -75,7 +76,7 @@ public:
 
     friend inline std::ostream& operator<<(std::ostream& os, const NetworkSample& network_sample)
     {
-        return os << network_sample.sample_;
+        return os << detail::networkToNetworkUnderlyingCast<SampleType>(network_sample.sample_);
     }
 
     // not private as gcc requires memcpyable types to not have any private members
