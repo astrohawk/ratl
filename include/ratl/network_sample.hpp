@@ -7,8 +7,6 @@
 
 // ratl includes
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/dither_generator.hpp>
-#include <ratl/detail/sample_converter.hpp>
 #include <ratl/detail/type_traits.hpp>
 
 namespace ratl
@@ -77,9 +75,7 @@ public:
 
     friend inline std::ostream& operator<<(std::ostream& os, const NetworkSample& network_sample)
     {
-        detail::NullDitherGenerator dither_generator;
-        return os << detail::NetworkToSampleConverter<SampleType, SampleType, detail::NullDitherGenerator>::convert(
-                   network_sample.sample_, dither_generator);
+        return os << network_sample.sample_;
     }
 
     // not private as gcc requires memcpyable types to not have any private members
