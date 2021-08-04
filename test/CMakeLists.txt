@@ -39,6 +39,18 @@ target_link_libraries(test_sample
 add_test(NAME test_sample COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_sample --gtest_output=xml:test_sample.xml)
 
 
+add_executable(test_round
+        test_round.cpp
+        test_utils.hpp
+        )
+target_link_libraries(test_round
+        ratl
+        gtest_main
+        )
+
+add_test(NAME test_round COMMAND ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_round --gtest_output=xml:test_round.xml)
+
+
 add_executable(test_convert
         test_convert.cpp
         test_utils.hpp

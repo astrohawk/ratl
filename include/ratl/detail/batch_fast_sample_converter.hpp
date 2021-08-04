@@ -1,13 +1,17 @@
-#ifndef _ratl_detail_batch_sample_converter_
-#define _ratl_detail_batch_sample_converter_
+#ifndef _ratl_detail_batch_fast_sample_converter_
+#define _ratl_detail_batch_fast_sample_converter_
 
 // C++ Standard Library includes
 #include <cmath>
 #include <type_traits>
 
 // ratl includes
+#include <ratl/detail/batch_cast.hpp>
+#include <ratl/detail/batch_endianness.hpp>
+#include <ratl/detail/batch_round.hpp>
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/convert_traits.hpp>
 #include <ratl/sample_type_limits.hpp>
 
 #if defined(RATL_HAS_XSIMD)
@@ -16,18 +20,18 @@ namespace ratl
 {
 namespace detail
 {
-// BatchSampleConverter
+// BatchFastSampleConverter
 
-template<class InputSampleType, class OutputSampleType>
-struct BatchSampleConverter;
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+struct BatchFastSampleConverter;
 
 // intXX_t -> intXX_t
 
-template<class SampleType>
-struct BatchSampleConverter<SampleType, SampleType>
+template<class SampleType, class DitherGenerator>
+struct BatchFastSampleConverter<SampleType, SampleType, DitherGenerator>
 {
     static inline const BatchSampleValueType_t<SampleType>& convert(
-        const BatchSampleValueType_t<SampleType>& sample) noexcept
+        const BatchSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
     {
         return sample;
     }
@@ -35,111 +39,146 @@ struct BatchSampleConverter<SampleType, SampleType>
 
 // int16_t -> intXX_t
 
-template<>
-struct BatchSampleConverter<int16_t, int24_t>
+template<class DitherGenerator>
+struct BatchFastSampleConverter<int16_t, int24_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int24_t> convert(const BatchSampleValueType_t<int16_t>& sample) noexcept
+    static inline BatchSampleValueType_t<int24_t> convert(
+        const BatchSampleValueType_t<int16_t>& sample, DitherGenerator&) noexcept
     {
-        return sample << 8;
+        return batchSampleCast<int24_t>(sample) << 8;
     }
 };
 
-template<>
-struct BatchSampleConverter<int16_t, int32_t>
+template<class DitherGenerator>
+struct BatchFastSampleConverter<int16_t, int32_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int32_t> convert(const BatchSampleValueType_t<int16_t>& sample) noexcept
+    static inline BatchSampleValueType_t<int32_t> convert(
+        const BatchSampleValueType_t<int16_t>& sample, DitherGenerator&) noexcept
     {
-        return sample << 16;
+        return batchSampleCast<int32_t>(sample) << 16;
     }
 };
 
 // int24_t -> intXX_t
 
-template<>
-struct BatchSampleConverter<int24_t, int16_t>
+template<class DitherGenerator>
+struct BatchFastSampleConverter<int24_t, int16_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int16_t> convert(const BatchSampleValueType_t<int24_t>& sample) noexcept
+    static constexpr std::size_t TotalShift = 8;
+    static constexpr std::size_t PreDitherShift =
+        DitherGenerator::Int16Bits > 0 ? DitherGenerator::Int16Bits - TotalShift : 0;
+    static constexpr std::size_t PostDitherShift = TotalShift + PreDitherShift;
+
+    static inline BatchSampleValueType_t<int16_t> convert(
+        const BatchSampleValueType_t<int24_t>& sample, DitherGenerator& dither_generator) noexcept
     {
-        auto cmp = sample >= BatchSampleValueType_t<int32_t>(0x007FFF80);
-        auto temp = (sample + 0x80) >> 8;
-        auto max = BatchSampleValueType_t<int24_t>(SampleTypeLimits<int24_t>::max);
-        return xsimd::select(cmp, max, temp);
+        return batchSampleCast<int16_t>(
+            ((sample << PreDitherShift) + dither_generator.generateBatchInt16()) >> PostDitherShift);
     }
 };
 
-template<>
-struct BatchSampleConverter<int24_t, int32_t>
+template<class DitherGenerator>
+constexpr std::size_t BatchFastSampleConverter<int24_t, int16_t, DitherGenerator>::TotalShift;
+template<class DitherGenerator>
+constexpr std::size_t BatchFastSampleConverter<int24_t, int16_t, DitherGenerator>::PreDitherShift;
+template<class DitherGenerator>
+constexpr std::size_t BatchFastSampleConverter<int24_t, int16_t, DitherGenerator>::PostDitherShift;
+
+template<class DitherGenerator>
+struct BatchFastSampleConverter<int24_t, int32_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int32_t> convert(const BatchSampleValueType_t<int24_t>& sample) noexcept
+    static inline BatchSampleValueType_t<int32_t> convert(
+        const BatchSampleValueType_t<int24_t>& sample, DitherGenerator&) noexcept
     {
-        return sample << 8;
+        return batchSampleCast<int24_t>(sample << 8);
     }
 };
 
 // int32_t -> intXX_t
 
-template<>
-struct BatchSampleConverter<int32_t, int16_t>
+template<class DitherGenerator>
+struct BatchFastSampleConverter<int32_t, int16_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int16_t> convert(const BatchSampleValueType_t<int32_t>& sample) noexcept
+    static constexpr std::size_t TotalShift = 16;
+    static constexpr std::size_t PreDitherShift = TotalShift - DitherGenerator::Int16Bits;
+    static constexpr std::size_t PostDitherShift = TotalShift - PreDitherShift;
+
+    static inline BatchSampleValueType_t<int16_t> convert(
+        const BatchSampleValueType_t<int32_t>& sample, DitherGenerator& dither_generator) noexcept
     {
-        auto cmp = sample >= BatchSampleValueType_t<int32_t>(0x7FFF8000);
-        auto temp = (sample + 0x8000) >> 16;
-        auto max = BatchSampleValueType_t<int32_t>(SampleTypeLimits<int32_t>::max);
-        return xsimd::select(cmp, max, temp);
+        return batchSampleCast<int16_t>(
+            ((sample >> PreDitherShift) + dither_generator.generateBatchInt16()) >> PostDitherShift);
     }
 };
 
-template<>
-struct BatchSampleConverter<int32_t, int24_t>
+template<class DitherGenerator>
+constexpr std::size_t BatchFastSampleConverter<int32_t, int16_t, DitherGenerator>::TotalShift;
+template<class DitherGenerator>
+constexpr std::size_t BatchFastSampleConverter<int32_t, int16_t, DitherGenerator>::PreDitherShift;
+template<class DitherGenerator>
+constexpr std::size_t BatchFastSampleConverter<int32_t, int16_t, DitherGenerator>::PostDitherShift;
+
+template<class DitherGenerator>
+struct BatchFastSampleConverter<int32_t, int24_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int24_t> convert(const BatchSampleValueType_t<int32_t>& sample) noexcept
+    static inline BatchSampleValueType_t<int24_t> convert(
+        const BatchSampleValueType_t<int32_t>& sample, DitherGenerator&) noexcept
     {
-        auto cmp = sample >= BatchSampleValueType_t<int32_t>(0x7FFFFF80);
-        auto temp = (sample + 0x80) >> 8;
-        auto max = BatchSampleValueType_t<int32_t>(SampleTypeLimits<int32_t>::max);
-        return xsimd::select(cmp, max, temp);
+        return batchSampleCast<int24_t>(sample >> 8);
     }
 };
 
 // intXX_t -> float32_t
 
-template<class SampleType>
-struct BatchSampleConverter<SampleType, float32_t>
+template<class SampleType, class DitherGenerator>
+struct BatchFastSampleConverter<SampleType, float32_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<float32_t> convert(const BatchSampleValueType_t<SampleType>& sample) noexcept
+    static constexpr float32_t Scaler = FloatConvertTraits<SampleType>::Divisor;
+
+    static inline BatchSampleValueType_t<float32_t> convert(
+        const BatchSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
     {
-        return xsimd::to_float(sample) * FloatConvertTraits<SampleType>::Divisor;
+        return xsimd::to_float(batchSampleCast<int32_t>(sample)) * Scaler;
     }
 };
+
+template<class SampleType, class DitherGenerator>
+constexpr float32_t BatchFastSampleConverter<SampleType, float32_t, DitherGenerator>::Scaler;
 
 // float32_t -> intXX_t
 
-template<class SampleType>
-struct BatchSampleConverter<float32_t, SampleType>
+template<class SampleType, class DitherGenerator>
+struct BatchFastSampleConverter<float32_t, SampleType, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<SampleType> convert(BatchSampleValueType_t<float32_t> sample) noexcept
+private:
+    static constexpr float32_t PositiveScaler =
+        static_cast<float32_t>(SampleTypeLimits<SampleType>::max) - DitherGenerator::MaxFloat32;
+    static constexpr float32_t NegativeScaler =
+        -static_cast<float32_t>(SampleTypeLimits<SampleType>::min) - DitherGenerator::MaxFloat32;
+
+public:
+    static inline BatchSampleValueType_t<SampleType> convert(
+        BatchSampleValueType_t<float32_t> sample, DitherGenerator& dither_generator) noexcept
     {
-        auto cmp_max = sample >= SampleTypeLimits<float32_t>::max;
-        auto cmp_min = sample < SampleTypeLimits<float32_t>::min;
-        sample *= FloatConvertTraits<SampleType>::Multiplier;
-        //        auto out = xsimd::to_int(xsimd::round(sample));
-        sample -= 0.5;
-        auto out = xsimd_extra::to_int_round(sample);
-        out = xsimd::select(
-            xsimd::bool_cast(cmp_max), BatchSampleValueType_t<SampleType>(SampleTypeLimits<SampleType>::max), out);
-        out = xsimd::select(
-            xsimd::bool_cast(cmp_min), BatchSampleValueType_t<SampleType>(SampleTypeLimits<SampleType>::min), out);
-        return out;
+        auto dither = dither_generator.generateBatchFloat32();
+        auto positive_out = batchRoundFloat32ToInt32((sample * PositiveScaler) + dither);
+        auto negative_out = batchRoundFloat32ToInt32((sample * NegativeScaler) + dither);
+        return batchSampleCast<SampleType>(xsimd::select(xsimd::bool_cast(sample < 0), negative_out, positive_out));
     }
 };
 
+template<class SampleType, class DitherGenerator>
+constexpr float32_t BatchFastSampleConverter<float32_t, SampleType, DitherGenerator>::PositiveScaler;
+template<class SampleType, class DitherGenerator>
+constexpr float32_t BatchFastSampleConverter<float32_t, SampleType, DitherGenerator>::NegativeScaler;
+
 // float32_t -> float32_t
 
-template<>
-struct BatchSampleConverter<float32_t, float32_t>
+template<class DitherGenerator>
+struct BatchFastSampleConverter<float32_t, float32_t, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<float32_t> convert(const BatchSampleValueType_t<float32_t>& sample) noexcept
+    static inline BatchSampleValueType_t<float32_t> convert(
+        const BatchSampleValueType_t<float32_t>& sample, DitherGenerator&) noexcept
     {
         return sample;
     }
@@ -147,359 +186,55 @@ struct BatchSampleConverter<float32_t, float32_t>
 
 // BatchSampleToNetworkConverter
 
-template<class InputSampleType, class OutputSampleType>
-struct BatchSampleToNetworkConverter;
-
-// int16_t -> intXX_t
-
-template<>
-struct BatchSampleToNetworkConverter<int16_t, int16_t>
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+struct BatchFastSampleToNetworkConverter
 {
-    static inline BatchNetworkSampleValueType_t<int16_t> convert(const BatchSampleValueType_t<int16_t>& sample) noexcept
+    static inline BatchNetworkSampleValueType_t<OutputSampleType> convert(
+        const BatchSampleValueType_t<InputSampleType>& sample, DitherGenerator& dither_generator) noexcept
     {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int16_t>(((sample >> 8) & 0x00ff) | ((sample << 8) & 0xff00));
-#    else
-        return batchNetworkSampleTypeCast<int16_t>(sample);
-#    endif
+        return BatchFastSampleToNetworkConverter<OutputSampleType, OutputSampleType, DitherGenerator>::convert(
+            BatchFastSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>::convert(
+                sample, dither_generator),
+            dither_generator);
     }
 };
 
-template<>
-struct BatchSampleToNetworkConverter<int16_t, int24_t>
-{
-    static inline BatchNetworkSampleValueType_t<int24_t> convert(const BatchSampleValueType_t<int16_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int24_t>(((sample >> 8) & 0x00ff) | ((sample << 8) & 0xff00));
-#    else
-        return batchNetworkSampleTypeCast<int24_t>(SampleConverter<int16_t, int24_t>::convert(sample));
-#    endif
-    }
-};
+// XX_t -> XX_t
 
-template<>
-struct BatchSampleToNetworkConverter<int16_t, int32_t>
-{
-    static inline BatchNetworkSampleValueType_t<int32_t> convert(const BatchSampleValueType_t<int16_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int32_t>(((sample >> 8) & 0x00ff) | ((sample << 8) & 0xff00));
-#    else
-        return batchNetworkSampleTypeCast<int24_t>(SampleConverter<int16_t, int32_t>::convert(sample));
-#    endif
-    }
-};
-
-// int24_t -> intXX_t
-
-template<>
-struct BatchSampleToNetworkConverter<int24_t, int16_t>
-{
-    static inline BatchNetworkSampleValueType_t<int16_t> convert(const BatchSampleValueType_t<int24_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int16_t>(((sample >> 16) & 0x00ff) | (sample & 0xff00));
-#    else
-        return batchNetworkSampleTypeCast<int16_t>(SampleConverter<int24_t, int16_t>::convert(sample));
-#    endif
-    }
-};
-
-template<>
-struct BatchSampleToNetworkConverter<int24_t, int24_t>
-{
-    static inline BatchNetworkSampleValueType_t<int24_t> convert(const BatchSampleValueType_t<int24_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int24_t>(
-            ((sample >> 16) & 0x000000ff) | (sample & 0x0000ff00) | ((sample << 16) & 0x00ff0000));
-#    else
-        return batchNetworkSampleTypeCast<int24_t>(sample);
-#    endif
-    }
-};
-
-template<>
-struct BatchSampleToNetworkConverter<int24_t, int32_t>
-{
-    static inline BatchNetworkSampleValueType_t<int32_t> convert(const BatchSampleValueType_t<int24_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int32_t>(
-            ((sample >> 16) & 0x000000ff) | (sample & 0x0000ff00) | ((sample << 16) & 0x00ff0000));
-#    else
-        return batchNetworkSampleTypeCast<int32_t>(SampleConverter<int24_t, int32_t>::convert(sample));
-#    endif
-    }
-};
-
-// int32_t -> intXX_t
-
-template<>
-struct BatchSampleToNetworkConverter<int32_t, int16_t>
-{
-    static inline BatchNetworkSampleValueType_t<int16_t> convert(const BatchSampleValueType_t<int32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int16_t>(((sample >> 24) & 0x000000ff) | ((sample >> 8) & 0x0000ff00));
-#    else
-        return batchNetworkSampleTypeCast<int16_t>(SampleConverter<int32_t, int16_t>::convert(sample));
-#    endif
-    }
-};
-
-template<>
-struct BatchSampleToNetworkConverter<int32_t, int24_t>
-{
-    static inline BatchNetworkSampleValueType_t<int24_t> convert(const BatchSampleValueType_t<int32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int24_t>(
-            ((sample >> 24) & 0x000000ff) | ((sample >> 8) & 0x0000ff00) | ((sample << 8) & 0x00ff0000));
-#    else
-        return batchNetworkSampleTypeCast<int24_t>(SampleConverter<int32_t, int24_t>::convert(sample));
-#    endif
-    }
-};
-
-template<>
-struct BatchSampleToNetworkConverter<int32_t, int32_t>
-{
-    static inline BatchNetworkSampleValueType_t<int32_t> convert(const BatchSampleValueType_t<int32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchNetworkSampleTypeCast<int32_t>(
-            ((sample >> 24) & 0x000000ff) | ((sample >> 8) & 0x0000ff00) | ((sample << 8) & 0x00ff0000) |
-            ((sample << 24) & 0xff000000));
-#    else
-        return batchNetworkSampleTypeCast<int32_t>(sample);
-#    endif
-    }
-};
-
-// float32_t -> float32_t
-
-template<>
-struct BatchSampleToNetworkConverter<float32_t, float32_t>
-{
-    static inline BatchNetworkSampleValueType_t<float32_t> convert(
-        const BatchSampleValueType_t<float32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return BatchSampleToNetworkConverter<int32_t, int32_t>::convert(batchSampleTypeCast<int32_t>(sample));
-#    else
-        return sample;
-#    endif
-    }
-};
-
-// intXX_t -> float32_t
-
-template<class SampleType>
-struct BatchSampleToNetworkConverter<SampleType, float32_t>
-{
-    static inline BatchNetworkSampleValueType_t<float32_t> convert(
-        const BatchSampleValueType_t<SampleType>& sample) noexcept
-    {
-        return BatchSampleToNetworkConverter<float32_t, float32_t>::convert(
-            BatchSampleConverter<SampleType, float32_t>::convert(sample));
-    }
-};
-
-// float32_t -> intXX_t
-
-template<class SampleType>
-struct BatchSampleToNetworkConverter<float32_t, SampleType>
+template<class SampleType, class DitherGenerator>
+struct BatchFastSampleToNetworkConverter<SampleType, SampleType, DitherGenerator>
 {
     static inline BatchNetworkSampleValueType_t<SampleType> convert(
-        const BatchSampleValueType_t<float32_t>& sample) noexcept
+        const BatchSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
     {
-        return BatchSampleToNetworkConverter<SampleType, SampleType>::convert(
-            BatchSampleConverter<float32_t, SampleType>::convert(sample));
+        return batchSampleToNetworkSample<SampleType>(sample);
     }
 };
 
-// sample_converter_impl
+// BatchNetworkToSampleConverter
 
-template<class InputSampleType, class OutputSampleType>
-struct BatchNetworkToSampleConverter;
-
-// int16_t -> intXX_t
-
-template<>
-struct BatchNetworkToSampleConverter<int16_t, int16_t>
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+struct BatchFastNetworkToSampleConverter
 {
-    static inline BatchSampleValueType_t<int16_t> convert(const BatchNetworkSampleValueType_t<int16_t>& sample) noexcept
+    static inline BatchSampleValueType_t<OutputSampleType> convert(
+        const BatchNetworkSampleValueType_t<InputSampleType>& sample, DitherGenerator& dither_generator) noexcept
     {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int16_t> cast = batchSampleTypeCast<int16_t>(sample);
-        return ((cast >> 8) & 0x000000ff) | ((cast << 8) & 0x0000ff00);
-#    else
-        return batchSampleTypeCast<int16_t>(sample);
-#    endif
+        return BatchFastSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>::convert(
+            BatchFastNetworkToSampleConverter<InputSampleType, InputSampleType, DitherGenerator>::convert(
+                sample, dither_generator),
+            dither_generator);
     }
 };
 
-template<>
-struct BatchNetworkToSampleConverter<int16_t, int24_t>
-{
-    static inline BatchSampleValueType_t<int24_t> convert(const BatchNetworkSampleValueType_t<int16_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int24_t> cast = batchSampleTypeCast<int24_t>(sample);
-        return (cast & 0x0000ff00) | ((cast << 16) & 0x00ff0000);
-#    else
-        return SampleConverter<int16_t, int24_t>::convert(batchSampleTypeCast<int24_t>(sample));
-#    endif
-    }
-};
+// XX_t -> XX_t
 
-template<>
-struct BatchNetworkToSampleConverter<int16_t, int32_t>
-{
-    static inline BatchSampleValueType_t<int32_t> convert(const BatchNetworkSampleValueType_t<int16_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int32_t> cast = batchSampleTypeCast<int32_t>(sample);
-        return ((cast << 8) & 0x00ff0000) | ((cast << 24) & 0xff000000);
-#    else
-        return SampleConverter<int16_t, int32_t>::convert(batchSampleTypeCast<int32_t>(sample));
-#    endif
-    }
-};
-
-// int24_t -> intXX_t
-
-template<>
-struct BatchNetworkToSampleConverter<int24_t, int16_t>
-{
-    static inline BatchSampleValueType_t<int16_t> convert(const BatchNetworkSampleValueType_t<int24_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int16_t> cast = batchSampleTypeCast<int16_t>(sample);
-        return ((cast >> 8) & 0x000000ff) | ((cast << 8) & 0x0000ff00);
-#    else
-        return SampleConverter<int24_t, int16_t>::convert(batchSampleTypeCast<int16_t>(sample));
-#    endif
-    }
-};
-
-template<>
-struct BatchNetworkToSampleConverter<int24_t, int24_t>
-{
-    static inline BatchSampleValueType_t<int24_t> convert(const BatchNetworkSampleValueType_t<int24_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int24_t> cast = batchSampleTypeCast<int24_t>(sample);
-        return ((cast >> 16) & 0x000000ff) | (cast & 0x0000ff00) | ((cast << 16) & 0x00ff0000);
-#    else
-        return batchSampleTypeCast<int24_t>(sample);
-#    endif
-    }
-};
-
-template<>
-struct BatchNetworkToSampleConverter<int24_t, int32_t>
-{
-    static inline BatchSampleValueType_t<int32_t> convert(const BatchNetworkSampleValueType_t<int24_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int32_t> cast = batchSampleTypeCast<int32_t>(sample);
-        return ((cast >> 8) & 0x0000ff00) | ((cast << 8) & 0x00ff0000) | ((cast << 24) & 0xff000000);
-#    else
-        return SampleConverter<int24_t, int32_t>::convert(batchSampleTypeCast<int32_t>(sample));
-#    endif
-    }
-};
-
-// int32_t -> intXX_t
-
-template<>
-struct BatchNetworkToSampleConverter<int32_t, int16_t>
-{
-    static inline BatchSampleValueType_t<int16_t> convert(const BatchNetworkSampleValueType_t<int32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int16_t> cast = batchSampleTypeCast<int16_t>(sample);
-        return ((cast >> 8) & 0x000000ff) | ((cast << 8) & 0x0000ff00);
-#    else
-        return SampleConverter<int32_t, int16_t>::convert(batchSampleTypeCast<int16_t>(sample));
-#    endif
-    }
-};
-
-template<>
-struct BatchNetworkToSampleConverter<int32_t, int24_t>
-{
-    static inline BatchSampleValueType_t<int24_t> convert(const BatchNetworkSampleValueType_t<int32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int24_t> cast = batchSampleTypeCast<int24_t>(sample);
-        return ((cast >> 16) & 0x000000ff) | (cast & 0x0000ff00) | ((cast << 16) & 0x00ff0000);
-#    else
-        return SampleConverter<int32_t, int24_t>::convert(batchSampleTypeCast<int24_t>(sample));
-#    endif
-    }
-};
-
-template<>
-struct BatchNetworkToSampleConverter<int32_t, int32_t>
-{
-    static inline BatchSampleValueType_t<int32_t> convert(const BatchNetworkSampleValueType_t<int32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        BatchSampleValueType_t<int32_t> cast = batchSampleTypeCast<int32_t>(sample);
-        return ((cast >> 24) & 0x000000ff) | ((cast >> 8) & 0x0000ff00) | ((cast << 8) & 0x00ff0000) |
-               ((cast << 24) & 0xff000000);
-#    else
-        return batchSampleTypeCast<int32_t>(sample);
-#    endif
-    }
-};
-
-// float32_t -> float32_t
-
-template<>
-struct BatchNetworkToSampleConverter<float32_t, float32_t>
-{
-    static inline BatchSampleValueType_t<float32_t> convert(
-        const BatchNetworkSampleValueType_t<float32_t>& sample) noexcept
-    {
-#    if defined(RATL_CPP_LITTLE_ENDIAN)
-        return batchSampleTypeCast<float32_t>(
-            BatchNetworkToSampleConverter<int32_t, int32_t>::convert(batchNetworkSampleTypeCast<int32_t>(sample)));
-#    else
-        return batchSampleTypeCast<float32_t>(sample);
-#    endif
-    }
-};
-
-// intXX_t -> float32_t
-
-template<class SampleType>
-struct BatchNetworkToSampleConverter<SampleType, float32_t>
-{
-    static inline BatchSampleValueType_t<float32_t> convert(
-        const BatchNetworkSampleValueType_t<SampleType>& sample) noexcept
-    {
-        BatchSampleValueType_t<SampleType> temp =
-            BatchNetworkToSampleConverter<SampleType, SampleType>::convert(sample);
-        temp = batchFixNegativeSamples<SampleType>(temp);
-        return BatchSampleConverter<SampleType, float32_t>::convert(temp);
-    }
-};
-
-// float32_t -> intXX_t
-
-template<class SampleType>
-struct BatchNetworkToSampleConverter<float32_t, SampleType>
+template<class SampleType, class DitherGenerator>
+struct BatchFastNetworkToSampleConverter<SampleType, SampleType, DitherGenerator>
 {
     static inline BatchSampleValueType_t<SampleType> convert(
-        const BatchNetworkSampleValueType_t<float32_t>& sample) noexcept
+        const BatchNetworkSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
     {
-        return BatchSampleConverter<float32_t, SampleType>::convert(
-            BatchNetworkToSampleConverter<float32_t, float32_t>::convert(sample));
+        return batchNetworkSampleToSample<SampleType>(sample);
     }
 };
 
@@ -508,4 +243,4 @@ struct BatchNetworkToSampleConverter<float32_t, SampleType>
 
 #endif
 
-#endif // _ratl_detail_batch_sample_converter_
+#endif // _ratl_detail_batch_fast_sample_converter_

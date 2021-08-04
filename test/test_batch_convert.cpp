@@ -1,7 +1,7 @@
 
 #include "test_utils.hpp"
 
-#include <ratl/detail/batch_sample_converter.hpp>
+#include <ratl/detail/batch_reference_sample_converter.hpp>
 
 #if defined(RATL_HAS_XSIMD)
 

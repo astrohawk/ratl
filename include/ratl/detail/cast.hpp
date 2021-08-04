@@ -14,18 +14,30 @@ namespace ratl
 {
 namespace detail
 {
+// sampleToNetworkCast
+
+template<class Output, class Input>
+inline Output bitwiseCast(const Input& input) noexcept
+{
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+    return std::bit_cast<Output>(input);
+#elif defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
+    Output output;
+    __builtin_memcpy(&output, &input, sizeof(Output));
+    return output;
+#else
+    Output output;
+    std::memcpy(&output, &input, sizeof(Output));
+    return output;
+#endif
+}
+
 // sampleToNetworkUnderlyingCast
 
 template<class SampleType>
 inline NetworkSampleValueUnderlyingType_t<SampleType> sampleToNetworkUnderlyingCast(SampleType input) noexcept
 {
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
-    return std::bit_cast<NetworkSampleValueUnderlyingType_t<SampleType>>(input);
-#else
-    NetworkSampleValueUnderlyingType_t<SampleType> output;
-    std::memcpy(&output, &input, sizeof(SampleType));
-    return output;
-#endif
+    return bitwiseCast<NetworkSampleValueUnderlyingType_t<SampleType>>(input);
 }
 
 // networkUnderlyingToSampleCast
@@ -33,13 +45,7 @@ inline NetworkSampleValueUnderlyingType_t<SampleType> sampleToNetworkUnderlyingC
 template<class SampleType>
 inline SampleType networkUnderlyingToSampleCast(NetworkSampleValueUnderlyingType_t<SampleType> input) noexcept
 {
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
-    return std::bit_cast<SampleType>(input);
-#else
-    SampleType output;
-    std::memcpy(&output, &input, sizeof(SampleType));
-    return output;
-#endif
+    return bitwiseCast<SampleType>(input);
 }
 
 // networkToNetworkUnderlyingCast
@@ -48,13 +54,7 @@ template<class SampleType>
 inline NetworkSampleValueUnderlyingType_t<SampleType> networkToNetworkUnderlyingCast(
     NetworkSampleValueType_t<SampleType> input) noexcept
 {
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
-    return std::bit_cast<NetworkSampleValueUnderlyingType_t<SampleType>>(input);
-#else
-    NetworkSampleValueUnderlyingType_t<SampleType> output;
-    std::memcpy(&output, &input, sizeof(SampleType));
-    return output;
-#endif
+    return bitwiseCast<NetworkSampleValueUnderlyingType_t<SampleType>>(input);
 }
 
 // networkUnderlyingToNetworkCast
@@ -63,13 +63,7 @@ template<class SampleType>
 inline NetworkSampleValueType_t<SampleType> networkUnderlyingToNetworkCast(
     NetworkSampleValueUnderlyingType_t<SampleType> input) noexcept
 {
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
-    return std::bit_cast<NetworkSampleValueType_t<SampleType>>(input);
-#else
-    NetworkSampleValueType_t<SampleType> output;
-    std::memcpy(&output, &input, sizeof(SampleType));
-    return output;
-#endif
+    return bitwiseCast<NetworkSampleValueType_t<SampleType>>(input);
 }
 
 } // namespace detail

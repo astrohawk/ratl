@@ -23,28 +23,26 @@ ratl::BasicInterleaved<Sample> generateRandomInterleaved(std::size_t num_channel
     }
 
     ratl::BasicInterleaved<Sample> input_interleaved{num_channels, num_frames};
-    ratl::DitherGenerator dither_generator;
-    ratl::transform(float_interleaved.begin(), float_interleaved.end(), input_interleaved.begin(), dither_generator);
-
+    ratl::transform(float_interleaved.begin(), float_interleaved.end(), input_interleaved.begin());
     return input_interleaved;
 }
 
 template<class InputSample, class OutputSample>
 void benchSampleTransform(benchmark::State& state)
 {
-    using InputInterleaved = ratl::BasicInterleaved<InputSample>;
-    using OutputInterleaved = ratl::BasicInterleaved<OutputSample>;
-
     static constexpr std::size_t num_channels = 32;
     static constexpr std::size_t num_frames = 480;
 
-    InputInterleaved input_interleaved = generateRandomInterleaved<InputSample>(num_channels, num_frames);
-    OutputInterleaved output_interleaved{num_channels, num_frames};
+    auto input = generateRandomInterleaved<InputSample>(num_channels, num_frames);
+    auto output = ratl::BasicNoninterleaved<OutputSample>{num_channels, num_frames};
     ratl::DitherGenerator dither_generator;
     for (auto _ : state)
     {
-        ratl::transform(
-            input_interleaved.begin(), input_interleaved.end(), output_interleaved.begin(), dither_generator);
+        for (std::size_t i = 0; i < num_channels; ++i)
+        {
+            ratl::transform(
+                input.channel(i).begin(), input.channel(i).end(), output.channel(i).begin(), dither_generator);
+        }
     }
 }
 

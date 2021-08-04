@@ -6,7 +6,7 @@
 
 // ratl includes
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/sample_converter.hpp>
+#include <ratl/detail/reference_sample_converter.hpp>
 #include <ratl/dither_generator.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
@@ -25,7 +25,7 @@ private:
     using InputSample = Sample<InputSampleType>;
     using OutputSample = Sample<OutputSampleType>;
 
-    using SampleConverter = detail::SampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using SampleConverter = detail::ReferenceSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit DefaultConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
@@ -46,7 +46,8 @@ private:
     using InputSample = Sample<InputSampleType>;
     using OutputSample = NetworkSample<OutputSampleType>;
 
-    using SampleConverter = detail::SampleToNetworkConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using SampleConverter =
+        detail::ReferenceSampleToNetworkConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit DefaultConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
@@ -67,7 +68,8 @@ private:
     using InputSample = NetworkSample<InputSampleType>;
     using OutputSample = Sample<OutputSampleType>;
 
-    using SampleConverter = detail::NetworkToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using SampleConverter =
+        detail::ReferenceNetworkToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit DefaultConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}

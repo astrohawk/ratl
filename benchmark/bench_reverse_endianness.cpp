@@ -1,0 +1,87 @@
+#include <benchmark/benchmark.h>
+#include <chrono>
+#include <random>
+#include <ratl/ratl.hpp>
+#include <thread>
+
+namespace ratl
+{
+using SampleType = int24_t;
+using NetworkSampleType = detail::NetworkSampleValueUnderlyingType_t<SampleType>;
+
+static NetworkSampleType generateRandom()
+{
+    static class
+    {
+    public:
+        NetworkSampleType generate()
+        {
+            return static_cast<NetworkSampleType>(distribution_(random_generator_));
+        }
+
+    private:
+        std::random_device random_device_;
+        std::mt19937 random_generator_{random_device_()};
+        std::uniform_int_distribution<uint32_t> distribution_{
+            static_cast<uint32_t>(SampleTypeLimits<SampleType>::min),
+            static_cast<uint32_t>(SampleTypeLimits<SampleType>::max)};
+    } random_state;
+    return random_state.generate();
+}
+
+inline NetworkSampleType reverseEndiannessTest(NetworkSampleType input) noexcept
+{
+    NetworkSampleType output;
+    output.storage_[0] = input.storage_[2];
+    output.storage_[1] = input.storage_[1];
+    output.storage_[2] = input.storage_[0];
+    return output;
+}
+
+static void benchReverseEndianness(benchmark::State& state)
+{
+    std::array<NetworkSampleType, 1000> input;
+    for (auto& in : input)
+    {
+        in = generateRandom();
+    }
+    std::array<NetworkSampleType, 1000> output;
+    for (auto _ : state)
+    {
+        std::transform(
+            input.begin(),
+            input.end(),
+            output.begin(),
+            [](NetworkSampleType in)
+            {
+                return detail::reverseEndianness(in);
+            });
+    }
+}
+BENCHMARK(benchReverseEndianness);
+
+static void benchReverseEndiannessTest(benchmark::State& state)
+{
+    std::array<NetworkSampleType, 1000> input;
+    for (auto& in : input)
+    {
+        in = generateRandom();
+    }
+    std::array<NetworkSampleType, 1000> output;
+    for (auto _ : state)
+    {
+        std::transform(
+            input.begin(),
+            input.end(),
+            output.begin(),
+            [](NetworkSampleType in)
+            {
+                return reverseEndiannessTest(in);
+            });
+    }
+}
+BENCHMARK(benchReverseEndiannessTest);
+
+} // namespace ratl
+
+BENCHMARK_MAIN();

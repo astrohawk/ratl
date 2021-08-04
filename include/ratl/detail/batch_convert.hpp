@@ -6,7 +6,7 @@
 
 // ratl includes
 #include <ratl/detail/batch_dither_generator.hpp>
-#include <ratl/detail/batch_sample_converter.hpp>
+#include <ratl/detail/batch_reference_sample_converter.hpp>
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/network_sample.hpp>
@@ -31,7 +31,7 @@ private:
     using InputBatchSampleValueType = BatchSampleType_t<InputSample>;
     using OutputBatchSampleValueType = BatchSampleType_t<OutputSample>;
 
-    using SampleConverter = BatchSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using SampleConverter = BatchReferenceSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit BatchConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
@@ -55,7 +55,7 @@ private:
     using InputBatchSampleValueType = BatchSampleType_t<InputSample>;
     using OutputBatchSampleValueType = BatchSampleType_t<OutputSample>;
 
-    using SampleConverter = BatchSampleToNetworkConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using SampleConverter = BatchReferenceSampleToNetworkConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit BatchConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
@@ -79,7 +79,7 @@ private:
     using InputBatchSampleValueType = BatchSampleType_t<InputSample>;
     using OutputBatchSampleValueType = BatchSampleType_t<OutputSample>;
 
-    using SampleConverter = BatchNetworkToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
+    using SampleConverter = BatchReferenceNetworkToSampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
     explicit BatchConverterImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
