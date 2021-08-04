@@ -1,5 +1,5 @@
-#ifndef _ratl_batch_base_traits_
-#define _ratl_batch_base_traits_
+#ifndef _ratl_detail_batch_base_traits_
+#define _ratl_detail_batch_base_traits_
 
 // C++ Standard Library includes
 #include <type_traits>
@@ -84,4 +84,4 @@ using BatchNetworkSampleValueType_t = typename BatchNetworkSampleValueType<Sampl
 
 #endif
 
-#endif // _ratl_batch_base_traits_
+#endif // _ratl_detail_batch_base_traits_

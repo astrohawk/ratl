@@ -1,5 +1,5 @@
-#ifndef _ratl_batch_traits_
-#define _ratl_batch_traits_
+#ifndef _ratl_detail_batch_traits_
+#define _ratl_detail_batch_traits_
 
 // C++ Standard Library includes
 #include <type_traits>
@@ -40,4 +40,4 @@ using BatchSampleType_t = typename BatchSampleType<Sample>::type;
 
 #endif
 
-#endif // _ratl_batch_traits_
+#endif // _ratl_detail_batch_traits_
