@@ -201,8 +201,8 @@ template<class SampleType>
 inline BatchSampleValueType_t<SampleType> batchNetworkSampleToSample(
     const BatchNetworkSampleValueType_t<SampleType>& input) noexcept
 {
-    return xsimd::bitwise_cast<BatchSampleValueType_t<SampleType>>(
-        batchNetworkToHost<NetworkSampleValueUnderlyingType_t<SampleType>>(input));
+    return batchFixNegativeSamples<SampleType>(xsimd::bitwise_cast<BatchSampleValueType_t<SampleType>>(
+        batchNetworkToHost<NetworkSampleValueUnderlyingType_t<SampleType>>(input)));
 }
 
 } // namespace detail
