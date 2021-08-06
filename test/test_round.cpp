@@ -23,17 +23,7 @@ struct RoundHalfUpConverter
 {
     static int32_t convert(ratl::float32_t sample) noexcept
     {
-        float whole;
-        auto fractional = std::modf(sample, &whole);
-        if (fractional >= 0.5)
-        {
-            return static_cast<int32_t>(whole + 1);
-        }
-        else if (fractional < -0.5)
-        {
-            return static_cast<int32_t>(whole - 1);
-        }
-        return static_cast<int32_t>(whole);
+        return static_cast<int32_t>(std::floor(sample + 0.5));
     }
 };
 
