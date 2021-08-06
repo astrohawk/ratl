@@ -5,7 +5,7 @@
 #if (defined(RATL_CPP_ARCH_X86) || defined(RATL_CPP_ARCH_X86_64)) && defined(__SSE__)
 #    include <ratl/detail/intrin.hpp>
 #endif
-#if  defined(RATL_CPP_ARCH_AARCH64) && defined(__ARM_NEON)
+#if defined(RATL_CPP_ARCH_AARCH64) && defined(__ARM_NEON)
 #    include <ratl/detail/intrin.hpp>
 #endif
 
@@ -131,15 +131,15 @@ BENCHMARK_TEMPLATE(benchFloatToInt, SseIntrinsicsConverter);
 BENCHMARK_TEMPLATE(benchAsymmetricFloatToInt, SseIntrinsicsConverter);
 #endif
 
-#if  defined(RATL_CPP_ARCH_AARCH64) && defined(__ARM_NEON)
+#if defined(RATL_CPP_ARCH_AARCH64) && defined(__ARM_NEON)
 struct NeonIntrinsicsConverter
-    {
+{
     template<typename FloatConvertTraits>
     static int32_t convert(float32_t sample) noexcept
     {
         return vgetq_lane_s32(vcvtnq_s32_f32(vdupq_n_f32(sample * FloatConvertTraits::Multiplier)), 0);
     }
-    };
+};
 BENCHMARK_TEMPLATE(benchFloatToInt, NeonIntrinsicsConverter);
 BENCHMARK_TEMPLATE(benchAsymmetricFloatToInt, NeonIntrinsicsConverter);
 #endif
