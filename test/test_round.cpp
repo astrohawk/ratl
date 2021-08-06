@@ -19,11 +19,21 @@ SampleType convert(ratl::float32_t sample)
     return static_cast<SampleType>(Converter::convert(sample * detail::FloatConvertTraits<SampleType>::Multiplier));
 }
 
-struct LrintConverter
+struct RoundHalfUpConverter
 {
     static int32_t convert(ratl::float32_t sample) noexcept
     {
-        return std::lrint(sample);
+        float whole;
+        auto fractional = std::modf(sample, &whole);
+        if (fractional >= 0.5)
+        {
+            return static_cast<int32_t>(whole + 1);
+        }
+        else if (fractional < -0.5)
+        {
+            return static_cast<int32_t>(whole - 1);
+        }
+        return static_cast<int32_t>(whole);
     }
 };
 
@@ -52,9 +62,9 @@ TYPED_TEST(TestRound, magicEqualToLrintForAllInt32Inputs)
     {
         auto original = static_cast<SampleType>(i);
         auto input = ratl::convert<ratl::Sample<ratl::float32_t>>(ratl::Sample<SampleType>(original)).get();
-        auto lrint_output = convert<SampleType, LrintConverter>(input);
-        auto magic_output = convert<SampleType, MagicConverter>(input);
-        EXPECT_EQ(magic_output, lrint_output);
+        auto reference_output = convert<SampleType, RoundHalfUpConverter>(input);
+        auto test_output = convert<SampleType, MagicConverter>(input);
+        EXPECT_EQ(test_output, reference_output);
     }
 }
 
@@ -64,34 +74,18 @@ TYPED_TEST(TestRound, magicCloseToLrintForAllFloatInputs)
 
     static constexpr float32_t Min = 1e-10;
 
-    std::uint64_t num_trials = 0;
-    std::uint64_t num_errors = 0;
     for (float32_t input = ratl::SampleTypeLimits<float32_t>::max; input > Min; input = std::nextafter(input, 0.f))
     {
-        auto lrint_output = static_cast<std::int64_t>(convert<SampleType, LrintConverter>(input));
-        auto magic_output = static_cast<std::int64_t>(convert<SampleType, MagicConverter>(input));
-        EXPECT_GE(magic_output, lrint_output - 1);
-        EXPECT_LE(magic_output, lrint_output + 1);
-        ++num_trials;
-        if (magic_output != lrint_output)
-        {
-            ++num_errors;
-        }
+        auto reference_output = static_cast<std::int64_t>(convert<SampleType, RoundHalfUpConverter>(input));
+        auto test_output = static_cast<std::int64_t>(convert<SampleType, MagicConverter>(input));
+        EXPECT_EQ(test_output, reference_output);
     }
     for (float32_t input = ratl::SampleTypeLimits<float32_t>::min; input < -Min; input = std::nextafter(input, 0.f))
     {
-        auto lrint_output = static_cast<std::int64_t>(convert<SampleType, LrintConverter>(input));
-        auto magic_output = static_cast<std::int64_t>(convert<SampleType, MagicConverter>(input));
-        EXPECT_GE(magic_output, lrint_output - 1);
-        EXPECT_LE(magic_output, lrint_output + 1);
-        ++num_trials;
-        if (magic_output != lrint_output)
-        {
-            ++num_errors;
-        }
+        auto reference_output = static_cast<std::int64_t>(convert<SampleType, RoundHalfUpConverter>(input));
+        auto test_output = static_cast<std::int64_t>(convert<SampleType, MagicConverter>(input));
+        EXPECT_EQ(test_output, reference_output);
     }
-    auto error_percent = (static_cast<double>(num_errors) * 100) / static_cast<double>(num_trials);
-    std::cout << "num errors: " << num_errors << "/" << num_trials << " (" << error_percent << "%)" << std::endl;
 }
 
 } // namespace test
