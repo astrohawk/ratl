@@ -2,6 +2,7 @@
 #define _ratl_detail_cast_
 
 // C++ Standard Library includes
+#include <cstring>
 #include <type_traits>
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 #    include <bit>

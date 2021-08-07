@@ -5,15 +5,15 @@
 #include <type_traits>
 
 // ratl includes
-#include <ratl/detail/batch_sample_transformer.hpp>
+#include <ratl/detail/basic_sample_transformer.hpp>
+#include <ratl/detail/batch_basic_sample_transformer.hpp>
 #include <ratl/detail/channel_iterator.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/frame_iterator.hpp>
 #include <ratl/detail/interleaved_iterator.hpp>
 #include <ratl/detail/noninterleaved_iterator.hpp>
-#include <ratl/detail/sample_transformer.hpp>
 #include <ratl/dither_generator.hpp>
-#include <ratl/sample_converter.hpp>
+#include <ratl/sample_transformer.hpp>
 
 namespace ratl
 {
@@ -31,16 +31,26 @@ Iterator2 apply(Iterator1 first1, Iterator1 last1, Iterator2 first2, BinaryOp bi
     return first2;
 }
 
-// TransformImpl class
+// Transformer class
 
-template<class SampleConverter, class InputIterator, class OutputIterator, class DitherGenerator>
-class DefaultTransformerImpl;
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputIterator,
+    class OutputIterator,
+    class DitherGenerator>
+class Transformer;
 
-// DefaultTransformerImpl for InterleavedIterator
+// Transformer for InterleavedIterator
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     InterleavedIterator<InputSample>,
     InterleavedIterator<OutputSample>,
     DitherGenerator>
@@ -52,8 +62,7 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
     using InputFrame = typename InputIterator::value_type;
     using OutputFrame = typename OutputIterator::value_type;
@@ -61,8 +70,10 @@ private:
     using InputFrameIterator = typename InputFrame::const_iterator;
     using OutputFrameIterator = typename OutputFrame::iterator;
 
+    using FrameTransformer = Transformer<SampleTransformerT, InputFrameIterator, OutputFrameIterator, DitherGenerator>;
+
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -77,31 +88,35 @@ public:
         {
             // Input and output don't have same number of channels, so must transform frame by frame
 
-            DefaultTransformerImpl<SampleConverter, InputFrameIterator, OutputFrameIterator, DitherGenerator> transform{
-                dither_generator_};
+            FrameTransformer frame_transformer{dither_generator_};
             auto min_channels = std::min(first.channels(), result.channels());
             return detail::apply(
                 first,
                 last,
                 result,
-                [&transform, min_channels](InputFrame input, OutputFrame output)
+                [&frame_transformer, min_channels](InputFrame input, OutputFrame output)
                 {
                     auto input_begin = input.cbegin();
                     auto input_end = std::next(input_begin, min_channels);
-                    transform(input_begin, input_end, output.begin());
+                    frame_transformer(input_begin, input_end, output.begin());
                 });
         }
     }
 
 private:
-    DitherGenerator& dither_generator_;
+    std::reference_wrapper<DitherGenerator> dither_generator_;
 };
 
-// DefaultTransformerImpl for NoninterleavedIterator
+// Transformer for NoninterleavedIterator
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     NoninterleavedIterator<InputSample>,
     NoninterleavedIterator<OutputSample>,
     DitherGenerator>
@@ -113,8 +128,7 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
     using InputChannel = typename InputIterator::value_type;
     using OutputChannel = typename OutputIterator::value_type;
@@ -122,8 +136,11 @@ private:
     using InputChannelIterator = typename InputChannel::const_iterator;
     using OutputChannelIterator = typename OutputChannel::iterator;
 
+    using ChannelTransformer =
+        Transformer<SampleTransformerT, InputChannelIterator, OutputChannelIterator, DitherGenerator>;
+
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -138,31 +155,35 @@ public:
         {
             // Input and output don't have same number of frames, so must transform channel by channel
 
-            DefaultTransformerImpl<SampleConverter, InputChannelIterator, OutputChannelIterator, DitherGenerator>
-                transform{dither_generator_};
+            ChannelTransformer channel_transformer{dither_generator_};
             auto min_frames = std::min(first.frames(), result.frames());
             return detail::apply(
                 first,
                 last,
                 result,
-                [&transform, min_frames](InputChannel input, OutputChannel output)
+                [&channel_transformer, min_frames](InputChannel input, OutputChannel output)
                 {
                     auto input_begin = input.cbegin();
                     auto input_end = std::next(input_begin, min_frames);
-                    transform(input_begin, input_end, output.begin());
+                    channel_transformer(input_begin, input_end, output.begin());
                 });
         }
     }
 
 private:
-    DitherGenerator& dither_generator_;
+    std::reference_wrapper<DitherGenerator> dither_generator_;
 };
 
-// DefaultTransformerImpl for FrameIterator
+// Transformer for FrameIterator
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     FrameIterator<InputSample, false>,
     FrameIterator<OutputSample, false>,
     DitherGenerator>
@@ -174,11 +195,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -210,9 +230,14 @@ private:
     SampleTransformer sample_transformer_;
 };
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     FrameIterator<InputSample, false>,
     FrameIterator<OutputSample, true>,
     DitherGenerator>
@@ -224,11 +249,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -246,9 +270,14 @@ private:
     SampleTransformer sample_transformer_;
 };
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     FrameIterator<InputSample, true>,
     FrameIterator<OutputSample, false>,
     DitherGenerator>
@@ -260,11 +289,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -282,9 +310,14 @@ private:
     SampleTransformer sample_transformer_;
 };
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     FrameIterator<InputSample, true>,
     FrameIterator<OutputSample, true>,
     DitherGenerator>
@@ -296,11 +329,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -311,11 +343,16 @@ private:
     SampleTransformer sample_transformer_;
 };
 
-// DefaultTransformerImpl for ChannelIterator
+// Transformer for ChannelIterator
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     ChannelIterator<InputSample, false>,
     ChannelIterator<OutputSample, false>,
     DitherGenerator>
@@ -327,11 +364,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -363,9 +399,14 @@ private:
     SampleTransformer sample_transformer_;
 };
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     ChannelIterator<InputSample, false>,
     ChannelIterator<OutputSample, true>,
     DitherGenerator>
@@ -377,11 +418,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -399,9 +439,14 @@ private:
     SampleTransformer sample_transformer_;
 };
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     ChannelIterator<InputSample, true>,
     ChannelIterator<OutputSample, false>,
     DitherGenerator>
@@ -413,11 +458,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -435,9 +479,14 @@ private:
     SampleTransformer sample_transformer_;
 };
 
-template<class SampleConverter, class InputSample, class OutputSample, class DitherGenerator>
-class DefaultTransformerImpl<
-    SampleConverter,
+template<
+    template<class, class, class>
+    class SampleTransformerT,
+    class InputSample,
+    class OutputSample,
+    class DitherGenerator>
+class Transformer<
+    SampleTransformerT,
     ChannelIterator<InputSample, true>,
     ChannelIterator<OutputSample, true>,
     DitherGenerator>
@@ -449,11 +498,10 @@ private:
     using BaseInputSample = std::remove_cv_t<InputSample>;
     using BaseOutputSample = std::remove_cv_t<OutputSample>;
 
-    using SampleTransformer =
-        BatchSampleTransformerImpl<SampleConverter, BaseInputSample, BaseOutputSample, DitherGenerator>;
+    using SampleTransformer = SampleTransformerT<BaseInputSample, BaseOutputSample, DitherGenerator>;
 
 public:
-    explicit DefaultTransformerImpl(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
+    explicit Transformer(DitherGenerator& dither_generator) : sample_transformer_{dither_generator} {}
 
     inline OutputIterator operator()(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
@@ -463,19 +511,10 @@ public:
 private:
     SampleTransformer sample_transformer_;
 };
-
-// DefaultTransformer alias
-
-template<class SampleConverter, class InputIterator, class OutputIterator, class DitherGenerator>
-using DefaultTransformer = DefaultTransformerImpl<
-    SampleConverter,
-    std::remove_cv_t<std::remove_reference_t<InputIterator>>,
-    std::remove_cv_t<std::remove_reference_t<OutputIterator>>,
-    DitherGenerator>;
 
 } // namespace detail
 
-// transform functions
+// transform
 
 template<class InputIterator, class OutputIterator, class Transformer>
 inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result, Transformer transformer)
@@ -483,23 +522,73 @@ inline OutputIterator transform(InputIterator first, InputIterator last, OutputI
     return transformer(first, last, result);
 }
 
+namespace detail
+{
+template<template<class, class, class> class SampleTransformerT, class InputIterator, class OutputIterator>
+inline OutputIterator transform_impl(
+    InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
+{
+    using Transformer = detail::Transformer<SampleTransformerT, InputIterator, OutputIterator, DitherGenerator>;
+    return transform(first, last, result, Transformer{dither_generator});
+}
+
+template<template<class, class, class> class SampleTransformerT, class InputIterator, class OutputIterator>
+inline OutputIterator transform_impl(InputIterator first, InputIterator last, OutputIterator result)
+{
+    using TransformerDitherGenerator = detail::BatchNullDitherGenerator;
+    using Transformer =
+        detail::Transformer<SampleTransformerT, InputIterator, OutputIterator, TransformerDitherGenerator>;
+    TransformerDitherGenerator dither_generator{};
+    return transform(first, last, result, Transformer{dither_generator});
+}
+} // namespace detail
+
+// transform
+
 template<class InputIterator, class OutputIterator>
 inline OutputIterator transform(
     InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
 {
-    using Transformer =
-        detail::DefaultTransformer<DefaultSampleConverter, InputIterator, OutputIterator, DitherGenerator>;
-    return transform(first, last, result, Transformer{dither_generator});
+    return detail::transform_impl<DefaultSampleTransformer, InputIterator, OutputIterator>(
+        first, last, result, dither_generator);
 }
 
 template<class InputIterator, class OutputIterator>
 inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result)
 {
-    using TransformerDitherGenerator = detail::BatchNullDitherGenerator;
-    using Transformer =
-        detail::DefaultTransformer<DefaultSampleConverter, InputIterator, OutputIterator, TransformerDitherGenerator>;
-    TransformerDitherGenerator dither_generator{};
-    return transform(first, last, result, Transformer{dither_generator});
+    return detail::transform_impl<DefaultSampleTransformer, InputIterator, OutputIterator>(first, last, result);
+}
+
+// reference_transform
+
+template<class InputIterator, class OutputIterator>
+inline OutputIterator reference_transform(
+    InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
+{
+    return detail::transform_impl<ReferenceSampleTransformer, InputIterator, OutputIterator>(
+        first, last, result, dither_generator);
+}
+
+template<class InputIterator, class OutputIterator>
+inline OutputIterator reference_transform(InputIterator first, InputIterator last, OutputIterator result)
+{
+    return detail::transform_impl<ReferenceSampleTransformer, InputIterator, OutputIterator>(first, last, result);
+}
+
+// fast_transform
+
+template<class InputIterator, class OutputIterator>
+inline OutputIterator fast_transform(
+    InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
+{
+    return detail::transform_impl<FastSampleTransformer, InputIterator, OutputIterator>(
+        first, last, result, dither_generator);
+}
+
+template<class InputIterator, class OutputIterator>
+inline OutputIterator fast_transform(InputIterator first, InputIterator last, OutputIterator result)
+{
+    return detail::transform_impl<FastSampleTransformer, InputIterator, OutputIterator>(first, last, result);
 }
 
 } // namespace ratl
