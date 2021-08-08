@@ -6,8 +6,8 @@
 
 // ratl includes
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/sample_converter.hpp>
 #include <ratl/dither_generator.hpp>
-#include <ratl/sample_converter.hpp>
 
 namespace ratl
 {
@@ -22,14 +22,14 @@ inline auto convert(const InputSample& sample, SampleConverter sample_converter)
 namespace detail
 {
 template<template<class, class, class> class SampleConverterT, class OutputSample, class InputSample>
-inline OutputSample convert_impl(const InputSample& sample, DitherGenerator& dither_generator) noexcept
+inline OutputSample convertImpl(const InputSample& sample, DitherGenerator& dither_generator) noexcept
 {
     using SampleConverter = DefaultSampleConverter<InputSample, OutputSample, DitherGenerator>;
     return convert(sample, SampleConverter{dither_generator});
 }
 
 template<template<class, class, class> class SampleConverterT, class OutputSample, class InputSample>
-inline OutputSample convert_impl(const InputSample& sample) noexcept
+inline OutputSample convertImpl(const InputSample& sample) noexcept
 {
     using ConverterDitherGenerator = detail::NullDitherGenerator;
     using SampleConverter = SampleConverterT<InputSample, OutputSample, ConverterDitherGenerator>;
@@ -43,41 +43,41 @@ inline OutputSample convert_impl(const InputSample& sample) noexcept
 template<class OutputSample, class InputSample>
 inline OutputSample convert(const InputSample& sample, DitherGenerator& dither_generator) noexcept
 {
-    return detail::convert_impl<DefaultSampleConverter, OutputSample, InputSample>(sample, dither_generator);
+    return detail::convertImpl<detail::DefaultSampleConverter, OutputSample, InputSample>(sample, dither_generator);
 }
 
 template<class OutputSample, class InputSample>
 inline OutputSample convert(const InputSample& sample) noexcept
 {
-    return detail::convert_impl<DefaultSampleConverter, OutputSample, InputSample>(sample);
+    return detail::convertImpl<detail::DefaultSampleConverter, OutputSample, InputSample>(sample);
 }
 
-// reference_convert
+// referenceConvert
 
 template<class OutputSample, class InputSample>
-inline OutputSample reference_convert(const InputSample& sample, DitherGenerator& dither_generator) noexcept
+inline OutputSample referenceConvert(const InputSample& sample, DitherGenerator& dither_generator) noexcept
 {
-    return detail::convert_impl<ReferenceSampleConverter, OutputSample, InputSample>(sample, dither_generator);
-}
-
-template<class OutputSample, class InputSample>
-inline OutputSample reference_convert(const InputSample& sample) noexcept
-{
-    return detail::convert_impl<ReferenceSampleConverter, OutputSample, InputSample>(sample);
-}
-
-// fast_convert
-
-template<class OutputSample, class InputSample>
-inline OutputSample fast_convert(const InputSample& sample, DitherGenerator& dither_generator) noexcept
-{
-    return detail::convert_impl<FastSampleConverter, OutputSample, InputSample>(sample, dither_generator);
+    return detail::convertImpl<detail::ReferenceSampleConverter, OutputSample, InputSample>(sample, dither_generator);
 }
 
 template<class OutputSample, class InputSample>
-inline OutputSample fast_convert(const InputSample& sample) noexcept
+inline OutputSample referenceConvert(const InputSample& sample) noexcept
 {
-    return detail::convert_impl<FastSampleConverter, OutputSample, InputSample>(sample);
+    return detail::convertImpl<detail::ReferenceSampleConverter, OutputSample, InputSample>(sample);
+}
+
+// fastConvert
+
+template<class OutputSample, class InputSample>
+inline OutputSample fastConvert(const InputSample& sample, DitherGenerator& dither_generator) noexcept
+{
+    return detail::convertImpl<detail::FastSampleConverter, OutputSample, InputSample>(sample, dither_generator);
+}
+
+template<class OutputSample, class InputSample>
+inline OutputSample fastConvert(const InputSample& sample) noexcept
+{
+    return detail::convertImpl<detail::FastSampleConverter, OutputSample, InputSample>(sample);
 }
 
 } // namespace ratl

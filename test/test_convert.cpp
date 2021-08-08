@@ -17,17 +17,17 @@ protected:
 
 TEST_F(ConvertInt16, Int16)
 {
-    EXPECT_EQ(reference_convert<Sample<int16_t>>(sample_), Sample<int16_t>{0x1234});
+    EXPECT_EQ(referenceConvert<Sample<int16_t>>(sample_), Sample<int16_t>{0x1234});
 }
 
 TEST_F(ConvertInt16, Int24)
 {
-    EXPECT_EQ(reference_convert<Sample<int24_t>>(sample_), Sample<int24_t>{0x123400});
+    EXPECT_EQ(referenceConvert<Sample<int24_t>>(sample_), Sample<int24_t>{0x123400});
 }
 
 TEST_F(ConvertInt16, Int32)
 {
-    EXPECT_EQ(reference_convert<Sample<int32_t>>(sample_), Sample<int32_t>{0x12340000});
+    EXPECT_EQ(referenceConvert<Sample<int32_t>>(sample_), Sample<int32_t>{0x12340000});
 }
 
 TEST_F(ConvertInt16, Float32)
@@ -35,34 +35,34 @@ TEST_F(ConvertInt16, Float32)
     uint32_t output = 0x3e11a000;
     float32_t float_output;
     std::memcpy(&float_output, &output, sizeof(float32_t));
-    EXPECT_EQ(reference_convert<Sample<float32_t>>(sample_), Sample<float32_t>{float_output});
+    EXPECT_EQ(referenceConvert<Sample<float32_t>>(sample_), Sample<float32_t>{float_output});
 }
 
 TEST_F(ConvertInt16, NetworkInt16)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int16_t>>(sample_),
+        referenceConvert<NetworkSample<int16_t>>(sample_),
         NetworkSample<int16_t>{detail::networkUnderlyingToNetworkCast<int16_t>(0x3412)});
 }
 
 TEST_F(ConvertInt16, NetworkInt24)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int24_t>>(sample_),
+        referenceConvert<NetworkSample<int24_t>>(sample_),
         NetworkSample<int24_t>{detail::networkUnderlyingToNetworkCast<int24_t>(0x003412)});
 }
 
 TEST_F(ConvertInt16, NetworkInt32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int32_t>>(sample_),
+        referenceConvert<NetworkSample<int32_t>>(sample_),
         NetworkSample<int32_t>{detail::networkUnderlyingToNetworkCast<int32_t>(0x00003412)});
 }
 
 TEST_F(ConvertInt16, NetworkFloat32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<float32_t>>(sample_),
+        referenceConvert<NetworkSample<float32_t>>(sample_),
         NetworkSample<float32_t>{detail::networkUnderlyingToNetworkCast<float32_t>(0x00a0113e)});
 }
 
@@ -76,17 +76,17 @@ protected:
 
 TEST_F(ConvertInt24, Int16)
 {
-    EXPECT_EQ(reference_convert<Sample<int16_t>>(sample_), Sample<int16_t>{0x1234});
+    EXPECT_EQ(referenceConvert<Sample<int16_t>>(sample_), Sample<int16_t>{0x1234});
 }
 
 TEST_F(ConvertInt24, Int24)
 {
-    EXPECT_EQ(reference_convert<Sample<int24_t>>(sample_), Sample<int24_t>{0x123456});
+    EXPECT_EQ(referenceConvert<Sample<int24_t>>(sample_), Sample<int24_t>{0x123456});
 }
 
 TEST_F(ConvertInt24, Int32)
 {
-    EXPECT_EQ(reference_convert<Sample<int32_t>>(sample_), Sample<int32_t>{0x12345600});
+    EXPECT_EQ(referenceConvert<Sample<int32_t>>(sample_), Sample<int32_t>{0x12345600});
 }
 
 TEST_F(ConvertInt24, Float32)
@@ -94,34 +94,34 @@ TEST_F(ConvertInt24, Float32)
     uint32_t output = 0x3e11a2b0;
     float32_t float_output;
     std::memcpy(&float_output, &output, sizeof(float32_t));
-    EXPECT_EQ(reference_convert<Sample<float32_t>>(sample_), Sample<float32_t>{float_output});
+    EXPECT_EQ(referenceConvert<Sample<float32_t>>(sample_), Sample<float32_t>{float_output});
 }
 
 TEST_F(ConvertInt24, NetworkInt16)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int16_t>>(sample_),
+        referenceConvert<NetworkSample<int16_t>>(sample_),
         NetworkSample<int16_t>{detail::networkUnderlyingToNetworkCast<int16_t>(0x3412)});
 }
 
 TEST_F(ConvertInt24, NetworkInt24)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int24_t>>(sample_),
+        referenceConvert<NetworkSample<int24_t>>(sample_),
         NetworkSample<int24_t>{detail::networkUnderlyingToNetworkCast<int24_t>(0x563412)});
 }
 
 TEST_F(ConvertInt24, NetworkInt32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int32_t>>(sample_),
+        referenceConvert<NetworkSample<int32_t>>(sample_),
         NetworkSample<int32_t>{detail::networkUnderlyingToNetworkCast<int32_t>(0x00563412)});
 }
 
 TEST_F(ConvertInt24, NetworkFloat32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<float32_t>>(sample_),
+        referenceConvert<NetworkSample<float32_t>>(sample_),
         NetworkSample<float32_t>{detail::networkUnderlyingToNetworkCast<float32_t>(0xb0a2113e)});
 }
 
@@ -135,17 +135,17 @@ protected:
 
 TEST_F(ConvertInt32, Int16)
 {
-    EXPECT_EQ(reference_convert<Sample<int16_t>>(sample_), Sample<int16_t>{0x1234});
+    EXPECT_EQ(referenceConvert<Sample<int16_t>>(sample_), Sample<int16_t>{0x1234});
 }
 
 TEST_F(ConvertInt32, Int24)
 {
-    EXPECT_EQ(reference_convert<Sample<int24_t>>(sample_), Sample<int24_t>{0x123456});
+    EXPECT_EQ(referenceConvert<Sample<int24_t>>(sample_), Sample<int24_t>{0x123456});
 }
 
 TEST_F(ConvertInt32, Int32)
 {
-    EXPECT_EQ(reference_convert<Sample<int32_t>>(sample_), Sample<int32_t>{0x12345678});
+    EXPECT_EQ(referenceConvert<Sample<int32_t>>(sample_), Sample<int32_t>{0x12345678});
 }
 
 TEST_F(ConvertInt32, Float32)
@@ -153,34 +153,34 @@ TEST_F(ConvertInt32, Float32)
     uint32_t output = 0x3e11a2b4;
     float32_t float_output;
     std::memcpy(&float_output, &output, sizeof(float32_t));
-    EXPECT_EQ(reference_convert<Sample<float32_t>>(sample_), Sample<float32_t>{float_output});
+    EXPECT_EQ(referenceConvert<Sample<float32_t>>(sample_), Sample<float32_t>{float_output});
 }
 
 TEST_F(ConvertInt32, NetworkInt16)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int16_t>>(sample_),
+        referenceConvert<NetworkSample<int16_t>>(sample_),
         NetworkSample<int16_t>{detail::networkUnderlyingToNetworkCast<int16_t>(0x3412)});
 }
 
 TEST_F(ConvertInt32, NetworkInt24)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int24_t>>(sample_),
+        referenceConvert<NetworkSample<int24_t>>(sample_),
         NetworkSample<int24_t>{detail::networkUnderlyingToNetworkCast<int24_t>(0x563412)});
 }
 
 TEST_F(ConvertInt32, NetworkInt32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int32_t>>(sample_),
+        referenceConvert<NetworkSample<int32_t>>(sample_),
         NetworkSample<int32_t>{detail::networkUnderlyingToNetworkCast<int32_t>(0x78563412)});
 }
 
 TEST_F(ConvertInt32, NetworkFloat32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<float32_t>>(sample_),
+        referenceConvert<NetworkSample<float32_t>>(sample_),
         NetworkSample<float32_t>{detail::networkUnderlyingToNetworkCast<float32_t>(0xb4a2113e)});
 }
 
@@ -195,28 +195,28 @@ protected:
 TEST_F(ConvertFloat32, NetworkInt16)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int16_t>>(sample_),
+        referenceConvert<NetworkSample<int16_t>>(sample_),
         NetworkSample<int16_t>{detail::networkUnderlyingToNetworkCast<int16_t>(0xcc0f)});
 }
 
 TEST_F(ConvertFloat32, NetworkInt24)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int24_t>>(sample_),
+        referenceConvert<NetworkSample<int24_t>>(sample_),
         NetworkSample<int24_t>{detail::networkUnderlyingToNetworkCast<int24_t>(0x92cb0f)});
 }
 
 TEST_F(ConvertFloat32, NetworkInt32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<int32_t>>(sample_),
+        referenceConvert<NetworkSample<int32_t>>(sample_),
         NetworkSample<int32_t>{detail::networkUnderlyingToNetworkCast<int32_t>(0x4092cb0f)});
 }
 
 TEST_F(ConvertFloat32, NetworkFloat32)
 {
     EXPECT_EQ(
-        reference_convert<NetworkSample<float32_t>>(sample_),
+        referenceConvert<NetworkSample<float32_t>>(sample_),
         NetworkSample<float32_t>{detail::networkUnderlyingToNetworkCast<float32_t>(0x24b9fc3d)});
 }
 
@@ -230,17 +230,17 @@ protected:
 
 TEST_F(ConvertNetworkInt16, Int16)
 {
-    EXPECT_EQ(reference_convert<Sample<int16_t>>(network_), Sample<int16_t>{0x1234});
+    EXPECT_EQ(referenceConvert<Sample<int16_t>>(network_), Sample<int16_t>{0x1234});
 }
 
 TEST_F(ConvertNetworkInt16, Int24)
 {
-    EXPECT_EQ(reference_convert<Sample<int24_t>>(network_), Sample<int24_t>{0x123400});
+    EXPECT_EQ(referenceConvert<Sample<int24_t>>(network_), Sample<int24_t>{0x123400});
 }
 
 TEST_F(ConvertNetworkInt16, Int32)
 {
-    EXPECT_EQ(reference_convert<Sample<int32_t>>(network_), Sample<int32_t>{0x12340000});
+    EXPECT_EQ(referenceConvert<Sample<int32_t>>(network_), Sample<int32_t>{0x12340000});
 }
 
 TEST_F(ConvertNetworkInt16, Float32)
@@ -248,7 +248,7 @@ TEST_F(ConvertNetworkInt16, Float32)
     uint32_t output = 0x3e11a000;
     float32_t float_output;
     std::memcpy(&float_output, &output, sizeof(float32_t));
-    EXPECT_EQ(reference_convert<Sample<float32_t>>(network_), Sample<float32_t>{float_output});
+    EXPECT_EQ(referenceConvert<Sample<float32_t>>(network_), Sample<float32_t>{float_output});
 }
 
 // network int24
@@ -261,17 +261,17 @@ protected:
 
 TEST_F(ConvertNetworkInt24, Int16)
 {
-    EXPECT_EQ(reference_convert<Sample<int16_t>>(network_), Sample<int16_t>{0x1234});
+    EXPECT_EQ(referenceConvert<Sample<int16_t>>(network_), Sample<int16_t>{0x1234});
 }
 
 TEST_F(ConvertNetworkInt24, Int24)
 {
-    EXPECT_EQ(reference_convert<Sample<int24_t>>(network_), Sample<int24_t>{0x123456});
+    EXPECT_EQ(referenceConvert<Sample<int24_t>>(network_), Sample<int24_t>{0x123456});
 }
 
 TEST_F(ConvertNetworkInt24, Int32)
 {
-    EXPECT_EQ(reference_convert<Sample<int32_t>>(network_), Sample<int32_t>{0x12345600});
+    EXPECT_EQ(referenceConvert<Sample<int32_t>>(network_), Sample<int32_t>{0x12345600});
 }
 
 TEST_F(ConvertNetworkInt24, Float32)
@@ -279,7 +279,7 @@ TEST_F(ConvertNetworkInt24, Float32)
     uint32_t output = 0x3e11a2b0;
     float32_t float_output;
     std::memcpy(&float_output, &output, sizeof(float32_t));
-    EXPECT_EQ(reference_convert<Sample<float32_t>>(network_), Sample<float32_t>{float_output});
+    EXPECT_EQ(referenceConvert<Sample<float32_t>>(network_), Sample<float32_t>{float_output});
 }
 
 // network int32
@@ -292,17 +292,17 @@ protected:
 
 TEST_F(ConvertNetworkInt32, Int16)
 {
-    EXPECT_EQ(reference_convert<Sample<int16_t>>(network_), Sample<int16_t>{0x1234});
+    EXPECT_EQ(referenceConvert<Sample<int16_t>>(network_), Sample<int16_t>{0x1234});
 }
 
 TEST_F(ConvertNetworkInt32, Int24)
 {
-    EXPECT_EQ(reference_convert<Sample<int24_t>>(network_), Sample<int24_t>{0x123456});
+    EXPECT_EQ(referenceConvert<Sample<int24_t>>(network_), Sample<int24_t>{0x123456});
 }
 
 TEST_F(ConvertNetworkInt32, Int32)
 {
-    EXPECT_EQ(reference_convert<Sample<int32_t>>(network_), Sample<int32_t>{0x12345678});
+    EXPECT_EQ(referenceConvert<Sample<int32_t>>(network_), Sample<int32_t>{0x12345678});
 }
 
 TEST_F(ConvertNetworkInt32, Float32)
@@ -310,7 +310,7 @@ TEST_F(ConvertNetworkInt32, Float32)
     uint32_t output = 0x3e11a2b4;
     float32_t float_output;
     std::memcpy(&float_output, &output, sizeof(float32_t));
-    EXPECT_EQ(reference_convert<Sample<float32_t>>(network_), Sample<float32_t>{float_output});
+    EXPECT_EQ(referenceConvert<Sample<float32_t>>(network_), Sample<float32_t>{float_output});
 }
 
 // network float32
@@ -323,22 +323,22 @@ protected:
 
 TEST_F(ConvertNetworkFloat32, Int16)
 {
-    EXPECT_EQ(reference_convert<Sample<int16_t>>(network_), Sample<int16_t>{0x0fcc});
+    EXPECT_EQ(referenceConvert<Sample<int16_t>>(network_), Sample<int16_t>{0x0fcc});
 }
 
 TEST_F(ConvertNetworkFloat32, Int24)
 {
-    EXPECT_EQ(reference_convert<Sample<int24_t>>(network_), Sample<int24_t>{0x0fcb92});
+    EXPECT_EQ(referenceConvert<Sample<int24_t>>(network_), Sample<int24_t>{0x0fcb92});
 }
 
 TEST_F(ConvertNetworkFloat32, Int32)
 {
-    EXPECT_EQ(reference_convert<Sample<int32_t>>(network_), Sample<int32_t>{0x0fcb9240});
+    EXPECT_EQ(referenceConvert<Sample<int32_t>>(network_), Sample<int32_t>{0x0fcb9240});
 }
 
 TEST_F(ConvertNetworkFloat32, Float32)
 {
-    EXPECT_EQ(reference_convert<Sample<float32_t>>(network_), Sample<float32_t>{0.1234});
+    EXPECT_EQ(referenceConvert<Sample<float32_t>>(network_), Sample<float32_t>{0.1234});
 }
 
 // misc
@@ -346,7 +346,8 @@ TEST(Converter, Test)
 {
     using TestDitherGenerator = detail::NullDitherGenerator;
     TestDitherGenerator dither_generator;
-    auto converter = DefaultSampleConverter<Sample<int16_t>, Sample<float32_t>, TestDitherGenerator>{dither_generator};
+    auto converter =
+        detail::DefaultSampleConverter<Sample<int16_t>, Sample<float32_t>, TestDitherGenerator>{dither_generator};
     uint32_t output = 0x3e11a000;
     float32_t float_output;
     std::memcpy(&float_output, &output, sizeof(float32_t));
@@ -408,12 +409,12 @@ TYPED_TEST(ConvertFloat32Correct, Typical)
     for (float32_t f = 1.1; f > min; f = std::nextafter(f, 0.f))
     {
         auto input_sample = Sample<float32_t>{f};
-        EXPECT_EQ(reference_convert<OutputSample>(input_sample), convert(input_sample, ReferenceConverter{}));
+        EXPECT_EQ(referenceConvert<OutputSample>(input_sample), convert(input_sample, ReferenceConverter{}));
     }
     for (float32_t f = -1.1; f < -min; f = std::nextafter(f, 0.f))
     {
         auto input_sample = Sample<float32_t>{f};
-        EXPECT_EQ(reference_convert<OutputSample>(input_sample), convert(input_sample, ReferenceConverter{}));
+        EXPECT_EQ(referenceConvert<OutputSample>(input_sample), convert(input_sample, ReferenceConverter{}));
     }
 }
 
@@ -447,8 +448,8 @@ TYPED_TEST(ConvertFloat32Transparent, Typical)
     for (long long i = this->min(); i <= this->max(); ++i)
     {
         InputSample input_sample{i};
-        auto temp_float = reference_convert<Sample<float32_t>>(input_sample);
-        auto output_sample = reference_convert<InputSample>(temp_float);
+        auto temp_float = referenceConvert<Sample<float32_t>>(input_sample);
+        auto output_sample = referenceConvert<InputSample>(temp_float);
         EXPECT_EQ(output_sample, input_sample);
     }
 }
@@ -470,11 +471,11 @@ TYPED_TEST(ConvertFloatIntNoWrapping, ConvertFloatIntNoWrapping)
 
     for (float32_t f = 1.1; f > 0.9; f = std::nextafter(f, 0.f))
     {
-        EXPECT_GT(reference_convert<OutputSample>(Sample<float32_t>{f}), OutputSample{0});
+        EXPECT_GT(referenceConvert<OutputSample>(Sample<float32_t>{f}), OutputSample{0});
     }
     for (float32_t f = -1.1; f < -0.9; f = std::nextafter(f, 0.f))
     {
-        EXPECT_LT(reference_convert<OutputSample>(Sample<float32_t>{f}), OutputSample{0});
+        EXPECT_LT(referenceConvert<OutputSample>(Sample<float32_t>{f}), OutputSample{0});
     }
 }
 
@@ -500,9 +501,9 @@ TYPED_TEST(ConvertIntInputNegativeTransparent, IntInputConvert)
     {
         auto sample_value = static_cast<typename TestFixture::InputSampleType>(i);
         auto positive_input = InputSample(sample_value);
-        auto positive_output = reference_convert<OutputSample>(positive_input);
+        auto positive_output = referenceConvert<OutputSample>(positive_input);
         auto negative_input = InputSample(-sample_value);
-        auto negative_output = reference_convert<OutputSample>(negative_input);
+        auto negative_output = referenceConvert<OutputSample>(negative_input);
         if (negative_output.get() != OutputSampleTypeLimits::min)
         {
             EXPECT_EQ(positive_output.get(), -negative_output.get());
@@ -529,11 +530,11 @@ TYPED_TEST(ConvertFloatInputNegativeTransparent, FloatInputConvert)
     using OutputSampleTypeLimits = SampleTypeLimits<typename TestFixture::OutputSampleType>;
     for (std::int64_t i = 0; i < Int32SampleTypeLimits::max; ++i)
     {
-        auto sample_value = reference_convert<InputSample>(Sample<int32_t>(static_cast<int32_t>(i))).get();
+        auto sample_value = referenceConvert<InputSample>(Sample<int32_t>(static_cast<int32_t>(i))).get();
         auto positive_input = InputSample(sample_value);
-        auto positive_output = reference_convert<OutputSample>(positive_input);
+        auto positive_output = referenceConvert<OutputSample>(positive_input);
         auto negative_input = InputSample(-sample_value);
-        auto negative_output = reference_convert<OutputSample>(negative_input);
+        auto negative_output = referenceConvert<OutputSample>(negative_input);
         if (negative_output.get() != OutputSampleTypeLimits::min)
         {
             EXPECT_EQ(positive_output.get(), -negative_output.get());

@@ -16,11 +16,7 @@ add_subdirectory(third_party)
 
 set(RATL_INCLUDE_DIR include)
 set(RATL_HEADERS
-        ${RATL_INCLUDE_DIR}/ratl/detail/basic_sample_converter.hpp
-        ${RATL_INCLUDE_DIR}/ratl/detail/basic_sample_transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_base_traits.hpp
-        ${RATL_INCLUDE_DIR}/ratl/detail/batch_basic_sample_converter.hpp
-        ${RATL_INCLUDE_DIR}/ratl/detail/batch_basic_sample_transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_cast.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_creator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_dither_generator.hpp
@@ -46,9 +42,12 @@ set(RATL_HEADERS
         ${RATL_INCLUDE_DIR}/ratl/detail/rand.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/reference_sample_converter_impl.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/round.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/sample_converter.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_iterator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_span.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/sample_transformer.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/type_traits.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/types.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/xsimd.hpp
@@ -67,8 +66,6 @@ set(RATL_HEADERS
         ${RATL_INCLUDE_DIR}/ratl/noninterleaved_span.hpp
         ${RATL_INCLUDE_DIR}/ratl/ratl.hpp
         ${RATL_INCLUDE_DIR}/ratl/sample.hpp
-        ${RATL_INCLUDE_DIR}/ratl/sample_converter.hpp
-        ${RATL_INCLUDE_DIR}/ratl/sample_transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/sample_type_limits.hpp
         ${RATL_INCLUDE_DIR}/ratl/transform.hpp
         ${RATL_INCLUDE_DIR}/ratl/types.hpp

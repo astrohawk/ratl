@@ -38,11 +38,12 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputBatchConvert)
         {
             auto sample_value = static_cast<typename TestFixture::InputSampleType>(j);
             batch_input[j - i] = sample_value;
-            batch_refrence_output[j - i] = reference_convert<OutputSample>(InputSample(sample_value)).get();
+            batch_refrence_output[j - i] = referenceConvert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
         auto batch_convert_output = convert(
-            batch_input, ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
+            batch_input,
+            detail::ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
         for (std::size_t j = 0; j < detail::BatchSize; ++j)
         {
             auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
@@ -73,11 +74,12 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputNetworkOutputBatchConvert)
             batch_input[j - i] = sample_value;
             batch_refrence_output[j - i] =
                 detail::networkToNetworkUnderlyingCast<typename TestFixture::OutputSampleType>(
-                    reference_convert<OutputSample>(InputSample(sample_value)).get());
+                    referenceConvert<OutputSample>(InputSample(sample_value)).get());
         }
         TestDitherGenerator dither_generator;
         auto batch_convert_output = convert(
-            batch_input, ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
+            batch_input,
+            detail::ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
         for (std::size_t j = 0; j < detail::BatchSize; ++j)
         {
             auto refrence_output =
@@ -111,11 +113,12 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputNetworkInputBatchConvert)
             auto sample_value = detail::sampleToNetworkSample(static_cast<typename TestFixture::InputSampleType>(j));
             batch_input[j - i] =
                 detail::networkToNetworkUnderlyingCast<typename TestFixture::InputSampleType>(sample_value);
-            batch_refrence_output[j - i] = reference_convert<OutputSample>(InputSample(sample_value)).get();
+            batch_refrence_output[j - i] = referenceConvert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
         auto batch_convert_output = convert(
-            batch_input, ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
+            batch_input,
+            detail::ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
         for (std::size_t j = 0; j < detail::BatchSize; ++j)
         {
             auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
@@ -151,13 +154,14 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputConvert)
                                          static_cast<std::int64_t>(Int32SampleTypeLimits::max) + 1);
              ++j)
         {
-            auto sample_value = reference_convert<InputSample>(Sample<int32_t>(static_cast<int32_t>(j))).get();
+            auto sample_value = referenceConvert<InputSample>(Sample<int32_t>(static_cast<int32_t>(j))).get();
             batch_input[j - i] = sample_value;
-            batch_refrence_output[j - i] = reference_convert<OutputSample>(InputSample(sample_value)).get();
+            batch_refrence_output[j - i] = referenceConvert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
         auto batch_convert_output = convert(
-            batch_input, ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
+            batch_input,
+            detail::ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
         for (std::size_t j = 0; j < detail::BatchSize; ++j)
         {
             auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
@@ -184,15 +188,16 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputNetworkOutputConvert)
                                          static_cast<std::int64_t>(Int32SampleTypeLimits::max) + 1);
              ++j)
         {
-            auto sample_value = reference_convert<InputSample>(Sample<int32_t>(static_cast<int32_t>(j))).get();
+            auto sample_value = referenceConvert<InputSample>(Sample<int32_t>(static_cast<int32_t>(j))).get();
             batch_input[j - i] = sample_value;
             batch_refrence_output[j - i] =
                 detail::networkToNetworkUnderlyingCast<typename TestFixture::OutputSampleType>(
-                    reference_convert<OutputSample>(InputSample(sample_value)).get());
+                    referenceConvert<OutputSample>(InputSample(sample_value)).get());
         }
         TestDitherGenerator dither_generator;
         auto batch_convert_output = convert(
-            batch_input, ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
+            batch_input,
+            detail::ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
         for (std::size_t j = 0; j < detail::BatchSize; ++j)
         {
             auto refrence_output =
@@ -224,13 +229,14 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputNetworkInputConvert)
              ++j)
         {
             auto sample_value = detail::sampleToNetworkSample(
-                reference_convert<Sample<float32_t>>(Sample<int32_t>(static_cast<int32_t>(j))).get());
+                referenceConvert<Sample<float32_t>>(Sample<int32_t>(static_cast<int32_t>(j))).get());
             batch_input[j - i] = detail::networkToNetworkUnderlyingCast<float32_t>(sample_value);
-            batch_refrence_output[j - i] = reference_convert<OutputSample>(InputSample(sample_value)).get();
+            batch_refrence_output[j - i] = referenceConvert<OutputSample>(InputSample(sample_value)).get();
         }
         TestDitherGenerator dither_generator;
         auto batch_convert_output = convert(
-            batch_input, ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
+            batch_input,
+            detail::ReferenceSampleConverter<InputSample, OutputSample, TestDitherGenerator>{dither_generator});
         for (std::size_t j = 0; j < detail::BatchSize; ++j)
         {
             auto refrence_output = static_cast<typename TestFixture::OutputSampleType>(batch_refrence_output[j]);
