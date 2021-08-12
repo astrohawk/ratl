@@ -129,7 +129,7 @@ public:
         return data_ < other.data_;
     }
 
-    inline bool operator<=>(const NoninterleavedIterator& other) const noexcept = default;
+    inline auto operator<=>(const NoninterleavedIterator& other) const noexcept = default;
 
 #else
 

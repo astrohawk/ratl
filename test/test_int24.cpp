@@ -6,6 +6,12 @@ namespace ratl
 {
 namespace test
 {
+static_assert(sizeof(int24_t) == 3, "int24_t is not 3 bytes");
+static_assert(sizeof(int24_t[2]) == 6, "int24_t is not packed correctly");
+static_assert(std::is_trivial<int24_t>::value, "int24_t is not a trivial type");
+static_assert(std::is_trivially_copyable<int24_t>::value, "int24_t is not a trivially copyable type");
+static_assert(std::is_standard_layout<int24_t>::value, "int24_t is not a standard layout type");
+
 // Type tests
 
 TEST(ReturnTypes, Plus)

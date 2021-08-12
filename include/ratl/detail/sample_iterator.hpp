@@ -129,7 +129,7 @@ public:
         return data_ < other.data_;
     }
 
-    inline bool operator<=>(const SampleIterator& other) const noexcept = default;
+    inline auto operator<=>(const SampleIterator& other) const noexcept = default;
 
 #else
 
@@ -193,6 +193,10 @@ class SampleIterator<Tag, Sample, true>
     using size_type = detail::types::size_type;
 
 public:
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
+    using iterator_concept = std::contiguous_iterator_tag;
+    using element_type = sample;
+#endif
     using iterator_category = std::random_access_iterator_tag;
     using value_type = sample;
     using difference_type = detail::types::difference_type;
@@ -283,7 +287,7 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline bool operator<=>(const SampleIterator& other) const noexcept = default;
+    inline auto operator<=>(const SampleIterator& other) const noexcept = default;
 
 #else
 
