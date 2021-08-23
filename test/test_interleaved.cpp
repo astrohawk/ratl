@@ -683,19 +683,21 @@ protected:
     public:
         using super_type = ratl::Allocator<sample>;
 
+        using value_type = typename super_type::value_type;
         using size_type = typename super_type::size_type;
         using difference_type = typename super_type::difference_type;
+#if !defined(RATL_CPP_VERSION_HAS_CPP20)
         using pointer = typename super_type::pointer;
         using const_pointer = typename super_type::const_pointer;
         using reference = typename super_type::reference;
         using const_reference = typename super_type::const_reference;
-        using value_type = typename super_type::value_type;
+#endif
 
         using propagate_on_container_copy_assignment = std::false_type;
         using propagate_on_container_move_assignment = std::true_type;
         using propagate_on_container_swap = std::true_type;
 
-        Allocator() : n_{0}, p_{nullptr} {}
+        Allocator() : n_{0}, p_{} {}
 
         virtual ~Allocator()
         {
@@ -724,7 +726,7 @@ protected:
             return *this;
         }
 
-        virtual pointer allocate(size_type n)
+        virtual sample* allocate(size_type n)
         {
             EXPECT_EQ(n_, 0);
             EXPECT_EQ(p_, nullptr);
@@ -734,7 +736,7 @@ protected:
             return p_;
         }
 
-        virtual void deallocate(pointer p, size_type n)
+        virtual void deallocate(sample* p, size_type n)
         {
             EXPECT_EQ(p, p_);
             EXPECT_EQ(n, n_);
@@ -761,7 +763,7 @@ protected:
 
     private:
         size_type n_;
-        pointer p_;
+        sample* p_;
     };
 
     using Interleaved = ratl::BasicInterleaved<sample, Allocator>;

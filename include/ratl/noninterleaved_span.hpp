@@ -14,6 +14,7 @@
 #include <ratl/detail/types.hpp>
 #include <ratl/frame_span.hpp>
 #include <ratl/network_sample.hpp>
+#include <ratl/noninterleaved.hpp>
 #include <ratl/sample.hpp>
 
 namespace ratl
@@ -32,9 +33,9 @@ public:
     using sample = typename sample_traits::sample;
     using const_sample = typename sample_traits::const_sample;
     using sample_pointer = typename sample_traits::pointer;
-    using sample_const_pointer = typename sample_traits::const_pointer;
+    using const_sample_pointer = typename sample_traits::const_pointer;
     using sample_reference = typename sample_traits::reference;
-    using sample_const_reference = typename sample_traits::const_reference;
+    using const_sample_reference = typename sample_traits::const_reference;
 
     using channel_type = BasicChannelSpan<sample, true>;
     using const_channel_type = BasicChannelSpan<const_sample, true>;
@@ -58,44 +59,59 @@ public:
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 private:
-    sample_pointer data_ = nullptr;
-    size_type channels_ = 0;
-    size_type frames_ = 0;
+    sample_pointer start_;
+    size_type channels_;
+    size_type frames_;
 
 public:
-    BasicNoninterleavedSpan() noexcept = default;
+    BasicNoninterleavedSpan() noexcept : start_(), channels_(), frames_() {}
 
     BasicNoninterleavedSpan(sample_pointer data, size_type channels, size_type frames) noexcept :
-        data_(data), channels_(channels), frames_(frames)
+        start_(data), channels_(channels), frames_(frames)
     {
     }
 
     BasicNoninterleavedSpan(char_pointer data, size_type channels, size_type frames) noexcept :
-        data_(reinterpret_cast<sample_pointer>(data)), channels_(channels), frames_(frames)
+        start_(reinterpret_cast<sample_pointer>(data)), channels_(channels), frames_(frames)
     {
     }
 
     BasicNoninterleavedSpan(const BasicNoninterleavedSpan& other) noexcept :
-        data_(other.data_), channels_(other.channels_), frames_(other.frames_)
+        start_(other.data()), channels_(other.channels()), frames_(other.frames())
     {
     }
 
-    BasicNoninterleavedSpan& operator=(const BasicNoninterleavedSpan& other) noexcept
+    template<
+        class SampleArg,
+        class Allocator,
+        std::enable_if_t<std::is_same<SampleArg, std::remove_const_t<Sample>>::value, bool> = true>
+    BasicNoninterleavedSpan(BasicInterleaved<SampleArg, Allocator>& noninterleaved) noexcept :
+        start_(noninterleaved.data()), channels_(noninterleaved.channels()), frames_(noninterleaved.frames())
     {
-        BasicNoninterleavedSpan(other).swap(*this);
-        return *this;
     }
+
+    template<
+        class SampleArg,
+        class Allocator,
+        std::enable_if_t<std::is_same<typename detail::SampleTraits<SampleArg>::const_sample, Sample>::value, bool> =
+            true>
+    BasicNoninterleavedSpan(const BasicInterleaved<SampleArg, Allocator>& noninterleaved) noexcept :
+        start_(noninterleaved.data()), channels_(noninterleaved.channels()), frames_(noninterleaved.frames())
+    {
+    }
+
+    BasicNoninterleavedSpan& operator=(const BasicNoninterleavedSpan& other) noexcept = default;
 
     inline void swap(BasicNoninterleavedSpan& other) noexcept;
 
     inline sample_pointer data() noexcept
     {
-        return data_;
+        return start_;
     }
 
     inline const sample_pointer data() const noexcept
     {
-        return data_;
+        return start_;
     }
 
     inline size_type channels() const noexcept
@@ -110,42 +126,42 @@ public:
 
     inline size_type samples() const noexcept
     {
-        return channels_ * frames_;
+        return channels() * frames();
     }
 
     inline bool empty() const noexcept
     {
-        return (channels_ == 0) || (frames_ == 0);
+        return (channels() == 0) || (frames() == 0);
     }
 
     inline frame_type frame(size_type n)
     {
-        return frame_type(data_ + n, channels_, frames_);
+        return frame_type(start_ + n, channels(), frames());
     }
 
     inline const_frame_type frame(size_type n) const
     {
-        return const_frame_type(data_ + n, channels_, frames_);
+        return const_frame_type(start_ + n, channels(), frames());
     }
 
     inline channel_type channel(size_type n)
     {
-        return channel_type(data_ + (n * frames_), frames_);
+        return channel_type(start_ + (n * frames()), frames());
     }
 
     inline const_channel_type channel(size_type n) const
     {
-        return const_channel_type(data_ + (n * frames_), frames_);
+        return const_channel_type(start_ + (n * frames()), frames());
     }
 
     inline reference operator[](size_type n) noexcept
     {
-        return this->channel(n);
+        return channel(n);
     }
 
     inline const_reference operator[](size_type n) const noexcept
     {
-        return this->channel(n);
+        return channel(n);
     }
 
     inline reference at(size_type n);
@@ -154,43 +170,43 @@ public:
 
     inline reference front() noexcept
     {
-        return reference(data_, frames_);
+        return reference(start_, frames());
     }
 
     inline const_reference front() const noexcept
     {
-        return const_reference(data_, frames_);
+        return const_reference(start_, frames());
     }
 
     inline reference back() noexcept
     {
-        return reference(data_ + ((channels_ - 1) * frames_), frames_);
+        return reference(start_ + ((channels() - 1) * frames()), frames());
     }
 
     inline const_reference back() const noexcept
     {
-        return reference(data_ + ((channels_ - 1) * frames_), frames_);
+        return reference(start_ + ((channels() - 1) * frames()), frames());
     }
 
     // iterators
     inline iterator begin() noexcept
     {
-        return iterator(data_, frames_);
+        return iterator(start_, frames());
     }
 
     inline const_iterator begin() const noexcept
     {
-        return const_iterator(data_, frames_);
+        return const_iterator(start_, frames());
     }
 
     inline iterator end() noexcept
     {
-        return iterator(data_ + (channels_ * frames_), frames_);
+        return iterator(start_ + (channels() * frames()), frames());
     }
 
     inline const_iterator end() const noexcept
     {
-        return const_iterator(data_ + (channels_ * frames_), frames_);
+        return const_iterator(start_ + (channels() * frames()), frames());
     }
 
     // reverse iterators
@@ -234,37 +250,12 @@ public:
     {
         return rend();
     }
-
-    friend bool operator==<>(const BasicNoninterleavedSpan& a, const BasicNoninterleavedSpan& b) noexcept;
-
-    friend inline bool operator!=(const BasicNoninterleavedSpan& a, const BasicNoninterleavedSpan& b) noexcept
-    {
-        return !(a == b);
-    }
-
-protected:
-    BasicNoninterleavedSpan(size_type channels, size_type frames) noexcept :
-        data_(nullptr), channels_(channels), frames_(frames)
-    {
-    }
-
-    inline void set_pointer(sample_pointer begin) noexcept
-    {
-        data_ = begin;
-    }
-
-    inline void clear_contents() noexcept
-    {
-        data_ = nullptr;
-        channels_ = 0;
-        frames_ = 0;
-    }
 };
 
 template<class Sample>
 inline void BasicNoninterleavedSpan<Sample>::swap(BasicNoninterleavedSpan& other) noexcept
 {
-    std::swap(data_, other.data_);
+    std::swap(start_, other.start_);
     std::swap(channels_, other.channels_);
     std::swap(frames_, other.frames_);
 }
@@ -272,38 +263,34 @@ inline void BasicNoninterleavedSpan<Sample>::swap(BasicNoninterleavedSpan& other
 template<class Sample>
 inline typename BasicNoninterleavedSpan<Sample>::reference BasicNoninterleavedSpan<Sample>::at(size_type n)
 {
-    if (n >= channels_)
+    if (n >= channels())
     {
         throw std::out_of_range("Noninterleaved");
     }
-    return this->channel(n);
+    return (*this)[n];
 }
 
 template<class Sample>
 inline typename BasicNoninterleavedSpan<Sample>::const_reference BasicNoninterleavedSpan<Sample>::at(size_type n) const
 {
-    if (n >= channels_)
+    if (n >= channels())
     {
         throw std::out_of_range("Noninterleaved");
     }
-    return this->channel(n);
+    return (*this)[n];
 }
 
 template<class Sample>
 inline bool operator==(const BasicNoninterleavedSpan<Sample>& a, const BasicNoninterleavedSpan<Sample>& b) noexcept
 {
-    if ((a.channels_ == b.channels_) && (a.frames_ == b.frames_))
-    {
-        if (a.data_ == b.data_)
-        {
-            return true;
-        }
-        if (std::equal(a.data_, a.data_ + a.samples(), b.data_))
-        {
-            return true;
-        }
-    }
-    return false;
+    return (a.channels() == b.channels()) && (a.frames() == b.frames()) &&
+           std::equal(a.data(), a.data() + a.samples(), b.data());
+}
+
+template<class Sample>
+inline bool operator!=(const BasicNoninterleavedSpan<Sample>& a, const BasicNoninterleavedSpan<Sample>& b) noexcept
+{
+    return !(a == b);
 }
 
 template<class SampleType>
