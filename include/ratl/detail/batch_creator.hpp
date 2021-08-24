@@ -37,40 +37,39 @@ private:
     }
 
     template<typename Iterator, std::size_t... I>
-    static inline batch_type load_unaligned_impl(Iterator input, std::index_sequence<I...>) noexcept
+    static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
     {
         return batch_type{convert_input(input[I].get())...};
     }
 
     template<std::size_t I, typename Iterator>
-    static inline void store_unaligned_element(const batch_type& input, Iterator output) noexcept
+    static inline void store_element(const batch_type& input, Iterator output) noexcept
     {
         output[I].get() = convert_output(input[I]);
     }
 
     template<typename Iterator, std::size_t... I>
-    static inline void store_unaligned_impl(
-        const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
+    static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
     {
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
-        (store_unaligned_element<I>(input, output), ...);
+        (store_element<I>(input, output), ...);
 #    else
-        int fake[] = {(store_unaligned_element<I>(input, output), 0)...};
+        int fake[] = {(store_element<I>(input, output), 0)...};
         (void)fake;
 #    endif
     }
 
 public:
     template<typename Iterator>
-    static inline batch_type load_unaligned(Iterator input) noexcept
+    static inline batch_type load(Iterator input) noexcept
     {
-        return load_unaligned_impl(input, std::make_index_sequence<BatchSize>{});
+        return load_impl(input, std::make_index_sequence<BatchSize>{});
     }
 
     template<typename Iterator>
-    static inline void store_unaligned(const batch_type& input, Iterator output) noexcept
+    static inline void store(const batch_type& input, Iterator output) noexcept
     {
-        store_unaligned_impl(input, output, std::make_index_sequence<BatchSize>{});
+        store_impl(input, output, std::make_index_sequence<BatchSize>{});
     }
 };
 
@@ -91,40 +90,39 @@ private:
     }
 
     template<typename Iterator, std::size_t... I>
-    static inline batch_type load_unaligned_impl(Iterator input, std::index_sequence<I...>) noexcept
+    static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
     {
         return batch_type{convert_input(networkToNetworkUnderlyingCast<SampleType>(input[I].get()))...};
     }
 
     template<std::size_t I, typename Iterator>
-    static inline void store_unaligned_element(const batch_type& input, Iterator output) noexcept
+    static inline void store_element(const batch_type& input, Iterator output) noexcept
     {
         output[I].get() = networkUnderlyingToNetworkCast<SampleType>(convert_output(input[I]));
     }
 
     template<typename Iterator, std::size_t... I>
-    static inline void store_unaligned_impl(
-        const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
+    static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
     {
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
-        (store_unaligned_element<I>(input, output), ...);
+        (store_element<I>(input, output), ...);
 #    else
-        int fake[] = {(store_unaligned_element<I>(input, output), 0)...};
+        int fake[] = {(store_element<I>(input, output), 0)...};
         (void)fake;
 #    endif
     }
 
 public:
     template<typename Iterator>
-    static inline batch_type load_unaligned(Iterator input) noexcept
+    static inline batch_type load(Iterator input) noexcept
     {
-        return load_unaligned_impl(input, std::make_index_sequence<BatchSize>{});
+        return load_impl(input, std::make_index_sequence<BatchSize>{});
     }
 
     template<typename Iterator>
-    static inline void store_unaligned(const batch_type& input, Iterator output) noexcept
+    static inline void store(const batch_type& input, Iterator output) noexcept
     {
-        store_unaligned_impl(input, output, std::make_index_sequence<BatchSize>{});
+        store_impl(input, output, std::make_index_sequence<BatchSize>{});
     }
 };
 
@@ -133,7 +131,7 @@ struct BatchCreator : public BaseBatchCreator<Sample>
 {
 };
 
-// The load_unaligned and store_unaligned overloads for the specific sample types technically rely on undefined
+// The load and store overloads for the specific sample types technically rely on undefined
 // behaviour when performing the reinterpret_cast but this is a price we are currently willing to pay in order to get
 // the corresponding performance boost
 
@@ -144,20 +142,20 @@ struct BatchCreator<Sample<SampleType>, typename std::enable_if<HasBatchType_v<S
     using base = typename BatchCreator::BaseBatchCreator;
     using batch_type = typename base::batch_type;
 
-    using base::load_unaligned;
-    using base::store_unaligned;
+    using base::load;
+    using base::store;
 
-    static inline batch_type load_unaligned(Sample<SampleType>* input) noexcept
+    static inline batch_type load(Sample<SampleType>* input) noexcept
     {
         return batch_type(reinterpret_cast<SampleType*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline batch_type load_unaligned(const Sample<SampleType>* input) noexcept
+    static inline batch_type load(const Sample<SampleType>* input) noexcept
     {
         return batch_type(reinterpret_cast<const SampleType*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline void store_unaligned(const batch_type& input, Sample<SampleType>* output) noexcept
+    static inline void store(const batch_type& input, Sample<SampleType>* output) noexcept
     {
         input.store_unaligned(reinterpret_cast<SampleType*>(output));
     }
@@ -172,22 +170,22 @@ struct BatchCreator<
     using base = typename BatchCreator::BaseBatchCreator;
     using batch_type = typename base::batch_type;
 
-    using base::load_unaligned;
-    using base::store_unaligned;
+    using base::load;
+    using base::store;
 
-    static inline batch_type load_unaligned(NetworkSample<SampleType>* input) noexcept
+    static inline batch_type load(NetworkSample<SampleType>* input) noexcept
     {
         return batch_type(
             reinterpret_cast<NetworkSampleValueUnderlyingType_t<SampleType>*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline batch_type load_unaligned(const NetworkSample<SampleType>* input) noexcept
+    static inline batch_type load(const NetworkSample<SampleType>* input) noexcept
     {
         return batch_type(
             reinterpret_cast<const NetworkSampleValueUnderlyingType_t<SampleType>*>(input), xsimd::unaligned_mode{});
     }
 
-    static inline void store_unaligned(const batch_type& input, NetworkSample<SampleType>* output) noexcept
+    static inline void store(const batch_type& input, NetworkSample<SampleType>* output) noexcept
     {
         input.store_unaligned(reinterpret_cast<NetworkSampleValueUnderlyingType_t<SampleType>*>(output));
     }

@@ -46,7 +46,6 @@ set(RATL_HEADERS
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_iterator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_span.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_traits.hpp
-        ${RATL_INCLUDE_DIR}/ratl/detail/sample_transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/type_traits.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/types.hpp
