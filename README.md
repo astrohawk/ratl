@@ -23,8 +23,8 @@ std::size_t channels = 4;
 std::size_t frames = 32;
 ratl::interleaved<ratl::float32_t> input = generate_tone(channels, frames);
 ratl::network_interleaved<ratl::int16_t> output(channels, frames);
-ratl::DitherGenerator DitherGenerator;
-ratl::transform(input.begin(), input.end(), output.begin(), DitherGenerator);
+ratl::dither_generator dither_gen;
+ratl::transform(input.begin(), input.end(), output.begin(), dither_gen);
 ```
 
 Converting a 4 channel, 32 frame pre-allocated interleaved buffer of network-order 24-bit integers to a non-interleaved
