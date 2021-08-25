@@ -69,35 +69,7 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline bool operator==(const sample& other) const noexcept
-    {
-        return sample_ == other.sample_;
-    }
-
-    inline bool operator!=(const sample& other) const noexcept
-    {
-        return sample_ != other.sample_;
-    }
-
-    inline bool operator<(const sample& other) const noexcept
-    {
-        return sample_ < other.sample_;
-    }
-
-    inline bool operator<=(const sample& other) const noexcept
-    {
-        return sample_ <= other.sample_;
-    }
-
-    inline bool operator>(const sample& other) const noexcept
-    {
-        return sample_ > other.sample_;
-    }
-
-    inline bool operator>=(const sample& other) const noexcept
-    {
-        return sample_ >= other.sample_;
-    }
+    inline constexpr auto operator<=>(const sample& other) const noexcept = default;
 
 #else
 

@@ -98,18 +98,23 @@ struct network_sample_value_type
     static_assert(is_valid_sample_value_type_v<SampleValueType>, "sample_type is not a valid sample type");
 
     // opaque type
-    class type final
+    struct type final
     {
-    public:
-        constexpr bool operator==(const type& other) const noexcept
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+        inline constexpr bool operator==(const type& other) const noexcept = default;
+
+        inline constexpr bool operator!=(const type& other) const noexcept = default;
+#else
+        friend inline constexpr bool operator==(const type& a, const type& b) noexcept
         {
-            return storage_ == other.storage_;
+            return a.storage_ == b.storage_;
         }
 
-        constexpr bool operator!=(const type& other) const noexcept
+        friend inline constexpr bool operator!=(const type& a, const type& b) noexcept
         {
-            return storage_ != other.storage_;
+            return a.storage_ != b.storage_;
         }
+#endif
 
         network_sample_value_underlying_type_t<SampleValueType> storage_;
     };
