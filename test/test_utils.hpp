@@ -1,6 +1,18 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-#include <gtest/gtest.h>
+#ifndef _ratl_test_utils_
+#define _ratl_test_utils_
+
+// ratl includes
 #include <ratl/ratl.hpp>
+
+// other includes
+#include <gtest/gtest.h>
 
 #define TEST_RATL_TYPICAL_CHANNELS 32
 #define TEST_RATL_TYPICAL_FRAMES 480
@@ -189,3 +201,5 @@ using MoveNoninterleavedBase = MoveBase<ratl::noninterleaved, SampleValueType>;
 
 } // namespace test
 } // namespace ratl
+
+#endif

@@ -1,7 +1,14 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_intrin_
 #define _ratl_detail_intrin_
 
-// lib-aud-cpp includes
+// ratl includes
 #include <ratl/detail/config.hpp>
 
 #if defined(RATL_CPP_ARCH_X86) || defined(RATL_CPP_ARCH_X86_64)

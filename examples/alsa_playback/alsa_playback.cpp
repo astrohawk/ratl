@@ -1,16 +1,11 @@
-/*
- * Simple sound playback using ALSA API and libasound.
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
  *
- * Compile:
- * $ cc -o play sound_playback.c -lasound
- *
- * Usage:
- * $ ./play <sample_rate> <channels> <seconds> < <file>
- *
- * Examples:
- * $ ./play 44100 2 5 < /dev/urandom
- * $ ./play 22050 1 8 < /path/to/file.wav
- *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/**
  * Copyright (C) 2009 Alessandro Ghedini <al3xbio@gmail.com>
  * --------------------------------------------------------------
  * "THE BEER-WARE LICENSE" (Revision 42):
@@ -21,9 +16,12 @@
  * --------------------------------------------------------------
  */
 
+// ratl includes
+#include <ratl/ratl.hpp>
+
+// other includes
 #include <alsa/asoundlib.h>
 #include <cstdio>
-#include <ratl/ratl.hpp>
 #include <string>
 
 #define PCM_DEVICE "default"

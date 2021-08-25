@@ -1,11 +1,18 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_types_
 #define _ratl_types_
 
-#include <ratl/detail/config.hpp>
+// ratl includes
 #include <ratl/int24.hpp>
 #include <ratl/uint24.hpp>
 
-// C++ Standard Library includes
+// other includes
 #include <cstdint>
 
 namespace ratl

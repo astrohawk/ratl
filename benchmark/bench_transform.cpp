@@ -1,13 +1,23 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+// ratl includes
+#include <ratl/ratl.hpp>
+
+// other includes
 #include <benchmark/benchmark.h>
 #include <chrono>
 #include <random>
-#include <ratl/ratl.hpp>
 #include <thread>
 
 namespace ratl
 {
 template<class InputSampleType>
-    basic_interleaved<InputSampleType> generateRandomInterleaved(std::size_t num_channels, std::size_t num_frames)
+basic_interleaved<InputSampleType> generateRandomInterleaved(std::size_t num_channels, std::size_t num_frames)
 {
     std::random_device random_device;
     std::default_random_engine random_engine(random_device());

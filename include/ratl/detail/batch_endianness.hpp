@@ -1,14 +1,21 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_batch_endianness_
 #define _ratl_detail_batch_endianness_
-
-// C++ Standard Library includes
-#include <type_traits>
 
 // ratl includes
 #include <ratl/detail/batch_cast.hpp>
 #include <ratl/detail/batch_sample_fix.hpp>
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
+
+// other includes
+#include <type_traits>
 
 #if defined(RATL_HAS_XSIMD)
 
@@ -25,7 +32,7 @@ template<>
 struct batch_reverse_endianness_impl<uint16_t>
 {
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
-    static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 4> reverse(const xsimd::batch<std::uint32_t, 4>& input) noexcept
     {
         static const __m128i mask = _mm_set_epi8(-1, -1, 12, 13, -1, -1, 8, 9, -1, -1, 4, 5, -1, -1, 0, 1);
         return _mm_shuffle_epi8(input, mask);
@@ -33,7 +40,7 @@ struct batch_reverse_endianness_impl<uint16_t>
 #    endif
 
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
-    static inline xsimd::batch<uint16_t, 8> reverse(const xsimd::batch<uint16_t, 8>& input) noexcept
+    static inline xsimd::batch<std::uint16_t, 8> reverse(const xsimd::batch<std::uint16_t, 8>& input) noexcept
     {
         static const __m128i mask = _mm_set_epi8(14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1);
         return _mm_shuffle_epi8(input, mask);
@@ -41,7 +48,7 @@ struct batch_reverse_endianness_impl<uint16_t>
 #    endif
 
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-    static inline xsimd::batch<uint16_t, 16> reverse(const xsimd::batch<uint16_t, 16>& input) noexcept
+    static inline xsimd::batch<std::uint16_t, 16> reverse(const xsimd::batch<std::uint16_t, 16>& input) noexcept
     {
         // clang-format off
         static const __m256i mask = _mm256_set_epi8(
@@ -53,10 +60,10 @@ struct batch_reverse_endianness_impl<uint16_t>
 #    endif
 
 #    if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-    static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 4> reverse(const xsimd::batch<std::uint32_t, 4>& input) noexcept
     {
-        return xsimd::bitwise_cast<xsimd::batch<uint32_t, 4>>(
-            xsimd::batch<uint8_t, 16>(vrev16q_u8(xsimd::bitwise_cast<xsimd::batch<uint8_t, 16>>(input))));
+        return xsimd::bitwise_cast<xsimd::batch<std::uint32_t, 4>>(
+            xsimd::batch<std::uint8_t, 16>(vrev16q_u8(xsimd::bitwise_cast<xsimd::batch<std::uint8_t, 16>>(input))));
     }
 #    endif
 };
@@ -65,7 +72,7 @@ template<>
 struct batch_reverse_endianness_impl<uint24_t>
 {
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
-    static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 4> reverse(const xsimd::batch<std::uint32_t, 4>& input) noexcept
     {
         static const __m128i mask = _mm_set_epi8(-1, 12, 13, 14, -1, 8, 9, 10, -1, 4, 5, 6, -1, 0, 1, 2);
         return _mm_shuffle_epi8(input, mask);
@@ -73,7 +80,7 @@ struct batch_reverse_endianness_impl<uint24_t>
 #    endif
 
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-    static inline xsimd::batch<uint32_t, 8> reverse(const xsimd::batch<uint32_t, 8>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 8> reverse(const xsimd::batch<std::uint32_t, 8>& input) noexcept
     {
         // clang-format off
         static const __m256i mask = _mm256_set_epi8(
@@ -85,7 +92,7 @@ struct batch_reverse_endianness_impl<uint24_t>
 #    endif
 
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION && defined(XSIMD_AVX512DQ_AVAILABLE)
-    static inline xsimd::batch<uint32_t, 16> reverse(const xsimd::batch<uint32_t, 16>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 16> reverse(const xsimd::batch<std::uint32_t, 16>& input) noexcept
     {
         // clang-format off
         static const __m512i mask = _mm512_set_epi8(
@@ -99,10 +106,10 @@ struct batch_reverse_endianness_impl<uint24_t>
 #    endif
 
 #    if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-    static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 4> reverse(const xsimd::batch<std::uint32_t, 4>& input) noexcept
     {
-        return xsimd::bitwise_cast<xsimd::batch<uint32_t, 4>>(
-            xsimd::batch<uint8_t, 16>(vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<uint8_t, 16>>(input << 8))));
+        return xsimd::bitwise_cast<xsimd::batch<std::uint32_t, 4>>(xsimd::batch<std::uint8_t, 16>(
+            vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<std::uint8_t, 16>>(input << 8))));
     }
 #    endif
 };
@@ -111,7 +118,7 @@ template<>
 struct batch_reverse_endianness_impl<uint32_t>
 {
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
-    static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 4> reverse(const xsimd::batch<std::uint32_t, 4>& input) noexcept
     {
         static const __m128i mask = _mm_set_epi8(12, 13, 14, 15, 8, 9, 10, 11, 4, 5, 6, 7, 0, 1, 2, 3);
         return _mm_shuffle_epi8(input, mask);
@@ -119,7 +126,7 @@ struct batch_reverse_endianness_impl<uint32_t>
 #    endif
 
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX2_VERSION
-    static inline xsimd::batch<uint32_t, 8> reverse(const xsimd::batch<uint32_t, 8>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 8> reverse(const xsimd::batch<std::uint32_t, 8>& input) noexcept
     {
         // clang-format off
         static const __m256i mask = _mm256_set_epi8(
@@ -131,7 +138,7 @@ struct batch_reverse_endianness_impl<uint32_t>
 #    endif
 
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_AVX512_VERSION && defined(XSIMD_AVX512DQ_AVAILABLE)
-    static inline xsimd::batch<uint32_t, 16> reverse(const xsimd::batch<uint32_t, 16>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 16> reverse(const xsimd::batch<std::uint32_t, 16>& input) noexcept
     {
         // clang-format off
         static const __m512i mask = _mm512_set_epi8(
@@ -145,10 +152,10 @@ struct batch_reverse_endianness_impl<uint32_t>
 #    endif
 
 #    if XSIMD_ARM_INSTR_SET >= XSIMD_ARM7_NEON_VERSION
-    static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
+    static inline xsimd::batch<std::uint32_t, 4> reverse(const xsimd::batch<std::uint32_t, 4>& input) noexcept
     {
-        return xsimd::bitwise_cast<xsimd::batch<uint32_t, 4>>(
-            xsimd::batch<uint8_t, 16>(vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<uint8_t, 16>>(input))));
+        return xsimd::bitwise_cast<xsimd::batch<std::uint32_t, 4>>(
+            xsimd::batch<std::uint8_t, 16>(vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<std::uint8_t, 16>>(input))));
     }
 #    endif
 };

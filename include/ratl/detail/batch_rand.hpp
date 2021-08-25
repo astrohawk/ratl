@@ -1,13 +1,20 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_batch_rand_
 #define _ratl_detail_batch_rand_
-
-// C++ Standard Library includes
-#include <cstdint>
 
 // ratl includes
 #include <ratl/detail/batch_value_traits.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/rand.hpp>
+
+// other includes
+#include <cstdint>
 
 #if defined(RATL_HAS_XSIMD)
 
@@ -17,7 +24,7 @@ namespace detail
 {
 class batch_linear_congruential_generator
 {
-    using batch_type = xsimd::batch<uint32_t, batch_size>;
+    using batch_type = xsimd::batch<std::uint32_t, batch_size>;
 
 public:
     explicit batch_linear_congruential_generator(uint32_t seed) noexcept :

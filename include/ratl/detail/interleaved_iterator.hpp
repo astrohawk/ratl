@@ -1,14 +1,21 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_interleaved_iterator_
 #define _ratl_detail_interleaved_iterator_
-
-// C++ Standard Library includes
-#include <type_traits>
 
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/operator_arrow_proxy.hpp>
 #include <ratl/detail/sample_traits.hpp>
 #include <ratl/frame_span.hpp>
+
+// other includes
+#include <type_traits>
 
 namespace ratl
 {

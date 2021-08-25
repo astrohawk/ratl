@@ -1,10 +1,12 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_fast_sample_converter_impl_
 #define _ratl_detail_fast_sample_converter_impl_
-
-// C++ Standard Library includes
-#include <cfenv>
-#include <cmath>
-#include <type_traits>
 
 // ratl includes
 #include <ratl/detail/config.hpp>
@@ -14,6 +16,11 @@
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
 #include <ratl/sample_limits.hpp>
+
+// other includes
+#include <cfenv>
+#include <cmath>
+#include <type_traits>
 
 namespace ratl
 {

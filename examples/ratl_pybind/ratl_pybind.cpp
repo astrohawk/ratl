@@ -1,7 +1,16 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
+// ratl includes
+#include <ratl/ratl.hpp>
+
+// other includes
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <ratl/ratl.hpp>
 
 namespace py = pybind11;
 

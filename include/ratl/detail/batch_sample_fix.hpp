@@ -1,7 +1,14 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_batch_sample_fix_
 #define _ratl_batch_sample_fix_
 
-// C++ Standard Library includes
+// other includes
 #include <climits>
 #include <type_traits>
 

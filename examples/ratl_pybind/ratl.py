@@ -1,7 +1,6 @@
-import sys
-
 import matplotlib.pyplot as plt
 import numpy
+import sys
 
 sys.path.append(sys.argv[1])
 import ratl_pybind

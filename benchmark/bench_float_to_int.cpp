@@ -1,6 +1,16 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+// ratl includes
+#include <ratl/ratl.hpp>
+
+// other includes
 #include <benchmark/benchmark.h>
 #include <random>
-#include <ratl/ratl.hpp>
 
 #if (defined(RATL_CPP_ARCH_X86) || defined(RATL_CPP_ARCH_X86_64)) && defined(__SSE__)
 #    include <ratl/detail/intrin.hpp>
@@ -53,11 +63,11 @@ static void benchFloatToInt(benchmark::State& state)
             output.begin(),
             [](float32_t sample)
             {
-                if (RATL_UNLIKELY (sample >= sample_limits<float32_t>::max))
+                if (RATL_UNLIKELY(sample >= sample_limits<float32_t>::max))
                 {
                     return sample_limits<int32_t>::max;
                 }
-                if (RATL_UNLIKELY (sample < sample_limits<float32_t>::min))
+                if (RATL_UNLIKELY(sample < sample_limits<float32_t>::min))
                 {
                     return sample_limits<int32_t>::min;
                 }

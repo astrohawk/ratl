@@ -1,6 +1,14 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
+// ratl test includes
 #include "test_utils.hpp"
 
+// other includes
 #include <cstring>
 
 namespace ratl
@@ -379,8 +387,8 @@ protected:
 
     struct reference_converter
     {
-        const float32_t sample_abs_max_ = static_cast<float32_t>(std::max(
-            std::abs(sample_limits<OuputSampleType>::max), std::abs(sample_limits<OuputSampleType>::min)));
+        const float32_t sample_abs_max_ = static_cast<float32_t>(
+            std::max(std::abs(sample_limits<OuputSampleType>::max), std::abs(sample_limits<OuputSampleType>::min)));
 
         output_sample operator()(sample<float32_t> input) const noexcept
         {

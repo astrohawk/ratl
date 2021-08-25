@@ -1,7 +1,14 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_batch_value_traits_
 #define _ratl_detail_batch_value_traits_
 
-// C++ Standard Library includes
+// other includes
 #include <type_traits>
 
 // ratl includes
@@ -44,13 +51,13 @@ struct batch_sample_value_type<SampleValueType, typename std::enable_if<has_batc
 template<class SampleValueType>
 struct batch_sample_value_type<SampleValueType, typename std::enable_if<!has_batch_type_v<SampleValueType>>::type>
 {
-    using type = xsimd::batch<int32_t, batch_size>;
+    using type = xsimd::batch<std::int32_t, batch_size>;
 };
 
 template<>
 struct batch_sample_value_type<float32_t>
 {
-    using type = xsimd::batch<float32_t, batch_size>;
+    using type = xsimd::batch<float, batch_size>;
 };
 
 template<class SampleValueType>
@@ -74,7 +81,7 @@ struct batch_network_sample_value_type<
     SampleValueType,
     typename std::enable_if<!has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>::type>
 {
-    using type = xsimd::batch<uint32_t, batch_size>;
+    using type = xsimd::batch<std::uint32_t, batch_size>;
 };
 
 template<class SampleValueType>

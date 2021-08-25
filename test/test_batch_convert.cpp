@@ -1,7 +1,15 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-#include "test_utils.hpp"
-
+// ratl includes
 #include <ratl/detail/batch_reference_sample_converter_impl.hpp>
+
+// ratl test includes
+#include "test_utils.hpp"
 
 #if defined(RATL_HAS_XSIMD)
 

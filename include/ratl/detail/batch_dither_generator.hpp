@@ -1,9 +1,12 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_batch_dither_generator_
 #define _ratl_detail_batch_dither_generator_
-
-// C++ Standard Library includes
-#include <cstddef>
-#include <cstdint>
 
 // ratl includes
 #include <ratl/detail/batch_rand.hpp>
@@ -11,6 +14,10 @@
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/convert_traits.hpp>
 #include <ratl/detail/dither_generator.hpp>
+
+// other includes
+#include <cstddef>
+#include <cstdint>
 
 namespace ratl
 {

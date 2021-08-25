@@ -1,11 +1,18 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_rand_
 #define _ratl_detail_rand_
 
-// C++ Standard Library includes
-#include <cstdint>
-
 // ratl includes
 #include <ratl/detail/config.hpp>
+
+// other includes
+#include <cstdint>
 
 namespace ratl
 {

@@ -1,15 +1,22 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_detail_cast_
 #define _ratl_detail_cast_
 
-// C++ Standard Library includes
+// ratl includes
+#include <ratl/detail/sample_value_traits.hpp>
+
+// other includes
 #include <cstring>
 #include <type_traits>
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 #    include <bit>
 #endif
-
-// ratl includes
-#include <ratl/detail/sample_value_traits.hpp>
 
 namespace ratl
 {

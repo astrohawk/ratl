@@ -1,6 +1,15 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-#include <gtest/gtest.h>
+// ratl includes
 #include <ratl/ratl.hpp>
+
+// other includes
+#include <gtest/gtest.h>
 
 namespace ratl
 {

@@ -1,6 +1,16 @@
-#include <benchmark/benchmark.h>
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+// ratl includes
 #include <ratl/detail/batch_rand.hpp>
 #include <ratl/detail/rand.hpp>
+
+// other includes
+#include <benchmark/benchmark.h>
 
 template<class Generator>
 void benchPrng(benchmark::State& state)

@@ -1,19 +1,26 @@
-#ifndef _ratl_sample_span_
-#define _ratl_sample_span_
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
 
-// C++ Standard Library includes
-#include <algorithm>
-#include <cassert>
-#include <iterator>
-#include <memory>
-#include <stdexcept>
-#include <type_traits>
+#ifndef _ratl_detail_sample_span_
+#define _ratl_detail_sample_span_
 
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/frame_iterator.hpp>
 #include <ratl/detail/sample_traits.hpp>
 #include <ratl/sample.hpp>
+
+// other includes
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <memory>
+#include <stdexcept>
+#include <type_traits>
 
 namespace ratl
 {
@@ -372,4 +379,4 @@ inline void sample_span<SampleType, true, Iterator>::swap(sample_span& other) no
 
 } // namespace ratl
 
-#endif // _ratl_sample_span_
+#endif // _ratl_detail_sample_span_

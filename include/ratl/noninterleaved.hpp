@@ -1,10 +1,12 @@
+/**
+ * Copyright (c) 2018-2021 Hamish Cook
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 #ifndef _ratl_noninterleaved_
 #define _ratl_noninterleaved_
-
-// C++ Standard Library includes
-#include <iterator>
-#include <memory>
-#include <type_traits>
 
 // ratl includes
 #include <ratl/allocator.hpp>
@@ -16,6 +18,11 @@
 #include <ratl/frame_span.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
+
+// other includes
+#include <iterator>
+#include <memory>
+#include <type_traits>
 
 namespace ratl
 {
