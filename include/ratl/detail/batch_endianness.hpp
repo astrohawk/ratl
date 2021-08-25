@@ -16,13 +16,13 @@ namespace ratl
 {
 namespace detail
 {
-// BatchReverseEndiannessImpl
+// batch_reverse_endianness_impl
 
 template<class NetworkSampleValueUnderlyingType>
-struct BatchReverseEndiannessImpl;
+struct batch_reverse_endianness_impl;
 
 template<>
-struct BatchReverseEndiannessImpl<uint16_t>
+struct batch_reverse_endianness_impl<uint16_t>
 {
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
     static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
@@ -62,7 +62,7 @@ struct BatchReverseEndiannessImpl<uint16_t>
 };
 
 template<>
-struct BatchReverseEndiannessImpl<uint24_t>
+struct batch_reverse_endianness_impl<uint24_t>
 {
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
     static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
@@ -108,7 +108,7 @@ struct BatchReverseEndiannessImpl<uint24_t>
 };
 
 template<>
-struct BatchReverseEndiannessImpl<uint32_t>
+struct batch_reverse_endianness_impl<uint32_t>
 {
 #    if XSIMD_X86_INSTR_SET >= XSIMD_X86_SSE3_VERSION
     static inline xsimd::batch<uint32_t, 4> reverse(const xsimd::batch<uint32_t, 4>& input) noexcept
@@ -153,56 +153,56 @@ struct BatchReverseEndiannessImpl<uint32_t>
 #    endif
 };
 
-// batchReverseEndianness
+// batch_reverse_endianness
 
 template<class NetworkSampleValueUnderlyingType, class BatchNetworkSampleValueType>
-inline BatchNetworkSampleValueType batchReverseEndianness(const BatchNetworkSampleValueType& input) noexcept
+inline BatchNetworkSampleValueType batch_reverse_endianness(const BatchNetworkSampleValueType& input) noexcept
 {
-    return BatchReverseEndiannessImpl<NetworkSampleValueUnderlyingType>::reverse(input);
+    return batch_reverse_endianness_impl<NetworkSampleValueUnderlyingType>::reverse(input);
 }
 
-// batchHostToNetwork
+// batch_host_to_network
 
 template<class NetworkSampleValueUnderlyingType, class BatchNetworkSampleValueType>
-inline BatchNetworkSampleValueType batchHostToNetwork(const BatchNetworkSampleValueType& input) noexcept
+inline BatchNetworkSampleValueType batch_host_to_network(const BatchNetworkSampleValueType& input) noexcept
 {
 #    if defined(RATL_CPP_LITTLE_ENDIAN)
-    return batchReverseEndianness<NetworkSampleValueUnderlyingType>(input);
+    return batch_reverse_endianness<NetworkSampleValueUnderlyingType>(input);
 #    else
     return input;
 #    endif
 }
 
-// batchNetworkToHost
+// batch_network_to_host
 
 template<class NetworkSampleValueUnderlyingType, class BatchNetworkSampleValueType>
-inline BatchNetworkSampleValueType batchNetworkToHost(const BatchNetworkSampleValueType& input) noexcept
+inline BatchNetworkSampleValueType batch_network_to_host(const BatchNetworkSampleValueType& input) noexcept
 {
 #    if defined(RATL_CPP_LITTLE_ENDIAN)
-    return batchReverseEndianness<NetworkSampleValueUnderlyingType>(input);
+    return batch_reverse_endianness<NetworkSampleValueUnderlyingType>(input);
 #    else
     return input;
 #    endif
 }
 
-// batchSampleToNetworkSample
+// batch_sample_to_network_sample
 
-template<class SampleType>
-inline BatchNetworkSampleValueType_t<SampleType> batchSampleToNetworkSample(
-    const BatchSampleValueType_t<SampleType>& input) noexcept
+template<class SampleValueType>
+inline batch_network_sample_value_type_t<SampleValueType> batch_sample_to_network_sample(
+    const batch_sample_value_type_t<SampleValueType>& input) noexcept
 {
-    return batchHostToNetwork<NetworkSampleValueUnderlyingType_t<SampleType>>(
-        xsimd::bitwise_cast<BatchNetworkSampleValueType_t<SampleType>>(input));
+    return batch_host_to_network<network_sample_value_underlying_type_t<SampleValueType>>(
+        xsimd::bitwise_cast<batch_network_sample_value_type_t<SampleValueType>>(input));
 }
 
-// batchNetworkSampleToSample
+// batch_network_sample_to_sample
 
-template<class SampleType>
-inline BatchSampleValueType_t<SampleType> batchNetworkSampleToSample(
-    const BatchNetworkSampleValueType_t<SampleType>& input) noexcept
+template<class SampleValueType>
+inline batch_sample_value_type_t<SampleValueType> batch_network_sample_to_sample(
+    const batch_network_sample_value_type_t<SampleValueType>& input) noexcept
 {
-    return batchFixNegativeSamples<SampleType>(xsimd::bitwise_cast<BatchSampleValueType_t<SampleType>>(
-        batchNetworkToHost<NetworkSampleValueUnderlyingType_t<SampleType>>(input)));
+    return batch_fix_negative_samples<SampleValueType>(xsimd::bitwise_cast<batch_sample_value_type_t<SampleValueType>>(
+        batch_network_to_host<network_sample_value_underlying_type_t<SampleValueType>>(input)));
 }
 
 } // namespace detail

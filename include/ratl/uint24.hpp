@@ -29,126 +29,126 @@ public:
 
     ~uint24_t() = default;
 
-    constexpr inline uint24_t(const uint32_t& other) noexcept :
+    inline constexpr uint24_t(const uint32_t& other) noexcept :
         storage_{static_cast<uint8_t>(other), static_cast<uint8_t>(other >> 8), static_cast<uint8_t>(other >> 16)}
     {
     }
 
-    constexpr inline uint24_t& operator=(const uint32_t& other) noexcept
-    {
-        storage_[0] = static_cast<uint8_t>(other);
-        storage_[1] = static_cast<uint8_t>(other >> 8);
-        storage_[2] = static_cast<uint8_t>(other >> 16);
-        return *this;
-    }
+    inline constexpr uint24_t& operator=(const uint32_t& other) noexcept;
 
-    constexpr inline operator int32_t() const noexcept
-    {
-        return static_cast<int32_t>(
-            (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
-            (static_cast<uint32_t>(storage_[2]) << 16));
-    }
+    inline constexpr operator int32_t() const noexcept;
 
     // not private as gcc requires memcpyable types to not have any private members
     uint8_t storage_[3];
 };
 
-// Assignment operators
+inline constexpr uint24_t& uint24_t::operator=(const uint32_t& other) noexcept
+{
+    storage_[0] = static_cast<uint8_t>(other);
+    storage_[1] = static_cast<uint8_t>(other >> 8);
+    storage_[2] = static_cast<uint8_t>(other >> 16);
+    return *this;
+}
+
+inline constexpr uint24_t::operator int32_t() const noexcept
+{
+    return static_cast<int32_t>(
+        (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
+        (static_cast<uint32_t>(storage_[2]) << 16));
+}
 
 template<class Up>
-constexpr inline uint24_t& operator+=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator+=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) + val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator-=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator-=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) - val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator*=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator*=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) * val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator/=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator/=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) / val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator%=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator%=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) % val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator&=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator&=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) & val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator|=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator|=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) | val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator^=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator^=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) ^ val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator<<=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator<<=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) << val;
     return x;
 }
 
 template<class Up>
-constexpr inline uint24_t& operator>>=(uint24_t& x, const Up& val) noexcept
+inline constexpr uint24_t& operator>>=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) >> val;
     return x;
 }
 
-// Increment/decrement operators
-
-constexpr inline uint24_t& operator++(uint24_t& x) noexcept
+inline constexpr uint24_t& operator++(uint24_t& x) noexcept
 {
     int32_t tmp = x;
     x = ++tmp;
     return x;
 }
 
-constexpr inline uint24_t& operator--(uint24_t& x) noexcept
+inline constexpr uint24_t& operator--(uint24_t& x) noexcept
 {
     int32_t tmp = x;
     x = --tmp;
     return x;
 }
 
-constexpr inline uint24_t operator++(uint24_t& x, int) noexcept
+inline constexpr uint24_t operator++(uint24_t& x, int) noexcept
 {
     uint24_t tmp = x;
     ++x;
     return tmp;
 }
 
-constexpr inline uint24_t operator--(uint24_t& x, int) noexcept
+inline constexpr uint24_t operator--(uint24_t& x, int) noexcept
 {
     uint24_t tmp = x;
     --x;

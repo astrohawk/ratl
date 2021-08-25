@@ -6,8 +6,8 @@
 
 namespace ratl
 {
-using SampleType = int24_t;
-using NetworkSampleType = detail::NetworkSampleValueUnderlyingType_t<SampleType>;
+using sample_type = int24_t;
+using NetworkSampleType = detail::network_sample_value_underlying_type_t<sample_type>;
 
 static NetworkSampleType generateRandom()
 {
@@ -23,8 +23,8 @@ static NetworkSampleType generateRandom()
         std::random_device random_device_;
         std::mt19937 random_generator_{random_device_()};
         std::uniform_int_distribution<uint32_t> distribution_{
-            static_cast<uint32_t>(SampleTypeLimits<SampleType>::min),
-            static_cast<uint32_t>(SampleTypeLimits<SampleType>::max)};
+            static_cast<uint32_t>(sample_limits<sample_type>::min),
+            static_cast<uint32_t>(sample_limits<sample_type>::max)};
     } random_state;
     return random_state.generate();
 }
@@ -54,7 +54,7 @@ static void benchReverseEndianness(benchmark::State& state)
             output.begin(),
             [](NetworkSampleType in)
             {
-                return detail::reverseEndianness(in);
+                return detail::reverse_endianness(in);
             });
     }
 }

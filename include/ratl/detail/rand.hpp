@@ -11,36 +11,36 @@ namespace ratl
 {
 namespace detail
 {
-class LinearCongruentialGenerator
+class linear_congruential_generator
 {
 public:
-    explicit constexpr LinearCongruentialGenerator(uint32_t seed) noexcept : state_{seed} {}
+    explicit constexpr linear_congruential_generator(uint32_t seed) noexcept : state_{seed} {}
 
-    ~LinearCongruentialGenerator() = default;
+    ~linear_congruential_generator() = default;
 
-    LinearCongruentialGenerator(const LinearCongruentialGenerator&) = delete;
+    linear_congruential_generator(const linear_congruential_generator&) = delete;
 
-    LinearCongruentialGenerator& operator=(const LinearCongruentialGenerator&) = delete;
+    linear_congruential_generator& operator=(const linear_congruential_generator&) = delete;
 
-    LinearCongruentialGenerator(LinearCongruentialGenerator&&) noexcept = default;
+    linear_congruential_generator(linear_congruential_generator&&) noexcept = default;
 
-    LinearCongruentialGenerator& operator=(LinearCongruentialGenerator&&) noexcept = default;
+    linear_congruential_generator& operator=(linear_congruential_generator&&) noexcept = default;
 
-    constexpr inline uint32_t operator()() noexcept
+    inline constexpr uint32_t operator()() noexcept
     {
-        state_ = (Multiplier * state_) + Increment;
+        state_ = (multiplier * state_) + increment;
         return state_;
     }
 
-    constexpr inline void jump() noexcept
+    inline constexpr void jump() noexcept
     {
-        state_ = (*this)() ^ JumpMask;
+        state_ = (*this)() ^ jump_mask;
     }
 
 private:
-    static constexpr uint32_t Multiplier = 0x0bb38435;
-    static constexpr uint32_t Increment = 0x3619636b;
-    static constexpr uint32_t JumpMask = 0x8739cbf1;
+    static constexpr uint32_t multiplier = 0x0bb38435;
+    static constexpr uint32_t increment = 0x3619636b;
+    static constexpr uint32_t jump_mask = 0x8739cbf1;
     uint32_t state_;
 };
 

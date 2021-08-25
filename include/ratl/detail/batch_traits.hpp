@@ -5,7 +5,7 @@
 #include <type_traits>
 
 // ratl includes
-#include <ratl/detail/batch_base_traits.hpp>
+#include <ratl/detail/batch_value_traits.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
 
@@ -15,25 +15,25 @@ namespace ratl
 {
 namespace detail
 {
-// BatchSampleType
-
-template<class Sample>
-struct BatchSampleType;
+// batch_sample_type
 
 template<class SampleType>
-struct BatchSampleType<Sample<SampleType>>
+struct batch_sample_type;
+
+template<class SampleValueType>
+struct batch_sample_type<sample<SampleValueType>>
 {
-    using type = BatchSampleValueType_t<SampleType>;
+    using type = batch_sample_value_type_t<SampleValueType>;
+};
+
+template<class SampleValueType>
+struct batch_sample_type<network_sample<SampleValueType>>
+{
+    using type = batch_network_sample_value_type_t<SampleValueType>;
 };
 
 template<class SampleType>
-struct BatchSampleType<NetworkSample<SampleType>>
-{
-    using type = BatchNetworkSampleValueType_t<SampleType>;
-};
-
-template<class Sample>
-using BatchSampleType_t = typename BatchSampleType<Sample>::type;
+using batch_sample_type_t = typename batch_sample_type<SampleType>::type;
 
 } // namespace detail
 } // namespace ratl

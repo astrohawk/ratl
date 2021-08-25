@@ -21,21 +21,21 @@ inline OutputIterator transform(InputIterator first, InputIterator last, OutputI
 
 namespace detail
 {
-template<template<class, class, class> class TransformerT, class InputIterator, class OutputIterator>
-inline OutputIterator transformImpl(
-    InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
+template<template<class, class, class> class Transformer, class InputIterator, class OutputIterator>
+inline OutputIterator transform_impl(
+    InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
-    using Transformer = TransformerT<InputIterator, OutputIterator, DitherGenerator>;
-    return transform(first, last, result, Transformer{dither_generator});
+    using transformer = Transformer<InputIterator, OutputIterator, dither_generator>;
+    return transform(first, last, result, transformer(dither_gen));
 }
 
-template<template<class, class, class> class TransformerT, class InputIterator, class OutputIterator>
-inline OutputIterator transformImpl(InputIterator first, InputIterator last, OutputIterator result)
+template<template<class, class, class> class Transformer, class InputIterator, class OutputIterator>
+inline OutputIterator transform_impl(InputIterator first, InputIterator last, OutputIterator result)
 {
-    using TransformerDitherGenerator = BatchNullDitherGenerator;
-    using Transformer = TransformerT<InputIterator, OutputIterator, TransformerDitherGenerator>;
-    TransformerDitherGenerator dither_generator{};
-    return transform(first, last, result, Transformer{dither_generator});
+    using transformer_dither_generator = batch_null_dither_generator;
+    using transformer = Transformer<InputIterator, OutputIterator, transformer_dither_generator>;
+    transformer_dither_generator dither_gen;
+    return transform(first, last, result, transformer(dither_gen));
 }
 } // namespace detail
 
@@ -43,48 +43,48 @@ inline OutputIterator transformImpl(InputIterator first, InputIterator last, Out
 
 template<class InputIterator, class OutputIterator>
 inline OutputIterator transform(
-    InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
+    InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
-    return detail::transformImpl<detail::DefaultTransformer, InputIterator, OutputIterator>(
-        first, last, result, dither_generator);
+    return detail::transform_impl<detail::default_transformer, InputIterator, OutputIterator>(
+        first, last, result, dither_gen);
 }
 
 template<class InputIterator, class OutputIterator>
 inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result)
 {
-    return detail::transformImpl<detail::DefaultTransformer, InputIterator, OutputIterator>(first, last, result);
+    return detail::transform_impl<detail::default_transformer, InputIterator, OutputIterator>(first, last, result);
 }
 
-// referenceTransform
+// reference_transform
 
 template<class InputIterator, class OutputIterator>
-inline OutputIterator referenceTransform(
-    InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
+inline OutputIterator reference_transform(
+    InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
-    return detail::transformImpl<detail::ReferenceTransformer, InputIterator, OutputIterator>(
-        first, last, result, dither_generator);
-}
-
-template<class InputIterator, class OutputIterator>
-inline OutputIterator referenceTransform(InputIterator first, InputIterator last, OutputIterator result)
-{
-    return detail::transformImpl<detail::ReferenceTransformer, InputIterator, OutputIterator>(first, last, result);
-}
-
-// fastTransform
-
-template<class InputIterator, class OutputIterator>
-inline OutputIterator fastTransform(
-    InputIterator first, InputIterator last, OutputIterator result, DitherGenerator& dither_generator)
-{
-    return detail::transformImpl<detail::FastTransformer, InputIterator, OutputIterator>(
-        first, last, result, dither_generator);
+    return detail::transform_impl<detail::reference_transformer, InputIterator, OutputIterator>(
+        first, last, result, dither_gen);
 }
 
 template<class InputIterator, class OutputIterator>
-inline OutputIterator fastTransform(InputIterator first, InputIterator last, OutputIterator result)
+inline OutputIterator reference_transform(InputIterator first, InputIterator last, OutputIterator result)
 {
-    return detail::transformImpl<detail::FastTransformer, InputIterator, OutputIterator>(first, last, result);
+    return detail::transform_impl<detail::reference_transformer, InputIterator, OutputIterator>(first, last, result);
+}
+
+// fast_transform
+
+template<class InputIterator, class OutputIterator>
+inline OutputIterator fast_transform(
+    InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
+{
+    return detail::transform_impl<detail::fast_transformer, InputIterator, OutputIterator>(
+        first, last, result, dither_gen);
+}
+
+template<class InputIterator, class OutputIterator>
+inline OutputIterator fast_transform(InputIterator first, InputIterator last, OutputIterator result)
+{
+    return detail::transform_impl<detail::fast_transformer, InputIterator, OutputIterator>(first, last, result);
 }
 
 } // namespace ratl

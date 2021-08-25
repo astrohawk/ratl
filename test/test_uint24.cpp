@@ -339,5 +339,5 @@ TEST(CompareZeroPos1, GreaterThanEqualInt)
     EXPECT_FALSE(ratl::uint24_t(0) >= 1);
 }
 
-}
-}
+} // namespace test
+} // namespace ratl

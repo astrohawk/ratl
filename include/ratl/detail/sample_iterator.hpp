@@ -7,30 +7,29 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/sample_traits.hpp>
-#include <ratl/detail/types.hpp>
 #include <ratl/sample.hpp>
 
 namespace ratl
 {
 namespace detail
 {
-template<class Tag, class Sample, bool Contiguous>
-class SampleIterator;
+template<class Tag, class SampleType, bool Contiguous>
+class sample_iterator;
 
-template<class Tag, class Sample>
-class SampleIterator<Tag, Sample, false>
+template<class Tag, class SampleType>
+class sample_iterator<Tag, SampleType, false>
 {
-    using sample_traits = SampleTraits<Sample>;
-    using sample = typename sample_traits::sample;
+    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_type = typename sample_traits::sample_type;
     using sample_pointer = typename sample_traits::pointer;
     using sample_reference = typename sample_traits::reference;
 
-    using size_type = detail::types::size_type;
+    using size_type = std::size_t;
 
 public:
     using iterator_category = std::random_access_iterator_tag;
-    using value_type = sample;
-    using difference_type = detail::types::difference_type;
+    using value_type = sample_type;
+    using difference_type = std::ptrdiff_t;
     using pointer = sample_pointer;
     using reference = sample_reference;
 
@@ -39,13 +38,13 @@ private:
     size_type stride_ = 0;
 
 public:
-    SampleIterator() noexcept = default;
+    sample_iterator() noexcept = default;
 
-    SampleIterator(pointer data, size_type stride) noexcept : data_(data), stride_(stride) {}
+    sample_iterator(pointer data, size_type stride) noexcept : data_(data), stride_(stride) {}
 
-    SampleIterator(const SampleIterator& other) noexcept = default;
+    sample_iterator(const sample_iterator& other) noexcept = default;
 
-    SampleIterator& operator=(const SampleIterator& other) noexcept = default;
+    sample_iterator& operator=(const sample_iterator& other) noexcept = default;
 
     inline size_type stride() const noexcept
     {
@@ -67,51 +66,51 @@ public:
         return data_[n * stride_];
     }
 
-    inline SampleIterator& operator++() noexcept
+    inline sample_iterator& operator++() noexcept
     {
         data_ += stride_;
         return *this;
     }
 
-    inline SampleIterator operator++(int) noexcept
+    inline sample_iterator operator++(int) noexcept
     {
-        auto&& tmp = SampleIterator(*this);
+        auto&& tmp = sample_iterator(*this);
         ++(*this);
         return tmp;
     }
 
-    inline SampleIterator& operator--() noexcept
+    inline sample_iterator& operator--() noexcept
     {
         data_ -= stride_;
         return *this;
     }
 
-    inline SampleIterator operator--(int) noexcept
+    inline sample_iterator operator--(int) noexcept
     {
-        auto&& tmp = SampleIterator(*this);
+        auto&& tmp = sample_iterator(*this);
         --(*this);
         return tmp;
     }
 
-    inline SampleIterator operator+(difference_type n) const noexcept
+    inline sample_iterator operator+(difference_type n) const noexcept
     {
-        auto&& w = SampleIterator(*this);
+        auto&& w = sample_iterator(*this);
         w += n;
         return w;
     }
 
-    inline SampleIterator& operator+=(difference_type n) noexcept
+    inline sample_iterator& operator+=(difference_type n) noexcept
     {
         data_ += static_cast<difference_type>(n * stride_);
         return *this;
     }
 
-    inline SampleIterator operator-(difference_type n) const noexcept
+    inline sample_iterator operator-(difference_type n) const noexcept
     {
         return *this + (-n);
     }
 
-    inline SampleIterator& operator-=(difference_type n) noexcept
+    inline sample_iterator& operator-=(difference_type n) noexcept
     {
         *this += -n;
         return *this;
@@ -119,61 +118,62 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline bool operator==(const SampleIterator& other) const noexcept
+    inline bool operator==(const sample_iterator& other) const noexcept
     {
         return data_ == other.data_;
     }
 
-    inline bool operator<(const SampleIterator& other) const noexcept
+    inline bool operator<(const sample_iterator& other) const noexcept
     {
         return data_ < other.data_;
     }
 
-    inline auto operator<=>(const SampleIterator& other) const noexcept = default;
+    inline auto operator<=>(const sample_iterator& other) const noexcept = default;
 
 #else
 
-    friend inline bool operator==(const SampleIterator& x, const SampleIterator& y) noexcept
+    friend inline bool operator==(const sample_iterator& x, const sample_iterator& y) noexcept
     {
         return x.data_ == y.data_;
     }
 
-    friend inline bool operator!=(const SampleIterator& x, const SampleIterator& y) noexcept
+    friend inline bool operator!=(const sample_iterator& x, const sample_iterator& y) noexcept
     {
         return x.data_ != y.data_;
     }
 
-    friend inline bool operator<(const SampleIterator& x, const SampleIterator& y) noexcept
+    friend inline bool operator<(const sample_iterator& x, const sample_iterator& y) noexcept
     {
         return x.data_ < y.data_;
     }
 
-    friend inline bool operator<=(const SampleIterator& x, const SampleIterator& y) noexcept
+    friend inline bool operator<=(const sample_iterator& x, const sample_iterator& y) noexcept
     {
         return x.data_ <= y.data_;
     }
 
-    friend inline bool operator>(const SampleIterator& x, const SampleIterator& y) noexcept
+    friend inline bool operator>(const sample_iterator& x, const sample_iterator& y) noexcept
     {
         return x.data_ > y.data_;
     }
 
-    friend inline bool operator>=(const SampleIterator& x, const SampleIterator& y) noexcept
+    friend inline bool operator>=(const sample_iterator& x, const sample_iterator& y) noexcept
     {
         return x.data_ >= y.data_;
     }
 
 #endif
 
-    friend inline SampleIterator operator+(typename SampleIterator::difference_type n, SampleIterator x)
+    friend inline sample_iterator operator+(typename sample_iterator::difference_type n, sample_iterator x)
     {
         x += n;
         return x;
     }
 
-    friend inline typename SampleIterator::difference_type operator-(const SampleIterator& x, const SampleIterator& y)
+    friend inline typename sample_iterator::difference_type operator-(
+        const sample_iterator& x, const sample_iterator& y)
     {
-        return (x.data_ - y.data_) / static_cast<typename SampleIterator::difference_type>(x.stride_);
+        return (x.data_ - y.data_) / static_cast<typename sample_iterator::difference_type>(x.stride_);
     }
 
     inline pointer base() const noexcept
@@ -182,24 +182,24 @@ public:
     }
 };
 
-template<class Tag, class Sample>
-class SampleIterator<Tag, Sample, true>
+template<class Tag, class SampleType>
+class sample_iterator<Tag, SampleType, true>
 {
-    using sample_traits = SampleTraits<Sample>;
-    using sample = typename sample_traits::sample;
+    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_type = typename sample_traits::sample_type;
     using sample_pointer = typename sample_traits::pointer;
     using sample_reference = typename sample_traits::reference;
 
-    using size_type = detail::types::size_type;
+    using size_type = std::size_t;
 
 public:
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
     using iterator_concept = std::contiguous_iterator_tag;
-    using element_type = sample;
+    using element_type = sample_type;
 #endif
     using iterator_category = std::random_access_iterator_tag;
-    using value_type = sample;
-    using difference_type = detail::types::difference_type;
+    using value_type = sample_type;
+    using difference_type = std::ptrdiff_t;
     using pointer = sample_pointer;
     using reference = sample_reference;
 
@@ -207,13 +207,13 @@ private:
     pointer data_ = nullptr;
 
 public:
-    SampleIterator() noexcept = default;
+    sample_iterator() noexcept = default;
 
-    explicit SampleIterator(pointer data) noexcept : data_(data) {}
+    explicit sample_iterator(pointer data) noexcept : data_(data) {}
 
-    SampleIterator(const SampleIterator& other) noexcept = default;
+    sample_iterator(const sample_iterator& other) noexcept = default;
 
-    SampleIterator& operator=(const SampleIterator& other) noexcept = default;
+    sample_iterator& operator=(const sample_iterator& other) noexcept = default;
 
     inline size_type stride() const noexcept
     {
@@ -235,51 +235,51 @@ public:
         return data_[n];
     }
 
-    inline SampleIterator& operator++() noexcept
+    inline sample_iterator& operator++() noexcept
     {
         ++data_;
         return *this;
     }
 
-    inline SampleIterator operator++(int) noexcept
+    inline sample_iterator operator++(int) noexcept
     {
-        auto&& tmp = SampleIterator(*this);
+        auto&& tmp = sample_iterator(*this);
         ++(*this);
         return tmp;
     }
 
-    inline SampleIterator& operator--() noexcept
+    inline sample_iterator& operator--() noexcept
     {
         --data_;
         return *this;
     }
 
-    inline SampleIterator operator--(int) noexcept
+    inline sample_iterator operator--(int) noexcept
     {
-        auto&& tmp = SampleIterator(*this);
+        auto&& tmp = sample_iterator(*this);
         --(*this);
         return tmp;
     }
 
-    inline SampleIterator operator+(difference_type n) const noexcept
+    inline sample_iterator operator+(difference_type n) const noexcept
     {
-        auto&& w = SampleIterator(*this);
+        auto&& w = sample_iterator(*this);
         w += n;
         return w;
     }
 
-    inline SampleIterator& operator+=(difference_type n) noexcept
+    inline sample_iterator& operator+=(difference_type n) noexcept
     {
         data_ += n;
         return *this;
     }
 
-    inline SampleIterator operator-(difference_type n) const noexcept
+    inline sample_iterator operator-(difference_type n) const noexcept
     {
         return *this + (-n);
     }
 
-    inline SampleIterator& operator-=(difference_type n) noexcept
+    inline sample_iterator& operator-=(difference_type n) noexcept
     {
         *this += -n;
         return *this;
@@ -287,49 +287,50 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline auto operator<=>(const SampleIterator& other) const noexcept = default;
+    inline auto operator<=>(const sample_iterator& other) const noexcept = default;
 
 #else
 
-    friend inline bool operator==(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator==(const sample_iterator& x, const sample_iterator& y)
     {
         return x.data_ == y.data_;
     }
 
-    friend inline bool operator!=(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator!=(const sample_iterator& x, const sample_iterator& y)
     {
         return !(x == y);
     }
 
-    friend inline bool operator<(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator<(const sample_iterator& x, const sample_iterator& y)
     {
         return x.data_ < y.data_;
     }
 
-    friend inline bool operator<=(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator<=(const sample_iterator& x, const sample_iterator& y)
     {
         return !(x > y);
     }
 
-    friend inline bool operator>(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator>(const sample_iterator& x, const sample_iterator& y)
     {
         return y < x;
     }
 
-    friend inline bool operator>=(const SampleIterator& x, const SampleIterator& y)
+    friend inline bool operator>=(const sample_iterator& x, const sample_iterator& y)
     {
         return !(x < y);
     }
 
 #endif
 
-    friend inline SampleIterator operator+(typename SampleIterator::difference_type n, SampleIterator x)
+    friend inline sample_iterator operator+(typename sample_iterator::difference_type n, sample_iterator x)
     {
         x += n;
         return x;
     }
 
-    friend inline typename SampleIterator::difference_type operator-(const SampleIterator& x, const SampleIterator& y)
+    friend inline typename sample_iterator::difference_type operator-(
+        const sample_iterator& x, const sample_iterator& y)
     {
         return x.data_ - y.data_;
     }

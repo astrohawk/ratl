@@ -15,18 +15,18 @@
 
 namespace ratl
 {
-template<class Sample, class Allocator = ratl::Allocator<Sample>>
-class BasicChannel
+template<class SampleType, class Allocator = ratl::allocator<SampleType>>
+class basic_channel
 {
-    using data_impl_type = SampleSpan<Sample, true, detail::ChannelIterator>;
+    using data_impl_type = sample_span<SampleType, true, detail::channel_iterator>;
 
     using allocator_type = Allocator;
     using alloc_traits = std::allocator_traits<allocator_type>;
+    using sample_traits = typename data_impl_type::sample_traits;
 
 public:
-    using sample_traits = typename data_impl_type::sample_traits;
-    using sample = typename sample_traits::sample;
-    using const_sample = typename sample_traits::const_sample;
+    using sample_type = typename sample_traits::sample_type;
+    using const_sample_type = typename sample_traits::const_sample_type;
     using sample_pointer = typename data_impl_type::sample_pointer;
     using const_sample_pointer = typename data_impl_type::const_sample_pointer;
     using sample_reference = typename data_impl_type::sample_reference;
@@ -52,36 +52,38 @@ private:
 
 public:
     static_assert(
-        std::is_same<sample, typename allocator_type::value_type>::value,
-        "Allocator::value_type must be same type as Sample");
+        std::is_same<sample_type, typename allocator_type::value_type>::value,
+        "allocator::value_type must be same type as sample");
     static_assert(
         std::is_same<sample_pointer, typename alloc_traits::pointer>::value,
-        "Allocator::pointer must be same type as Sample*");
+        "allocator::pointer must be same type as sample*");
 
-    BasicChannel() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
+    basic_channel() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
 
-    explicit BasicChannel(const allocator_type& alloc) noexcept : alloc_(alloc) {}
+    explicit basic_channel(const allocator_type& alloc) noexcept : alloc_(alloc) {}
 
-    explicit BasicChannel(size_type samples);
+    explicit basic_channel(size_type samples);
 
-    BasicChannel(size_type samples, const allocator_type& alloc);
+    basic_channel(size_type samples, const allocator_type& alloc);
 
-    BasicChannel(const BasicChannel& other);
+    basic_channel(const basic_channel& other);
 
-    BasicChannel(const BasicChannel& other, const allocator_type& alloc);
+    basic_channel(const basic_channel& other, const allocator_type& alloc);
 
-    BasicChannel(BasicChannel&& other) noexcept = default;
+    basic_channel(basic_channel&& other) noexcept = default;
 
 #if defined(RATL_CPP_VERSION_HAS_CPP17)
-    BasicChannel(BasicChannel&& other, const allocator_type& alloc) noexcept(alloc_traits::is_always_equal::value) :
-        BasicChannel(other, alloc, alloc_traits::is_always_equal)
+    basic_channel(basic_channel&& other, const allocator_type& alloc) noexcept(alloc_traits::is_always_equal::value) :
+        basic_channel(other, alloc, alloc_traits::is_always_equal)
     {
     }
 #else
-    BasicChannel(BasicChannel&& other, const allocator_type& alloc) : BasicChannel(other, alloc, std::false_type{}) {}
+    basic_channel(basic_channel&& other, const allocator_type& alloc) : basic_channel(other, alloc, std::false_type{})
+    {
+    }
 #endif
 
-    ~BasicChannel()
+    ~basic_channel()
     {
         if (data() != nullptr)
         {
@@ -89,16 +91,17 @@ public:
         }
     }
 
-    BasicChannel& operator=(const BasicChannel& other);
+    basic_channel& operator=(const basic_channel& other);
 
-    BasicChannel& operator=(BasicChannel&& other) noexcept(alloc_traits::propagate_on_container_move_assignment::value);
+    basic_channel& operator=(basic_channel&& other) noexcept(
+        alloc_traits::propagate_on_container_move_assignment::value);
 
     allocator_type get_allocator() const noexcept
     {
         return alloc_;
     }
 
-    void swap(BasicChannel& other);
+    void swap(basic_channel& other);
 
     inline sample_pointer data() noexcept
     {
@@ -223,12 +226,12 @@ public:
     }
 
 private:
-    BasicChannel(BasicChannel&& other, const allocator_type& alloc, std::true_type) noexcept :
+    basic_channel(basic_channel&& other, const allocator_type& alloc, std::true_type) noexcept :
         alloc_(alloc), data_(std::move(other.data_))
     {
     }
 
-    BasicChannel(BasicChannel&& other, const allocator_type& alloc, std::false_type);
+    basic_channel(basic_channel&& other, const allocator_type& alloc, std::false_type);
 
     void allocate()
     {
@@ -241,12 +244,12 @@ private:
         alloc_.deallocate(data(), samples());
     }
 
-    void copy_assign_alloc(const BasicChannel& other)
+    void copy_assign_alloc(const basic_channel& other)
     {
         copy_assign_alloc(other, typename alloc_traits::propagate_on_container_copy_assignment{});
     }
 
-    void copy_assign_alloc(const BasicChannel& other, std::true_type)
+    void copy_assign_alloc(const basic_channel& other, std::true_type)
     {
         if (alloc_ != other.alloc_)
         {
@@ -255,55 +258,55 @@ private:
         alloc_ = other.alloc_;
     }
 
-    void copy_assign_alloc(const BasicChannel&, std::false_type) {}
+    void copy_assign_alloc(const basic_channel&, std::false_type) {}
 
-    void move_assign(BasicChannel& other, std::true_type) noexcept;
+    void move_assign(basic_channel& other, std::true_type) noexcept;
 
-    void move_assign(BasicChannel& other, std::false_type);
+    void move_assign(basic_channel& other, std::false_type);
 
-    void move_assign_alloc(BasicChannel& other) noexcept
+    void move_assign_alloc(basic_channel& other) noexcept
     {
         move_assign_alloc(other, typename alloc_traits::propagate_on_container_move_assignment{});
     }
 
-    void move_assign_alloc(BasicChannel& other, std::true_type) noexcept
+    void move_assign_alloc(basic_channel& other, std::true_type) noexcept
     {
         alloc_ = std::move(other.alloc_);
     }
 
-    void move_assign_alloc(BasicChannel&, std::false_type) noexcept {}
+    void move_assign_alloc(basic_channel&, std::false_type) noexcept {}
 
-    void swap_alloc(BasicChannel& other, std::true_type) noexcept
+    void swap_alloc(basic_channel& other, std::true_type) noexcept
     {
         std::swap(alloc_, other.alloc_);
     }
 
-    void swap_alloc(BasicChannel&, std::false_type) noexcept {}
+    void swap_alloc(basic_channel&, std::false_type) noexcept {}
 };
 
-template<class Sample, class Allocator>
-BasicChannel<Sample, Allocator>::BasicChannel(size_type samples) : data_(samples)
+template<class SampleType, class Allocator>
+basic_channel<SampleType, Allocator>::basic_channel(size_type samples) : data_(samples)
 {
     if (samples() > 0)
     {
         allocate();
-        std::fill_n(data(), samples(), sample{});
+        std::fill_n(data(), samples(), sample_type{});
     }
 }
 
-template<class Sample, class Allocator>
-BasicChannel<Sample, Allocator>::BasicChannel(size_type samples, const allocator_type& alloc) :
+template<class SampleType, class Allocator>
+basic_channel<SampleType, Allocator>::basic_channel(size_type samples, const allocator_type& alloc) :
     alloc_(alloc), data_(samples)
 {
     if (samples() > 0)
     {
         allocate();
-        std::fill_n(data(), samples(), sample{});
+        std::fill_n(data(), samples(), sample_type{});
     }
 }
 
-template<class Sample, class Allocator>
-BasicChannel<Sample, Allocator>::BasicChannel(const BasicChannel& other) :
+template<class SampleType, class Allocator>
+basic_channel<SampleType, Allocator>::basic_channel(const basic_channel& other) :
     alloc_(alloc_traits::select_on_container_copy_construction(other.alloc_)), data_(other.samples())
 {
     if (samples() > 0)
@@ -313,8 +316,8 @@ BasicChannel<Sample, Allocator>::BasicChannel(const BasicChannel& other) :
     }
 }
 
-template<class Sample, class Allocator>
-BasicChannel<Sample, Allocator>::BasicChannel(const BasicChannel& other, const allocator_type& alloc) :
+template<class SampleType, class Allocator>
+basic_channel<SampleType, Allocator>::basic_channel(const basic_channel& other, const allocator_type& alloc) :
     alloc_(alloc), data_(other.samples())
 {
     if (samples() > 0)
@@ -324,8 +327,9 @@ BasicChannel<Sample, Allocator>::BasicChannel(const BasicChannel& other, const a
     }
 }
 
-template<class Sample, class Allocator>
-BasicChannel<Sample, Allocator>::BasicChannel(BasicChannel&& other, const allocator_type& alloc, std::false_type) :
+template<class SampleType, class Allocator>
+basic_channel<SampleType, Allocator>::basic_channel(
+    basic_channel&& other, const allocator_type& alloc, std::false_type) :
     alloc_(alloc)
 {
     if (other.alloc_ == alloc)
@@ -339,27 +343,27 @@ BasicChannel<Sample, Allocator>::BasicChannel(BasicChannel&& other, const alloca
     }
 }
 
-template<class Sample, class Allocator>
-BasicChannel<Sample, Allocator>& BasicChannel<Sample, Allocator>::operator=(const BasicChannel& other)
+template<class SampleType, class Allocator>
+basic_channel<SampleType, Allocator>& basic_channel<SampleType, Allocator>::operator=(const basic_channel& other)
 {
     if (this != &other)
     {
         copy_assign_alloc(other);
-        BasicChannel(other).swap(*this);
+        basic_channel(other).swap(*this);
     }
     return *this;
 }
 
-template<class Sample, class Allocator>
-BasicChannel<Sample, Allocator>& BasicChannel<Sample, Allocator>::operator=(BasicChannel&& other) noexcept(
+template<class SampleType, class Allocator>
+basic_channel<SampleType, Allocator>& basic_channel<SampleType, Allocator>::operator=(basic_channel&& other) noexcept(
     alloc_traits::propagate_on_container_move_assignment::value)
 {
     move_assign(other, typename alloc_traits::propagate_on_container_move_assignment());
     return *this;
 }
 
-template<class Sample, class Allocator>
-void BasicChannel<Sample, Allocator>::move_assign(BasicChannel& other, std::true_type) noexcept
+template<class SampleType, class Allocator>
+void basic_channel<SampleType, Allocator>::move_assign(basic_channel& other, std::true_type) noexcept
 {
     if (data() != nullptr)
     {
@@ -369,8 +373,8 @@ void BasicChannel<Sample, Allocator>::move_assign(BasicChannel& other, std::true
     data_.move(other.data_);
 }
 
-template<class Sample, class Allocator>
-void BasicChannel<Sample, Allocator>::move_assign(BasicChannel& other, std::false_type)
+template<class SampleType, class Allocator>
+void basic_channel<SampleType, Allocator>::move_assign(basic_channel& other, std::false_type)
 {
     if (alloc_ != other.alloc_)
     {
@@ -391,38 +395,39 @@ void BasicChannel<Sample, Allocator>::move_assign(BasicChannel& other, std::fals
     }
 }
 
-template<class Sample, class Allocator>
-void BasicChannel<Sample, Allocator>::swap(BasicChannel& other)
+template<class SampleType, class Allocator>
+void basic_channel<SampleType, Allocator>::swap(basic_channel& other)
 {
     swap_alloc(other, typename alloc_traits::propagate_on_container_swap());
     data_.swap(other.data_);
 }
 
-template<class Sample, class Allocator>
-inline typename BasicChannel<Sample, Allocator>::reference BasicChannel<Sample, Allocator>::at(size_type n)
+template<class SampleType, class Allocator>
+inline typename basic_channel<SampleType, Allocator>::reference basic_channel<SampleType, Allocator>::at(size_type n)
 {
     if (n >= samples())
     {
-        throw std::out_of_range("Channel");
+        throw std::out_of_range("channel");
     }
     return (*this)[n];
 }
 
-template<class Sample, class Allocator>
-inline typename BasicChannel<Sample, Allocator>::const_reference BasicChannel<Sample, Allocator>::at(size_type n) const
+template<class SampleType, class Allocator>
+inline typename basic_channel<SampleType, Allocator>::const_reference basic_channel<SampleType, Allocator>::at(
+    size_type n) const
 {
     if (n >= samples())
     {
-        throw std::out_of_range("Channel");
+        throw std::out_of_range("channel");
     }
     return (*this)[n];
 }
 
-template<class SampleType>
-using Channel = BasicChannel<Sample<SampleType>>;
+template<class SampleValueType>
+using channel = basic_channel<sample<SampleValueType>>;
 
-template<class SampleType>
-using NetworkChannel = BasicChannel<NetworkSample<SampleType>>;
+template<class SampleValueType>
+using network_channel = basic_channel<network_sample<SampleValueType>>;
 
 } // namespace ratl
 

@@ -1,12 +1,6 @@
 #ifndef _ratl_detail_operator_arrow_proxy_
 #define _ratl_detail_operator_arrow_proxy_
 
-// C++ Standard Library includes
-
-// ratl includes
-#include <ratl/detail/config.hpp>
-#include <ratl/detail/types.hpp>
-
 namespace ratl
 {
 namespace detail
@@ -15,20 +9,30 @@ template<class Tp>
 class operator_arrow_proxy
 {
 public:
-    operator_arrow_proxy(Tp const& value) : value_(value) {}
+    explicit operator_arrow_proxy(const Tp& value) : value_(value) {}
 
-    Tp* operator->() const
+    Tp* operator->() noexcept
     {
         return &value_;
     }
 
-    operator Tp*() const
+    const Tp* operator->() const noexcept
+    {
+        return &value_;
+    }
+
+    operator const Tp*() noexcept
+    {
+        return &value_;
+    }
+
+    operator Tp*() const noexcept
     {
         return &value_;
     }
 
 private:
-    mutable Tp value_;
+    Tp value_;
 };
 
 } // namespace detail

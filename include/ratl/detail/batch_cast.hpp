@@ -5,7 +5,7 @@
 #include <type_traits>
 
 // ratl includes
-#include <ratl/detail/batch_base_traits.hpp>
+#include <ratl/detail/batch_value_traits.hpp>
 
 #if defined(RATL_HAS_XSIMD)
 
@@ -13,12 +13,12 @@ namespace ratl
 {
 namespace detail
 {
-// batchSampleCast
+// batch_sample_cast
 
 template<class OutputSampleType, class InputBatch>
-inline BatchSampleValueType_t<OutputSampleType> batchSampleCast(const InputBatch& input) noexcept
+inline batch_sample_value_type_t<OutputSampleType> batch_sample_cast(const InputBatch& input) noexcept
 {
-    return xsimd::batch_cast<typename BatchSampleValueType_t<OutputSampleType>::value_type>(input);
+    return xsimd::batch_cast<typename batch_sample_value_type_t<OutputSampleType>::value_type>(input);
 }
 
 } // namespace detail

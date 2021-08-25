@@ -9,62 +9,69 @@
 #endif
 
 // ratl includes
-#include <ratl/detail/type_traits.hpp>
+#include <ratl/detail/sample_value_traits.hpp>
 
 namespace ratl
 {
 namespace detail
 {
-// sampleToNetworkCast
-
-template<class Output, class Input>
-inline Output bitwiseCast(const Input& input) noexcept
+template<class OutputType, class InputType>
+inline typename std::enable_if_t<
+    sizeof(OutputType) == sizeof(InputType) && std::is_trivially_copyable<InputType>::value &&
+        std::is_trivially_copyable<OutputType>::value,
+    OutputType>
+bit_cast(const InputType& input) noexcept
 {
+    static_assert(
+        std::is_trivially_constructible<OutputType>::value, "destination type must be trivially constructible");
+
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
-    return std::bit_cast<Output>(input);
-#elif defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
-    Output output;
-    __builtin_memcpy(&output, &input, sizeof(Output));
-    return output;
+    return std::bit_cast<OutputType>(input);
 #else
-    Output output;
-    std::memcpy(&output, &input, sizeof(Output));
+    OutputType output;
+#    if defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
+    __builtin_memcpy(&output, &input, sizeof(OutputType));
+#    else
+    std::memcpy(&output, &input, sizeof(OutputType));
+#    endif
     return output;
 #endif
 }
 
-// sampleToNetworkUnderlyingCast
+// sample_to_network_underlying_cast
 
-template<class SampleType>
-inline NetworkSampleValueUnderlyingType_t<SampleType> sampleToNetworkUnderlyingCast(SampleType input) noexcept
+template<class SampleValueType>
+inline network_sample_value_underlying_type_t<SampleValueType> sample_to_network_underlying_cast(
+    SampleValueType input) noexcept
 {
-    return bitwiseCast<NetworkSampleValueUnderlyingType_t<SampleType>>(input);
+    return bit_cast<network_sample_value_underlying_type_t<SampleValueType>>(input);
 }
 
-// networkUnderlyingToSampleCast
+// network_underlying_to_sample_cast
 
-template<class SampleType>
-inline SampleType networkUnderlyingToSampleCast(NetworkSampleValueUnderlyingType_t<SampleType> input) noexcept
+template<class SampleValueType>
+inline SampleValueType network_underlying_to_sample_cast(
+    network_sample_value_underlying_type_t<SampleValueType> input) noexcept
 {
-    return bitwiseCast<SampleType>(input);
+    return bit_cast<SampleValueType>(input);
 }
 
-// networkToNetworkUnderlyingCast
+// network_to_network_underlying_cast
 
-template<class SampleType>
-inline NetworkSampleValueUnderlyingType_t<SampleType> networkToNetworkUnderlyingCast(
-    NetworkSampleValueType_t<SampleType> input) noexcept
+template<class SampleValueType>
+inline network_sample_value_underlying_type_t<SampleValueType> network_to_network_underlying_cast(
+    network_sample_value_type_t<SampleValueType> input) noexcept
 {
-    return bitwiseCast<NetworkSampleValueUnderlyingType_t<SampleType>>(input);
+    return bit_cast<network_sample_value_underlying_type_t<SampleValueType>>(input);
 }
 
-// networkUnderlyingToNetworkCast
+// network_underlying_to_network_cast
 
-template<class SampleType>
-inline NetworkSampleValueType_t<SampleType> networkUnderlyingToNetworkCast(
-    NetworkSampleValueUnderlyingType_t<SampleType> input) noexcept
+template<class SampleValueType>
+inline network_sample_value_type_t<SampleValueType> network_underlying_to_network_cast(
+    network_sample_value_underlying_type_t<SampleValueType> input) noexcept
 {
-    return bitwiseCast<NetworkSampleValueType_t<SampleType>>(input);
+    return bit_cast<network_sample_value_type_t<SampleValueType>>(input);
 }
 
 } // namespace detail

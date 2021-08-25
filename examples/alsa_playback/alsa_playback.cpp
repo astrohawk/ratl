@@ -134,8 +134,8 @@ int main(int argc, char** argv)
     snd_pcm_uframes_t frames;
     snd_pcm_hw_params_get_period_size(params, &frames, nullptr);
 
-    ratl::Interleaved<ratl::float32_t> float_interleaved{tmp_channels, frames};
-    ratl::Interleaved<ratl::int16_t> int_interleaved{tmp_channels, frames};
+    ratl::interleaved<ratl::float32_t> float_interleaved{tmp_channels, frames};
+    ratl::interleaved<ratl::int16_t> int_interleaved{tmp_channels, frames};
 
     unsigned int tmp_period;
     snd_pcm_hw_params_get_period_time(params, &tmp_period, nullptr);
@@ -143,12 +143,12 @@ int main(int argc, char** argv)
     std::size_t num_loops = (seconds * 1000000) / tmp_period;
     std::size_t wave_position = 0;
     std::size_t wave_frames = tmp_rate / 1000;
-    ratl::DitherGenerator dither_generator;
+    ratl::dither_generator dither_gen;
     for (std::size_t i = 0; i < num_loops; ++i)
     {
         for (auto frame : float_interleaved)
         {
-            auto sine_sample = ratl::Sample<ratl::float32_t>{static_cast<float>(
+            auto sine_sample = ratl::sample<ratl::float32_t>{static_cast<float>(
                 sine(static_cast<double>(wave_position) / static_cast<double>(wave_frames)) * Amplitude)};
             for (auto& sample : frame)
             {
@@ -157,7 +157,7 @@ int main(int argc, char** argv)
             wave_position = (wave_position + 1) % wave_frames;
         }
 
-        ratl::transform(float_interleaved.begin(), float_interleaved.end(), int_interleaved.begin(), dither_generator);
+        ratl::transform(float_interleaved.begin(), float_interleaved.end(), int_interleaved.begin(), dither_gen);
 
         auto writei_result = snd_pcm_writei(pcm_handle, int_interleaved.data(), int_interleaved.frames());
         if (writei_result == -EPIPE)

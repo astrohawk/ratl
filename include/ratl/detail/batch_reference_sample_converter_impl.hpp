@@ -13,7 +13,7 @@
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/convert_traits.hpp>
 #include <ratl/detail/reference_sample_converter_impl.hpp>
-#include <ratl/sample_type_limits.hpp>
+#include <ratl/sample_limits.hpp>
 
 namespace ratl
 {
@@ -21,293 +21,315 @@ namespace detail
 {
 #if defined(RATL_HAS_XSIMD)
 
-// BaseBatchReferenceSampleConverterImpl
+// base_batch_reference_sample_converter_impl
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl;
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+struct base_batch_reference_sample_converter_impl;
 
-template<class SampleType, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<SampleType>, Sample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<SampleValueType>, sample<SampleValueType>, DitherGenerator>
 {
-    static inline const BatchSampleValueType_t<SampleType>& batch_convert(
-        const BatchSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
+    static inline const batch_sample_value_type_t<SampleValueType>& batch_convert(
+        const batch_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
     {
-        return sample;
+        return input;
     }
 };
 
 template<class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<int16_t>, Sample<int24_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int24_t> batch_convert(
-        const BatchSampleValueType_t<int16_t>& sample, DitherGenerator&) noexcept
+    static inline batch_sample_value_type_t<int24_t> batch_convert(
+        const batch_sample_value_type_t<int16_t>& input, DitherGenerator&) noexcept
     {
-        return batchSampleCast<int24_t>(sample) << 8;
+        return batch_sample_cast<int24_t>(input) << 8;
     }
 };
 
 template<class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<int16_t>, Sample<int32_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<int16_t>, sample<int32_t>, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int32_t> batch_convert(
-        const BatchSampleValueType_t<int16_t>& sample, DitherGenerator&) noexcept
+    static inline batch_sample_value_type_t<int32_t> batch_convert(
+        const batch_sample_value_type_t<int16_t>& input, DitherGenerator&) noexcept
     {
-        return batchSampleCast<int32_t>(sample) << 16;
+        return batch_sample_cast<int32_t>(input) << 16;
     }
 };
 
 template<class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
-    static constexpr int32_t SampleInMax = static_cast<int32_t>(0x007FFF80);
-    static constexpr int16_t SampleOutMax = SampleTypeLimits<int16_t>::max;
-    static constexpr int32_t Rounding = static_cast<int32_t>(0x80);
-    static constexpr std::size_t TotalShift = 8;
-    static constexpr std::size_t PreDitherShift =
-        DitherGenerator::Int16Bits > 0 ? DitherGenerator::Int16Bits - TotalShift : 0;
-    static constexpr std::size_t PostDitherShift = TotalShift + PreDitherShift;
+    static constexpr int32_t sample_in_max = static_cast<int32_t>(0x007FFF80);
+    static constexpr int16_t sample_out_max = sample_limits<int16_t>::max;
+    static constexpr int32_t rounding = static_cast<int32_t>(0x80);
+    static constexpr std::size_t total_shift = 8;
+    static constexpr std::size_t pre_dither_shift =
+        DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
+    static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
 
-    static inline BatchSampleValueType_t<int16_t> batch_convert(
-        const BatchSampleValueType_t<int24_t>& sample, DitherGenerator& dither_generator) noexcept
+    static inline batch_sample_value_type_t<int16_t> batch_convert(
+        const batch_sample_value_type_t<int24_t>& input, DitherGenerator& dither_gen) noexcept
     {
-        static const BatchSampleValueType_t<int24_t> max(SampleOutMax);
-        auto cmp = sample >= SampleInMax;
-        auto temp =
-            (((sample + (Rounding + (sample >> 31))) << PreDitherShift) + dither_generator.generateBatchInt16()) >>
-            PostDitherShift;
-        return batchSampleCast<int16_t>(xsimd::select(cmp, max, temp));
+        static const batch_sample_value_type_t<int24_t> max(sample_out_max);
+        auto cmp = input >= sample_in_max;
+        auto temp = (((input + (rounding + (input >> 31))) << pre_dither_shift) + dither_gen.generate_batch_int16()) >>
+                    post_dither_shift;
+        return batch_sample_cast<int16_t>(xsimd::select(cmp, max, temp));
     }
 };
 
 template<class DitherGenerator>
-constexpr int32_t BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>::SampleInMax;
+constexpr int32_t
+    base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::sample_in_max;
 template<class DitherGenerator>
 constexpr int16_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>::SampleOutMax;
+    base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::sample_out_max;
 template<class DitherGenerator>
-constexpr int32_t BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>::Rounding;
-template<class DitherGenerator>
-constexpr std::size_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>::TotalShift;
+constexpr int32_t
+    base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::rounding;
 template<class DitherGenerator>
 constexpr std::size_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>::PreDitherShift;
+    base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::total_shift;
 template<class DitherGenerator>
 constexpr std::size_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>::PostDitherShift;
+    base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::pre_dither_shift;
+template<class DitherGenerator>
+constexpr std::size_t
+    base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::post_dither_shift;
 
 template<class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<int24_t>, Sample<int32_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<int32_t> batch_convert(
-        const BatchSampleValueType_t<int24_t>& sample, DitherGenerator&) noexcept
+    static inline batch_sample_value_type_t<int32_t> batch_convert(
+        const batch_sample_value_type_t<int24_t>& input, DitherGenerator&) noexcept
     {
-        return batchSampleCast<int24_t>(sample << 8);
+        return batch_sample_cast<int24_t>(input << 8);
     }
 };
 
 template<class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
-    static constexpr int32_t SampleInMax = static_cast<int32_t>(0x7FFF8000);
-    static constexpr int16_t SampleOutMax = SampleTypeLimits<int16_t>::max;
-    static constexpr int32_t Rounding = static_cast<int32_t>(0x8000);
-    static constexpr std::size_t TotalShift = 16;
-    static constexpr std::size_t PreDitherShift = TotalShift - DitherGenerator::Int16Bits;
-    static constexpr std::size_t PostDitherShift = TotalShift - PreDitherShift;
+    static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFF8000);
+    static constexpr int16_t sample_out_max = sample_limits<int16_t>::max;
+    static constexpr int32_t rounding = static_cast<int32_t>(0x8000);
+    static constexpr std::size_t total_shift = 16;
+    static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
+    static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 
-    static inline BatchSampleValueType_t<int16_t> batch_convert(
-        const BatchSampleValueType_t<int32_t>& sample, DitherGenerator& dither_generator) noexcept
+    static inline batch_sample_value_type_t<int16_t> batch_convert(
+        const batch_sample_value_type_t<int32_t>& input, DitherGenerator& dither_gen) noexcept
     {
-        static const BatchSampleValueType_t<int32_t> max(SampleOutMax);
-        auto cmp = sample >= SampleInMax;
-        auto temp =
-            (((sample + (Rounding + (sample >> 31))) >> PreDitherShift) + dither_generator.generateBatchInt16()) >>
-            PostDitherShift;
-        return batchSampleCast<int16_t>(xsimd::select(cmp, max, temp));
+        static const batch_sample_value_type_t<int32_t> max(sample_out_max);
+        auto cmp = input >= sample_in_max;
+        auto temp = (((input + (rounding + (input >> 31))) >> pre_dither_shift) + dither_gen.generate_batch_int16()) >>
+                    post_dither_shift;
+        return batch_sample_cast<int16_t>(xsimd::select(cmp, max, temp));
     }
 };
 
 template<class DitherGenerator>
-constexpr int32_t BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>::SampleInMax;
+constexpr int32_t
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::sample_in_max;
 template<class DitherGenerator>
 constexpr int16_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>::SampleOutMax;
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::sample_out_max;
 template<class DitherGenerator>
-constexpr int32_t BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>::Rounding;
-template<class DitherGenerator>
-constexpr std::size_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>::TotalShift;
+constexpr int32_t
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::rounding;
 template<class DitherGenerator>
 constexpr std::size_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>::PreDitherShift;
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::total_shift;
 template<class DitherGenerator>
 constexpr std::size_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>::PostDitherShift;
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::pre_dither_shift;
+template<class DitherGenerator>
+constexpr std::size_t
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::post_dither_shift;
 
 template<class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int24_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
 {
-    static constexpr int32_t SampleInMax = static_cast<int32_t>(0x7FFFFF80);
-    static constexpr int24_t SampleOutMax = SampleTypeLimits<int24_t>::max;
-    static constexpr int32_t Rounding = static_cast<int32_t>(0x80);
+    static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFFFF80);
+    static constexpr int24_t sample_out_max = sample_limits<int24_t>::max;
+    static constexpr int32_t rounding = static_cast<int32_t>(0x80);
 
-    static inline BatchSampleValueType_t<int24_t> batch_convert(
-        const BatchSampleValueType_t<int32_t>& sample, DitherGenerator&) noexcept
+    static inline batch_sample_value_type_t<int24_t> batch_convert(
+        const batch_sample_value_type_t<int32_t>& input, DitherGenerator&) noexcept
     {
-        static const BatchSampleValueType_t<int32_t> max(SampleOutMax);
-        auto cmp = sample >= SampleInMax;
-        auto temp = (sample + (Rounding + (sample >> 31))) >> 8;
-        return batchSampleCast<int24_t>(xsimd::select(cmp, max, temp));
+        static const batch_sample_value_type_t<int32_t> max(sample_out_max);
+        auto cmp = input >= sample_in_max;
+        auto temp = (input + (rounding + (input >> 31))) >> 8;
+        return batch_sample_cast<int24_t>(xsimd::select(cmp, max, temp));
     }
 };
 
 template<class DitherGenerator>
-constexpr int32_t BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int24_t>, DitherGenerator>::SampleInMax;
+constexpr int32_t
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>::sample_in_max;
 template<class DitherGenerator>
 constexpr int24_t
-    BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int24_t>, DitherGenerator>::SampleOutMax;
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>::sample_out_max;
 template<class DitherGenerator>
-constexpr int32_t BaseBatchReferenceSampleConverterImpl<Sample<int32_t>, Sample<int24_t>, DitherGenerator>::Rounding;
+constexpr int32_t
+    base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>::rounding;
 
-template<class SampleType, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<SampleType>, Sample<float32_t>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
 {
-    static constexpr float32_t Scaler = FloatConvertTraits<SampleType>::Divisor;
+    static constexpr float32_t scaler = float_convert_traits<SampleValueType>::divisor;
 
-    static inline BatchSampleValueType_t<float32_t> batch_convert(
-        const BatchSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
+    static inline batch_sample_value_type_t<float32_t> batch_convert(
+        const batch_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
     {
-        return xsimd::to_float(batchSampleCast<int32_t>(sample)) * Scaler;
+        return xsimd::to_float(batch_sample_cast<int32_t>(input)) * scaler;
     }
 };
 
-template<class SampleType, class DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
 constexpr float32_t
-    BaseBatchReferenceSampleConverterImpl<Sample<SampleType>, Sample<float32_t>, DitherGenerator>::Scaler;
+    base_batch_reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>::scaler;
 
-template<class SampleType, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<float32_t>, Sample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
 {
 private:
-    static constexpr float32_t SampleInMax =
-        static_cast<float32_t>(SampleTypeLimits<SampleType>::max) * FloatConvertTraits<SampleType>::Divisor;
-    static constexpr SampleType SampleOutMax = SampleTypeLimits<SampleType>::max;
-    static constexpr float32_t SampleInMin =
-        static_cast<float32_t>(SampleTypeLimits<SampleType>::min) * FloatConvertTraits<SampleType>::Divisor;
-    static constexpr SampleType SampleOutMin = SampleTypeLimits<SampleType>::min;
-    static constexpr float32_t Scaler = FloatConvertTraits<SampleType>::Multiplier - DitherGenerator::MaxFloat32;
+    static constexpr float32_t sample_in_max =
+        static_cast<float32_t>(sample_limits<SampleValueType>::max) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr SampleValueType sample_out_max = sample_limits<SampleValueType>::max;
+    static constexpr float32_t sample_in_min =
+        static_cast<float32_t>(sample_limits<SampleValueType>::min) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr SampleValueType sample_out_min = sample_limits<SampleValueType>::min;
+    static constexpr float32_t scaler =
+        float_convert_traits<SampleValueType>::multiplier - DitherGenerator::float32_max;
 
 public:
-    static inline BatchSampleValueType_t<SampleType> batch_convert(
-        BatchSampleValueType_t<float32_t> sample, DitherGenerator& dither_generator) noexcept
+    static inline batch_sample_value_type_t<SampleValueType> batch_convert(
+        batch_sample_value_type_t<float32_t> input, DitherGenerator& dither_gen) noexcept
     {
-        static const BatchSampleValueType_t<int32_t> min(SampleOutMin);
-        static const BatchSampleValueType_t<int32_t> max(SampleOutMax);
-        auto out = batchRoundFloat32ToInt32((sample * Scaler) + dither_generator.generateBatchFloat32());
-        out = xsimd::select(xsimd::bool_cast(sample >= SampleInMax), max, out);
-        out = xsimd::select(xsimd::bool_cast(sample < SampleInMin), min, out);
-        return batchSampleCast<SampleType>(out);
+        static const batch_sample_value_type_t<int32_t> min(sample_out_min);
+        static const batch_sample_value_type_t<int32_t> max(sample_out_max);
+        auto out = batch_round_float32_to_int32((input * scaler) + dither_gen.generate_batch_float32());
+        out = xsimd::select(xsimd::bool_cast(input >= sample_in_max), max, out);
+        out = xsimd::select(xsimd::bool_cast(input < sample_in_min), min, out);
+        return batch_sample_cast<SampleValueType>(out);
     }
 };
 
-template<class SampleType, class DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
 constexpr float32_t
-    BaseBatchReferenceSampleConverterImpl<Sample<float32_t>, Sample<SampleType>, DitherGenerator>::SampleInMax;
-template<class SampleType, class DitherGenerator>
-constexpr SampleType
-    BaseBatchReferenceSampleConverterImpl<Sample<float32_t>, Sample<SampleType>, DitherGenerator>::SampleOutMax;
-template<class SampleType, class DitherGenerator>
+    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
+        sample_in_max;
+template<class SampleValueType, class DitherGenerator>
+constexpr SampleValueType
+    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
+        sample_out_max;
+template<class SampleValueType, class DitherGenerator>
 constexpr float32_t
-    BaseBatchReferenceSampleConverterImpl<Sample<float32_t>, Sample<SampleType>, DitherGenerator>::SampleInMin;
-template<class SampleType, class DitherGenerator>
-constexpr SampleType
-    BaseBatchReferenceSampleConverterImpl<Sample<float32_t>, Sample<SampleType>, DitherGenerator>::SampleOutMin;
-template<class SampleType, class DitherGenerator>
+    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
+        sample_in_min;
+template<class SampleValueType, class DitherGenerator>
+constexpr SampleValueType
+    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
+        sample_out_min;
+template<class SampleValueType, class DitherGenerator>
 constexpr float32_t
-    BaseBatchReferenceSampleConverterImpl<Sample<float32_t>, Sample<SampleType>, DitherGenerator>::Scaler;
+    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::scaler;
 
 template<class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<float32_t>, Sample<float32_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<sample<float32_t>, sample<float32_t>, DitherGenerator>
 {
-    static inline BatchSampleValueType_t<float32_t> batch_convert(
-        const BatchSampleValueType_t<float32_t>& sample, DitherGenerator&) noexcept
+    static inline batch_sample_value_type_t<float32_t> batch_convert(
+        const batch_sample_value_type_t<float32_t>& input, DitherGenerator&) noexcept
     {
-        return sample;
+        return input;
     }
 };
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<InputSampleType>, NetworkSample<OutputSampleType>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<
+    sample<InputSampleType>,
+    network_sample<OutputSampleType>,
+    DitherGenerator>
 {
-    static inline BatchNetworkSampleValueType_t<OutputSampleType> batch_convert(
-        const BatchSampleValueType_t<InputSampleType>& sample, DitherGenerator& dither_generator) noexcept
+    static inline batch_network_sample_value_type_t<OutputSampleType> batch_convert(
+        const batch_sample_value_type_t<InputSampleType>& input, DitherGenerator& dither_gen) noexcept
     {
-        return BaseBatchReferenceSampleConverterImpl<
-            Sample<OutputSampleType>,
-            NetworkSample<OutputSampleType>,
+        return base_batch_reference_sample_converter_impl<
+            sample<OutputSampleType>,
+            network_sample<OutputSampleType>,
             DitherGenerator>::
             batch_convert(
-                BaseBatchReferenceSampleConverterImpl<
-                    Sample<InputSampleType>,
-                    Sample<OutputSampleType>,
-                    DitherGenerator>::batch_convert(sample, dither_generator),
-                dither_generator);
+                base_batch_reference_sample_converter_impl<
+                    sample<InputSampleType>,
+                    sample<OutputSampleType>,
+                    DitherGenerator>::batch_convert(input, dither_gen),
+                dither_gen);
     }
 };
 
-template<class SampleType, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<Sample<SampleType>, NetworkSample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct base_batch_reference_sample_converter_impl<
+    sample<SampleValueType>,
+    network_sample<SampleValueType>,
+    DitherGenerator>
 {
-    static inline BatchNetworkSampleValueType_t<SampleType> batch_convert(
-        const BatchSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
+    static inline batch_network_sample_value_type_t<SampleValueType> batch_convert(
+        const batch_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
     {
-        return batchSampleToNetworkSample<SampleType>(sample);
+        return batch_sample_to_network_sample<SampleValueType>(input);
     }
 };
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<NetworkSample<InputSampleType>, Sample<OutputSampleType>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<
+    network_sample<InputSampleType>,
+    sample<OutputSampleType>,
+    DitherGenerator>
 {
-    static inline BatchSampleValueType_t<OutputSampleType> batch_convert(
-        const BatchNetworkSampleValueType_t<InputSampleType>& sample, DitherGenerator& dither_generator) noexcept
+    static inline batch_sample_value_type_t<OutputSampleType> batch_convert(
+        const batch_network_sample_value_type_t<InputSampleType>& input, DitherGenerator& dither_gen) noexcept
     {
-        return BaseBatchReferenceSampleConverterImpl<
-            Sample<InputSampleType>,
-            Sample<OutputSampleType>,
+        return base_batch_reference_sample_converter_impl<
+            sample<InputSampleType>,
+            sample<OutputSampleType>,
             DitherGenerator>::
             batch_convert(
-                BaseBatchReferenceSampleConverterImpl<
-                    NetworkSample<InputSampleType>,
-                    Sample<InputSampleType>,
-                    DitherGenerator>::batch_convert(sample, dither_generator),
-                dither_generator);
+                base_batch_reference_sample_converter_impl<
+                    network_sample<InputSampleType>,
+                    sample<InputSampleType>,
+                    DitherGenerator>::batch_convert(input, dither_gen),
+                dither_gen);
     }
 };
 
-template<class SampleType, class DitherGenerator>
-struct BaseBatchReferenceSampleConverterImpl<NetworkSample<SampleType>, Sample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct base_batch_reference_sample_converter_impl<
+    network_sample<SampleValueType>,
+    sample<SampleValueType>,
+    DitherGenerator>
 {
-    static inline BatchSampleValueType_t<SampleType> batch_convert(
-        const BatchNetworkSampleValueType_t<SampleType>& sample, DitherGenerator&) noexcept
+    static inline batch_sample_value_type_t<SampleValueType> batch_convert(
+        const batch_network_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
     {
-        return batchNetworkSampleToSample<SampleType>(sample);
+        return batch_network_sample_to_sample<SampleValueType>(input);
     }
 };
 
-// BatchReferenceSampleConverterImpl
+// batch_reference_sample_converter_impl
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-struct BatchReferenceSampleConverterImpl :
-    BaseBatchReferenceSampleConverterImpl<InputSample, OutputSample, DitherGenerator>,
-    ReferenceSampleConverterImpl<InputSample, OutputSample, DitherGenerator>
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+struct batch_reference_sample_converter_impl :
+    base_batch_reference_sample_converter_impl<InputSampleType, OutputSampleType, DitherGenerator>,
+    reference_sample_converter_impl<InputSampleType, OutputSampleType, DitherGenerator>
 {
 };
 
 #else
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-using BatchReferenceSampleConverterImpl = ReferenceSampleConverterImpl<InputSample, OutputSample, DitherGenerator>;
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+using batch_reference_sample_converter_impl =
+    reference_sample_converter_impl<InputSampleType, OutputSampleType, DitherGenerator>;
 
 #endif
 

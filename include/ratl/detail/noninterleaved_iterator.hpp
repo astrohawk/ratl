@@ -7,30 +7,29 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/operator_arrow_proxy.hpp>
-#include <ratl/detail/types.hpp>
+#include <ratl/detail/sample_traits.hpp>
 #include <ratl/frame_span.hpp>
 
 namespace ratl
 {
 namespace detail
 {
-template<class Sample>
-class NoninterleavedIterator
+template<class SampleType>
+class noninterleaved_iterator
 {
-private:
-    using sample_traits = SampleTraits<Sample>;
-    using sample = typename sample_traits::sample;
+    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_type = typename sample_traits::sample_type;
     using sample_pointer = typename sample_traits::pointer;
     using sample_reference = typename sample_traits::reference;
 
-    using size_type = detail::types::size_type;
+    using size_type = std::size_t;
 
-    using frame_type = BasicChannelSpan<sample, true>;
+    using frame_type = basic_channel_span<sample_type, true>;
 
 public:
     using iterator_category = std::random_access_iterator_tag;
     using value_type = frame_type;
-    using difference_type = detail::types::difference_type;
+    using difference_type = std::ptrdiff_t;
     using pointer = detail::operator_arrow_proxy<frame_type>;
     using reference = frame_type;
 
@@ -39,13 +38,13 @@ private:
     size_type frames_ = 0;
 
 public:
-    NoninterleavedIterator() noexcept = default;
+    noninterleaved_iterator() noexcept = default;
 
-    NoninterleavedIterator(sample_pointer data, size_type frames) noexcept : data_(data), frames_(frames) {}
+    noninterleaved_iterator(sample_pointer data, size_type frames) noexcept : data_(data), frames_(frames) {}
 
-    NoninterleavedIterator(const NoninterleavedIterator& other) noexcept = default;
+    noninterleaved_iterator(const noninterleaved_iterator& other) noexcept = default;
 
-    NoninterleavedIterator& operator=(const NoninterleavedIterator& other) noexcept = default;
+    noninterleaved_iterator& operator=(const noninterleaved_iterator& other) noexcept = default;
 
     inline size_type frames() const noexcept
     {
@@ -67,51 +66,51 @@ public:
         return reference(data_ + (n * frames_), frames_);
     }
 
-    inline NoninterleavedIterator& operator++() noexcept
+    inline noninterleaved_iterator& operator++() noexcept
     {
         data_ += frames_;
         return *this;
     }
 
-    inline NoninterleavedIterator operator++(int) noexcept
+    inline noninterleaved_iterator operator++(int) noexcept
     {
-        auto&& tmp = NoninterleavedIterator(*this);
+        auto&& tmp = noninterleaved_iterator(*this);
         ++(*this);
         return tmp;
     }
 
-    inline NoninterleavedIterator& operator--() noexcept
+    inline noninterleaved_iterator& operator--() noexcept
     {
         data_ -= frames_;
         return *this;
     }
 
-    inline NoninterleavedIterator operator--(int) noexcept
+    inline noninterleaved_iterator operator--(int) noexcept
     {
-        auto&& tmp = NoninterleavedIterator(*this);
+        auto&& tmp = noninterleaved_iterator(*this);
         --(*this);
         return tmp;
     }
 
-    inline NoninterleavedIterator operator+(difference_type n) const noexcept
+    inline noninterleaved_iterator operator+(difference_type n) const noexcept
     {
-        auto&& w = NoninterleavedIterator(*this);
+        auto&& w = noninterleaved_iterator(*this);
         w += n;
         return w;
     }
 
-    inline NoninterleavedIterator& operator+=(difference_type n) noexcept
+    inline noninterleaved_iterator& operator+=(difference_type n) noexcept
     {
         data_ += static_cast<difference_type>(n * frames_);
         return *this;
     }
 
-    inline NoninterleavedIterator operator-(difference_type n) const noexcept
+    inline noninterleaved_iterator operator-(difference_type n) const noexcept
     {
         return *this + (-n);
     }
 
-    inline NoninterleavedIterator& operator-=(difference_type n) noexcept
+    inline noninterleaved_iterator& operator-=(difference_type n) noexcept
     {
         *this += -n;
         return *this;
@@ -119,63 +118,63 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline bool operator==(const NoninterleavedIterator& other) const noexcept
+    inline bool operator==(const noninterleaved_iterator& other) const noexcept
     {
         return data_ == other.data_;
     }
 
-    inline bool operator<(const NoninterleavedIterator& other) const noexcept
+    inline bool operator<(const noninterleaved_iterator& other) const noexcept
     {
         return data_ < other.data_;
     }
 
-    inline auto operator<=>(const NoninterleavedIterator& other) const noexcept = default;
+    inline auto operator<=>(const noninterleaved_iterator& other) const noexcept = default;
 
 #else
 
-    friend inline bool operator==(const NoninterleavedIterator& x, const NoninterleavedIterator& y) noexcept
+    friend inline bool operator==(const noninterleaved_iterator& x, const noninterleaved_iterator& y) noexcept
     {
         return x.data_ == y.data_;
     }
 
-    friend inline bool operator!=(const NoninterleavedIterator& x, const NoninterleavedIterator& y) noexcept
+    friend inline bool operator!=(const noninterleaved_iterator& x, const noninterleaved_iterator& y) noexcept
     {
         return !(x == y);
     }
 
-    friend inline bool operator<(const NoninterleavedIterator& x, const NoninterleavedIterator& y) noexcept
+    friend inline bool operator<(const noninterleaved_iterator& x, const noninterleaved_iterator& y) noexcept
     {
         return x.data_ < y.data_;
     }
 
-    friend inline bool operator<=(const NoninterleavedIterator& x, const NoninterleavedIterator& y) noexcept
+    friend inline bool operator<=(const noninterleaved_iterator& x, const noninterleaved_iterator& y) noexcept
     {
         return !(x > y);
     }
 
-    friend inline bool operator>(const NoninterleavedIterator& x, const NoninterleavedIterator& y) noexcept
+    friend inline bool operator>(const noninterleaved_iterator& x, const noninterleaved_iterator& y) noexcept
     {
         return y < x;
     }
 
-    friend inline bool operator>=(const NoninterleavedIterator& x, const NoninterleavedIterator& y) noexcept
+    friend inline bool operator>=(const noninterleaved_iterator& x, const noninterleaved_iterator& y) noexcept
     {
         return !(x < y);
     }
 
 #endif
 
-    friend inline NoninterleavedIterator operator+(
-        typename NoninterleavedIterator::difference_type n, NoninterleavedIterator x)
+    friend inline noninterleaved_iterator operator+(
+        typename noninterleaved_iterator::difference_type n, noninterleaved_iterator x)
     {
         x += n;
         return x;
     }
 
-    friend inline typename NoninterleavedIterator::difference_type operator-(
-        const NoninterleavedIterator& x, const NoninterleavedIterator& y)
+    friend inline typename noninterleaved_iterator::difference_type operator-(
+        const noninterleaved_iterator& x, const noninterleaved_iterator& y)
     {
-        return (x.data_ - y.data_) / static_cast<typename NoninterleavedIterator::difference_type>(x.frames_);
+        return (x.data_ - y.data_) / static_cast<typename noninterleaved_iterator::difference_type>(x.frames_);
     }
 
     inline sample_pointer base() const noexcept

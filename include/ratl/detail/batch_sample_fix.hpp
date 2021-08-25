@@ -15,22 +15,22 @@ namespace ratl
 {
 namespace detail
 {
-// batchFixNegativeSamples
+// batch_fix_negative_samples
 
-template<class SampleType>
-typename std::enable_if<HasBatchType_v<SampleType>, BatchSampleValueType_t<SampleType>>::type batchFixNegativeSamples(
-    const BatchSampleValueType_t<SampleType>& input) noexcept
+template<class SampleValueType>
+typename std::enable_if<has_batch_type_v<SampleValueType>, batch_sample_value_type_t<SampleValueType>>::type
+batch_fix_negative_samples(const batch_sample_value_type_t<SampleValueType>& input) noexcept
 {
     return input;
 }
 
-template<class SampleType>
-typename std::enable_if<!HasBatchType_v<SampleType>, BatchSampleValueType_t<SampleType>>::type batchFixNegativeSamples(
-    const BatchSampleValueType_t<SampleType>& input) noexcept
+template<class SampleValueType>
+typename std::enable_if<!has_batch_type_v<SampleValueType>, batch_sample_value_type_t<SampleValueType>>::type
+batch_fix_negative_samples(const batch_sample_value_type_t<SampleValueType>& input) noexcept
 {
-    static constexpr std::size_t Shift =
-        (sizeof(typename BatchSampleValueType_t<SampleType>::value_type) - sizeof(SampleType)) * CHAR_BIT;
-    return (input << Shift) >> Shift;
+    static constexpr std::size_t shift =
+        (sizeof(typename batch_sample_value_type_t<SampleValueType>::value_type) - sizeof(SampleValueType)) * CHAR_BIT;
+    return (input << shift) >> shift;
 }
 
 } // namespace detail

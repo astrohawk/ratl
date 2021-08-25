@@ -13,12 +13,12 @@ namespace ratl
 #if defined(RATL_HAS_XSIMD)
 
 template<class Tp>
-using Allocator = XSIMD_DEFAULT_ALLOCATOR(Tp);
+using allocator = XSIMD_DEFAULT_ALLOCATOR(Tp);
 
 #else
 
 template<class Tp>
-using Allocator = std::allocator<Tp>;
+using allocator = std::allocator<Tp>;
 
 #endif
 

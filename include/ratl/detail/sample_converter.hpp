@@ -13,44 +13,50 @@ namespace detail
 {
 template<
     template<class, class, class>
-    class SampleConverterImplT,
-    class InputSample,
-    class OutputSample,
+    class SampleConverterImpl,
+    class InputSampleType,
+    class OutputSampleType,
     class DitherGenerator>
-class BasicSampleConverter
+class basic_sample_converter
 {
-private:
-    using SampleConverterImpl = SampleConverterImplT<InputSample, OutputSample, DitherGenerator>;
+    using sample_converter_impl = SampleConverterImpl<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
-    explicit BasicSampleConverter(DitherGenerator& dither_generator) : dither_generator_{dither_generator} {}
+    explicit basic_sample_converter(DitherGenerator& dither_gen) : dither_generator_(dither_gen) {}
 
 #if defined(RATL_HAS_XSIMD)
-    inline BatchSampleType_t<OutputSample> operator()(const BatchSampleType_t<InputSample>& input) const noexcept
+    inline batch_sample_type_t<OutputSampleType> operator()(
+        const batch_sample_type_t<InputSampleType>& input) const noexcept
     {
-        return SampleConverterImpl::batch_convert(input, dither_generator_);
+        return sample_converter_impl::batch_convert(input, dither_generator_);
     }
 #endif
 
-    inline OutputSample operator()(const InputSample& input) const noexcept
+    inline OutputSampleType operator()(const InputSampleType& input) const noexcept
     {
-        return OutputSample{SampleConverterImpl::convert(input.get(), dither_generator_)};
+        return OutputSampleType{sample_converter_impl::convert(input.get(), dither_generator_)};
     }
 
 private:
     std::reference_wrapper<DitherGenerator> dither_generator_;
 };
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-using ReferenceSampleConverter =
-    BasicSampleConverter<detail::BatchReferenceSampleConverterImpl, InputSample, OutputSample, DitherGenerator>;
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+using reference_sample_converter = basic_sample_converter<
+    detail::batch_reference_sample_converter_impl,
+    InputSampleType,
+    OutputSampleType,
+    DitherGenerator>;
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-using FastSampleConverter =
-    BasicSampleConverter<detail::BatchFastSampleConverterImpl, InputSample, OutputSample, DitherGenerator>;
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+using fast_sample_converter = basic_sample_converter<
+    detail::batch_fast_sample_converter_impl,
+    InputSampleType,
+    OutputSampleType,
+    DitherGenerator>;
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-using DefaultSampleConverter = FastSampleConverter<InputSample, OutputSample, DitherGenerator>;
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+using default_sample_converter = fast_sample_converter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 } // namespace detail
 } // namespace ratl

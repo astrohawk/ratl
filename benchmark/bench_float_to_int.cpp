@@ -25,7 +25,7 @@ static float32_t generateRandom()
         std::random_device random_device_;
         std::mt19937 random_generator_{random_device_()};
         std::uniform_real_distribution<float32_t> distribution_{
-            SampleTypeLimits<float32_t>::min, SampleTypeLimits<float32_t>::max};
+            sample_limits<float32_t>::min, sample_limits<float32_t>::max};
     } random_state;
     return random_state.generate();
 }
@@ -53,26 +53,26 @@ static void benchFloatToInt(benchmark::State& state)
             output.begin(),
             [](float32_t sample)
             {
-                if RATL_UNLIKELY (sample >= SampleTypeLimits<float32_t>::max)
+                if (RATL_UNLIKELY (sample >= sample_limits<float32_t>::max))
                 {
-                    return SampleTypeLimits<int32_t>::max;
+                    return sample_limits<int32_t>::max;
                 }
-                if RATL_UNLIKELY (sample < SampleTypeLimits<float32_t>::min)
+                if (RATL_UNLIKELY (sample < sample_limits<float32_t>::min))
                 {
-                    return SampleTypeLimits<int32_t>::min;
+                    return sample_limits<int32_t>::min;
                 }
-                return Converter::template convert<detail::FloatConvertTraits<int32_t>>(sample);
+                return Converter::template convert<detail::float_convert_traits<int32_t>>(sample);
             }));
     }
 }
 
 struct PositiveAsymmetricFloatConvertTraits
 {
-    static constexpr float32_t Multiplier = static_cast<float32_t>(SampleTypeLimits<int32_t>::max);
+    static constexpr float32_t multiplier = static_cast<float32_t>(sample_limits<int32_t>::max);
 };
 struct NegativeAsymmetricFloatConvertTraits
 {
-    static constexpr float32_t Multiplier = -static_cast<float32_t>(SampleTypeLimits<int32_t>::min);
+    static constexpr float32_t multiplier = -static_cast<float32_t>(sample_limits<int32_t>::min);
 };
 
 template<typename Converter>
@@ -96,10 +96,10 @@ static void benchAsymmetricFloatToInt(benchmark::State& state)
 
 struct LrintConverter
 {
-    template<typename FloatConvertTraits>
+    template<typename float_convert_traits>
     static int32_t convert(float32_t sample) noexcept
     {
-        return static_cast<int32_t>(std::lrint(sample * FloatConvertTraits::Multiplier));
+        return static_cast<int32_t>(std::lrint(sample * float_convert_traits::multiplier));
     }
 };
 BENCHMARK_TEMPLATE(benchFloatToInt, LrintConverter);
@@ -108,10 +108,10 @@ BENCHMARK_TEMPLATE(benchAsymmetricFloatToInt, LrintConverter);
 #if defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
 struct BuiltinLrintConverter
 {
-    template<typename FloatConvertTraits>
+    template<typename float_convert_traits>
     static int32_t convert(float32_t sample) noexcept
     {
-        return static_cast<int32_t>(__builtin_lrint(sample * FloatConvertTraits::Multiplier));
+        return static_cast<int32_t>(__builtin_lrint(sample * float_convert_traits::multiplier));
     }
 };
 BENCHMARK_TEMPLATE(benchFloatToInt, BuiltinLrintConverter);
@@ -121,10 +121,10 @@ BENCHMARK_TEMPLATE(benchAsymmetricFloatToInt, BuiltinLrintConverter);
 #if (defined(RATL_CPP_ARCH_X86) || defined(RATL_CPP_ARCH_X86_64)) && defined(__SSE__)
 struct SseIntrinsicsConverter
 {
-    template<typename FloatConvertTraits>
+    template<typename float_convert_traits>
     static int32_t convert(float32_t sample) noexcept
     {
-        return _mm_cvt_ss2si(_mm_set_ss((sample * FloatConvertTraits::Multiplier)));
+        return _mm_cvt_ss2si(_mm_set_ss((sample * float_convert_traits::multiplier)));
     }
 };
 BENCHMARK_TEMPLATE(benchFloatToInt, SseIntrinsicsConverter);
@@ -134,10 +134,10 @@ BENCHMARK_TEMPLATE(benchAsymmetricFloatToInt, SseIntrinsicsConverter);
 #if defined(RATL_CPP_ARCH_AARCH64) && defined(__ARM_NEON)
 struct NeonIntrinsicsConverter
 {
-    template<typename FloatConvertTraits>
+    template<typename float_convert_traits>
     static int32_t convert(float32_t sample) noexcept
     {
-        return vgetq_lane_s32(vcvtnq_s32_f32(vdupq_n_f32(sample * FloatConvertTraits::Multiplier)), 0);
+        return vgetq_lane_s32(vcvtnq_s32_f32(vdupq_n_f32(sample * float_convert_traits::multiplier)), 0);
     }
 };
 BENCHMARK_TEMPLATE(benchFloatToInt, NeonIntrinsicsConverter);
@@ -146,10 +146,10 @@ BENCHMARK_TEMPLATE(benchAsymmetricFloatToInt, NeonIntrinsicsConverter);
 
 struct MagicConverter
 {
-    template<typename FloatConvertTraits>
+    template<typename float_convert_traits>
     static int32_t convert(float32_t sample) noexcept
     {
-        return ratl::detail::roundFloat32ToInt32Magic(sample * FloatConvertTraits::Multiplier);
+        return ratl::detail::round_float32_to_int32_magic(sample * float_convert_traits::multiplier);
     }
 };
 BENCHMARK_TEMPLATE(benchFloatToInt, MagicConverter);

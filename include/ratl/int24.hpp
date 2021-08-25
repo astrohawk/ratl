@@ -29,134 +29,134 @@ public:
 
     ~int24_t() = default;
 
-    constexpr inline int24_t(const int32_t& other) noexcept :
+    inline constexpr int24_t(const int32_t& other) noexcept :
         storage_{static_cast<uint8_t>(other), static_cast<uint8_t>(other >> 8), static_cast<uint8_t>(other >> 16)}
     {
     }
 
-    constexpr inline int24_t& operator=(const int32_t& other) noexcept
-    {
-        storage_[0] = static_cast<uint8_t>(other);
-        storage_[1] = static_cast<uint8_t>(other >> 8);
-        storage_[2] = static_cast<uint8_t>(other >> 16);
-        return *this;
-    }
+    inline constexpr int24_t& operator=(const int32_t& other) noexcept;
 
-    constexpr inline operator int32_t() const noexcept
-    {
-#if defined(RATL_CPP_COMPILER_GCC)
-#    pragma GCC diagnostic push
-#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#    pragma GCC diagnostic ignored "-Warray-bounds"
-#endif
-        return static_cast<int32_t>(
-            (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
-            (static_cast<uint32_t>(static_cast<int32_t>(static_cast<int8_t>(storage_[2]))) << 16));
-#if defined(RATL_CPP_COMPILER_GCC)
-#    pragma GCC diagnostic pop
-#endif
-    }
+    inline constexpr operator int32_t() const noexcept;
 
     // not private as gcc requires memcpyable types to not have any private members
     uint8_t storage_[3];
 };
 
-// Assignment operators
+inline constexpr int24_t& int24_t::operator=(const int32_t& other) noexcept
+{
+    storage_[0] = static_cast<uint8_t>(other);
+    storage_[1] = static_cast<uint8_t>(other >> 8);
+    storage_[2] = static_cast<uint8_t>(other >> 16);
+    return *this;
+}
+
+inline constexpr int24_t::operator int32_t() const noexcept
+{
+#if defined(RATL_CPP_COMPILER_GCC)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#    pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+    return static_cast<int32_t>(
+        (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
+        (static_cast<uint32_t>(static_cast<int32_t>(static_cast<int8_t>(storage_[2]))) << 16));
+#if defined(RATL_CPP_COMPILER_GCC)
+#    pragma GCC diagnostic pop
+#endif
+}
 
 template<class Up>
-constexpr inline int24_t& operator+=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator+=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) + val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator-=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator-=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) - val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator*=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator*=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) * val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator/=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator/=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) / val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator%=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator%=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) % val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator&=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator&=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) & val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator|=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator|=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) | val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator^=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator^=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) ^ val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator<<=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator<<=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) << val;
     return x;
 }
 
 template<class Up>
-constexpr inline int24_t& operator>>=(int24_t& x, const Up& val) noexcept
+inline constexpr int24_t& operator>>=(int24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) >> val;
     return x;
 }
 
-// Increment/decrement operators
-
-constexpr inline int24_t& operator++(int24_t& x) noexcept
+inline constexpr int24_t& operator++(int24_t& x) noexcept
 {
     int32_t tmp = x;
     x = ++tmp;
     return x;
 }
 
-constexpr inline int24_t& operator--(int24_t& x) noexcept
+inline constexpr int24_t& operator--(int24_t& x) noexcept
 {
     int32_t tmp = x;
     x = --tmp;
     return x;
 }
 
-constexpr inline int24_t operator++(int24_t& x, int) noexcept
+inline constexpr int24_t operator++(int24_t& x, int) noexcept
 {
     int24_t tmp = x;
     ++x;
     return tmp;
 }
 
-constexpr inline int24_t operator--(int24_t& x, int) noexcept
+inline constexpr int24_t operator--(int24_t& x, int) noexcept
 {
     int24_t tmp = x;
     --x;

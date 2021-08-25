@@ -6,11 +6,11 @@
 #include <cstdint>
 
 // ratl includes
-#include <ratl/detail/batch_base_traits.hpp>
 #include <ratl/detail/batch_rand.hpp>
+#include <ratl/detail/batch_value_traits.hpp>
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/dither_generator.hpp>
 #include <ratl/detail/convert_traits.hpp>
+#include <ratl/detail/dither_generator.hpp>
 
 namespace ratl
 {
@@ -18,93 +18,94 @@ namespace detail
 {
 #if defined(RATL_HAS_XSIMD)
 
-class BatchNullDitherGenerator : public NullDitherGenerator
+class batch_null_dither_generator : public null_dither_generator
 {
 public:
-    inline detail::BatchSampleValueType_t<int32_t> generateBatchInt16() noexcept
+    inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return detail::BatchSampleValueType_t<int32_t>{0};
+        return detail::batch_sample_value_type_t<int32_t>{0};
     }
 
-    inline detail::BatchSampleValueType_t<float32_t> generateBatchFloat32() noexcept
+    inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
     {
-        return detail::BatchSampleValueType_t<float32_t>{0.f};
+        return detail::batch_sample_value_type_t<float32_t>{0.f};
     }
 };
 
-class BatchTriangularDitherGenerator : public TriangularDitherGenerator
+class batch_triangular_dither_generator : public triangular_dither_generator
 {
 public:
-    inline detail::BatchSampleValueType_t<int32_t> generateBatchInt16() noexcept
+    inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return (xsimd::batch_cast<int32_t>(rng_()) >> Int16Shift) + (xsimd::batch_cast<int32_t>(rng_()) >> Int16Shift);
+        return (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift) +
+               (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift);
     }
 
-    inline detail::BatchSampleValueType_t<float32_t> generateBatchFloat32() noexcept
+    inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
     {
-        auto current =
-            (xsimd::batch_cast<int32_t>(rng_()) >> Float32Shift) + (xsimd::batch_cast<int32_t>(rng_()) >> Float32Shift);
-        return xsimd::to_float(current) * Float32Scaler;
+        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift) +
+                       (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift);
+        return xsimd::to_float(current) * float32_scaler;
     }
 
 private:
-    static constexpr uint32_t DefaultSeed = 0xfad46483;
-    static constexpr std::size_t Int16Shift = (32 - Int16Bits);
-    static constexpr std::size_t Float32Shift = 1;
-    static constexpr float32_t Float32Scaler = detail::FloatConvertTraits<int32_t>::Divisor;
+    static constexpr uint32_t default_seed = 0xfad46483;
+    static constexpr std::size_t int16_shift = (32 - int16_bits);
+    static constexpr std::size_t float32_shift = 1;
+    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
 
-    detail::BatchLinearCongruentialGenerator rng_{DefaultSeed};
+    detail::batch_linear_congruential_generator rng_{default_seed};
 };
 
-constexpr uint32_t BatchTriangularDitherGenerator::DefaultSeed;
-constexpr std::size_t BatchTriangularDitherGenerator::Int16Shift;
-constexpr std::size_t BatchTriangularDitherGenerator::Float32Shift;
-constexpr float32_t BatchTriangularDitherGenerator::Float32Scaler;
+constexpr uint32_t batch_triangular_dither_generator::default_seed;
+constexpr std::size_t batch_triangular_dither_generator::int16_shift;
+constexpr std::size_t batch_triangular_dither_generator::float32_shift;
+constexpr float32_t batch_triangular_dither_generator::float32_scaler;
 
-class BatchShapedDitherGenerator : public ShapedDitherGenerator
+class batch_shaped_dither_generator : public shaped_dither_generator
 {
 public:
-    inline detail::BatchSampleValueType_t<int32_t> generateBatchInt16() noexcept
+    inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return generateHighPass() >> Int16Shift;
+        return generate_high_pass() >> int16_shift;
     }
 
-    inline detail::BatchSampleValueType_t<float32_t> generateBatchFloat32() noexcept
+    inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
     {
-        return xsimd::to_float(generateHighPass()) * Float32Scaler;
+        return xsimd::to_float(generate_high_pass()) * float32_scaler;
     }
 
 private:
-    inline detail::BatchSampleValueType_t<int32_t> generateHighPass() noexcept
+    inline detail::batch_sample_value_type_t<int32_t> generate_high_pass() noexcept
     {
-        auto current =
-            (xsimd::batch_cast<int32_t>(rng_()) >> InitialShift) + (xsimd::batch_cast<int32_t>(rng_()) >> InitialShift);
+        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift) +
+                       (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift);
         auto high_pass = current - previous_;
         previous_ = current;
         return high_pass;
     }
 
-    static constexpr uint32_t DefaultSeed = 0x8914c30c;
-    static constexpr std::size_t InitialShift = 2;
-    static constexpr std::size_t Int16Shift = 32 - Int16Bits - (InitialShift - 1);
-    static constexpr float32_t Float32Scaler = detail::FloatConvertTraits<int32_t>::Divisor;
+    static constexpr uint32_t default_seed = 0x8914c30c;
+    static constexpr std::size_t initial_shift = 2;
+    static constexpr std::size_t int16_shift = 32 - int16_bits - (initial_shift - 1);
+    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
 
-    detail::BatchLinearCongruentialGenerator rng_{DefaultSeed};
-    detail::BatchSampleValueType_t<int32_t> previous_{};
+    detail::batch_linear_congruential_generator rng_{default_seed};
+    detail::batch_sample_value_type_t<int32_t> previous_{};
 };
 
-constexpr uint32_t BatchShapedDitherGenerator::DefaultSeed;
-constexpr std::size_t BatchShapedDitherGenerator::InitialShift;
-constexpr std::size_t BatchShapedDitherGenerator::Int16Shift;
-constexpr float32_t BatchShapedDitherGenerator::Float32Scaler;
+constexpr uint32_t batch_shaped_dither_generator::default_seed;
+constexpr std::size_t batch_shaped_dither_generator::initial_shift;
+constexpr std::size_t batch_shaped_dither_generator::int16_shift;
+constexpr float32_t batch_shaped_dither_generator::float32_scaler;
 
 #else
 
-using BatchNullDitherGenerator = NullDitherGenerator;
+using batch_null_dither_generator = null_dither_generator;
 
-using BatchTriangularDitherGenerator = TriangularDitherGenerator;
+using batch_triangular_dither_generator = triangular_dither_generator;
 
-using BatchShapedDitherGenerator = ShapedDitherGenerator;
+using batch_shaped_dither_generator = shaped_dither_generator;
 
 #endif
 

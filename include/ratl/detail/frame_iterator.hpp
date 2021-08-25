@@ -10,12 +10,12 @@ namespace ratl
 {
 namespace detail
 {
-struct FrameIteratorTag
+struct frame_iterator_tag
 {
 };
 
-template<class Sample, bool Contiguous = false>
-using FrameIterator = SampleIterator<FrameIteratorTag, Sample, Contiguous>;
+template<class SampleType, bool Contiguous = false>
+using frame_iterator = sample_iterator<frame_iterator_tag, SampleType, Contiguous>;
 
 } // namespace detail
 } // namespace ratl

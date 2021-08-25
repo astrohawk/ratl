@@ -12,9 +12,9 @@ void benchPrng(benchmark::State& state)
     }
 }
 
-BENCHMARK_TEMPLATE(benchPrng, ratl::detail::LinearCongruentialGenerator);
+BENCHMARK_TEMPLATE(benchPrng, ratl::detail::linear_congruential_generator);
 #if defined(RATL_HAS_XSIMD)
-BENCHMARK_TEMPLATE(benchPrng, ratl::detail::BatchLinearCongruentialGenerator);
+BENCHMARK_TEMPLATE(benchPrng, ratl::detail::batch_linear_congruential_generator);
 #endif
 
 BENCHMARK_MAIN();

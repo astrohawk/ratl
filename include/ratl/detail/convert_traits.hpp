@@ -2,25 +2,25 @@
 #define _ratl_detail_convert_traits_
 
 // ratl includes
-#include <ratl/sample_type_limits.hpp>
+#include <ratl/sample_limits.hpp>
 
 namespace ratl
 {
 namespace detail
 {
-// FloatConvertTraits
+// float_convert_traits
 
-template<class SampleType>
-struct FloatConvertTraits
+template<class SampleValueType>
+struct float_convert_traits
 {
-    static constexpr float32_t Multiplier = -static_cast<float32_t>(SampleTypeLimits<SampleType>::min);
-    static constexpr float32_t Divisor = 1.f / Multiplier;
+    static constexpr float32_t multiplier = -static_cast<float32_t>(sample_limits<SampleValueType>::min);
+    static constexpr float32_t divisor = 1.f / multiplier;
 };
 
-template<class SampleType>
-constexpr float32_t FloatConvertTraits<SampleType>::Multiplier;
-template<class SampleType>
-constexpr float32_t FloatConvertTraits<SampleType>::Divisor;
+template<class SampleValueType>
+constexpr float32_t float_convert_traits<SampleValueType>::multiplier;
+template<class SampleValueType>
+constexpr float32_t float_convert_traits<SampleValueType>::divisor;
 
 } // namespace detail
 } // namespace ratl

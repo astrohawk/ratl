@@ -7,30 +7,29 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/operator_arrow_proxy.hpp>
-#include <ratl/detail/types.hpp>
+#include <ratl/detail/sample_traits.hpp>
 #include <ratl/frame_span.hpp>
 
 namespace ratl
 {
 namespace detail
 {
-template<class Sample>
-class InterleavedIterator
+template<class SampleType>
+class interleaved_iterator
 {
-private:
-    using sample_traits = SampleTraits<Sample>;
-    using sample = typename sample_traits::sample;
+    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_type = typename sample_traits::sample_type;
     using sample_pointer = typename sample_traits::pointer;
     using sample_reference = typename sample_traits::reference;
 
-    using size_type = detail::types::size_type;
+    using size_type = std::size_t;
 
-    using frame_type = BasicFrameSpan<sample, true>;
+    using frame_type = basic_frame_span<sample_type, true>;
 
 public:
     using iterator_category = std::random_access_iterator_tag;
     using value_type = frame_type;
-    using difference_type = detail::types::difference_type;
+    using difference_type = std::ptrdiff_t;
     using pointer = detail::operator_arrow_proxy<frame_type>;
     using reference = frame_type;
 
@@ -39,13 +38,13 @@ private:
     size_type channels_ = 0;
 
 public:
-    InterleavedIterator() noexcept = default;
+    interleaved_iterator() noexcept = default;
 
-    InterleavedIterator(sample_pointer data, size_type channels) noexcept : data_(data), channels_(channels) {}
+    interleaved_iterator(sample_pointer data, size_type channels) noexcept : data_(data), channels_(channels) {}
 
-    InterleavedIterator(const InterleavedIterator& other) noexcept = default;
+    interleaved_iterator(const interleaved_iterator& other) noexcept = default;
 
-    InterleavedIterator& operator=(const InterleavedIterator& other) noexcept = default;
+    interleaved_iterator& operator=(const interleaved_iterator& other) noexcept = default;
 
     inline size_type channels() const noexcept
     {
@@ -67,51 +66,51 @@ public:
         return reference(data_ + (n * channels_), channels_);
     }
 
-    inline InterleavedIterator& operator++() noexcept
+    inline interleaved_iterator& operator++() noexcept
     {
         data_ += channels_;
         return *this;
     }
 
-    inline InterleavedIterator operator++(int) noexcept
+    inline interleaved_iterator operator++(int) noexcept
     {
-        auto&& tmp = InterleavedIterator(*this);
+        auto&& tmp = interleaved_iterator(*this);
         ++(*this);
         return tmp;
     }
 
-    inline InterleavedIterator& operator--() noexcept
+    inline interleaved_iterator& operator--() noexcept
     {
         data_ -= channels_;
         return *this;
     }
 
-    inline InterleavedIterator operator--(int) noexcept
+    inline interleaved_iterator operator--(int) noexcept
     {
-        auto&& tmp = InterleavedIterator(*this);
+        auto&& tmp = interleaved_iterator(*this);
         --(*this);
         return tmp;
     }
 
-    inline InterleavedIterator operator+(difference_type n) const noexcept
+    inline interleaved_iterator operator+(difference_type n) const noexcept
     {
-        auto&& w = InterleavedIterator(*this);
+        auto&& w = interleaved_iterator(*this);
         w += n;
         return w;
     }
 
-    inline InterleavedIterator& operator+=(difference_type n) noexcept
+    inline interleaved_iterator& operator+=(difference_type n) noexcept
     {
         data_ += static_cast<difference_type>(n * channels_);
         return *this;
     }
 
-    inline InterleavedIterator operator-(difference_type n) const noexcept
+    inline interleaved_iterator operator-(difference_type n) const noexcept
     {
         return *this + (-n);
     }
 
-    inline InterleavedIterator& operator-=(difference_type n) noexcept
+    inline interleaved_iterator& operator-=(difference_type n) noexcept
     {
         *this += -n;
         return *this;
@@ -119,62 +118,63 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline bool operator==(const InterleavedIterator& other) const noexcept
+    inline bool operator==(const interleaved_iterator& other) const noexcept
     {
         return data_ == other.data_;
     }
 
-    inline bool operator<(const InterleavedIterator& other) const noexcept
+    inline bool operator<(const interleaved_iterator& other) const noexcept
     {
         return data_ < other.data_;
     }
 
-    inline auto operator<=>(const InterleavedIterator& other) const noexcept = default;
+    inline auto operator<=>(const interleaved_iterator& other) const noexcept = default;
 
 #else
 
-    friend inline bool operator==(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
+    friend inline bool operator==(const interleaved_iterator& x, const interleaved_iterator& y) noexcept
     {
         return x.data_ == y.data_;
     }
 
-    friend inline bool operator!=(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
+    friend inline bool operator!=(const interleaved_iterator& x, const interleaved_iterator& y) noexcept
     {
         return !(x == y);
     }
 
-    friend inline bool operator<(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
+    friend inline bool operator<(const interleaved_iterator& x, const interleaved_iterator& y) noexcept
     {
         return x.data_ < y.data_;
     }
 
-    friend inline bool operator<=(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
+    friend inline bool operator<=(const interleaved_iterator& x, const interleaved_iterator& y) noexcept
     {
         return !(x > y);
     }
 
-    friend inline bool operator>(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
+    friend inline bool operator>(const interleaved_iterator& x, const interleaved_iterator& y) noexcept
     {
         return y < x;
     }
 
-    friend inline bool operator>=(const InterleavedIterator& x, const InterleavedIterator& y) noexcept
+    friend inline bool operator>=(const interleaved_iterator& x, const interleaved_iterator& y) noexcept
     {
         return !(x < y);
     }
 
 #endif
 
-    friend inline InterleavedIterator operator+(typename InterleavedIterator::difference_type n, InterleavedIterator x)
+    friend inline interleaved_iterator operator+(
+        typename interleaved_iterator::difference_type n, interleaved_iterator x)
     {
         x += n;
         return x;
     }
 
-    friend inline typename InterleavedIterator::difference_type operator-(
-        const InterleavedIterator& x, const InterleavedIterator& y)
+    friend inline typename interleaved_iterator::difference_type operator-(
+        const interleaved_iterator& x, const interleaved_iterator& y)
     {
-        return (x.data_ - y.data_) / static_cast<typename InterleavedIterator::difference_type>(x.channels_);
+        return (x.data_ - y.data_) / static_cast<typename interleaved_iterator::difference_type>(x.channels_);
     }
 
     inline sample_pointer base() const noexcept

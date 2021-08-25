@@ -5,18 +5,19 @@ namespace ratl
 {
 namespace test
 {
-template<typename SampleType, typename Converter>
-SampleType convert(ratl::float32_t sample)
+template<typename SampleValueType, typename Converter>
+SampleValueType convert(ratl::float32_t sample)
 {
-    if RATL_UNLIKELY (sample >= ratl::SampleTypeLimits<ratl::float32_t>::max)
+    if (RATL_UNLIKELY (sample >= ratl::sample_limits<ratl::float32_t>::max))
     {
-        return ratl::SampleTypeLimits<SampleType>::max;
+        return ratl::sample_limits<SampleValueType>::max;
     }
-    if RATL_UNLIKELY (sample < ratl::SampleTypeLimits<ratl::float32_t>::min)
+    if (RATL_UNLIKELY (sample < ratl::sample_limits<ratl::float32_t>::min))
     {
-        return ratl::SampleTypeLimits<SampleType>::min;
+        return ratl::sample_limits<SampleValueType>::min;
     }
-    return static_cast<SampleType>(Converter::convert(sample * detail::FloatConvertTraits<SampleType>::Multiplier));
+    return static_cast<SampleValueType>(
+        Converter::convert(sample * detail::float_convert_traits<SampleValueType>::multiplier));
 }
 
 struct RoundHalfUpConverter
@@ -31,7 +32,7 @@ struct MagicConverter
 {
     static int32_t convert(ratl::float32_t sample) noexcept
     {
-        return detail::roundFloat32ToInt32Magic(sample);
+        return detail::round_float32_to_int32_magic(sample);
     }
 };
 
@@ -39,27 +40,29 @@ template<typename SampleTypeArg>
 class TestRound : public testing::Test
 {
 public:
-    using SampleType = SampleTypeArg;
+    using sample_type = SampleTypeArg;
 };
 
 TYPED_TEST_SUITE(TestRound, PossibleIntSampleTypes, );
 
 TYPED_TEST(TestRound, MagicEqualToRoundHalfUp)
 {
-    using SampleType = typename TestFixture::SampleType;
+    using sample_type = typename TestFixture::sample_type;
 
     static constexpr float32_t FloatMin = 1e-10;
 
-    for (float32_t input = ratl::SampleTypeLimits<float32_t>::max; input > FloatMin; input = std::nextafter(input, 0.f))
+    for (float32_t input = ratl::sample_limits<float32_t>::max; input > FloatMin;
+         input = std::nextafter(input, 0.f))
     {
-        auto reference_output = static_cast<std::int64_t>(convert<SampleType, RoundHalfUpConverter>(input));
-        auto test_output = static_cast<std::int64_t>(convert<SampleType, MagicConverter>(input));
+        auto reference_output = static_cast<std::int64_t>(convert<sample_type, RoundHalfUpConverter>(input));
+        auto test_output = static_cast<std::int64_t>(convert<sample_type, MagicConverter>(input));
         EXPECT_EQ(test_output, reference_output);
     }
-    for (float32_t input = ratl::SampleTypeLimits<float32_t>::min; input < -FloatMin; input = std::nextafter(input, 0.f))
+    for (float32_t input = ratl::sample_limits<float32_t>::min; input < -FloatMin;
+         input = std::nextafter(input, 0.f))
     {
-        auto reference_output = static_cast<std::int64_t>(convert<SampleType, RoundHalfUpConverter>(input));
-        auto test_output = static_cast<std::int64_t>(convert<SampleType, MagicConverter>(input));
+        auto reference_output = static_cast<std::int64_t>(convert<sample_type, RoundHalfUpConverter>(input));
+        auto test_output = static_cast<std::int64_t>(convert<sample_type, MagicConverter>(input));
         EXPECT_EQ(test_output, reference_output);
     }
 }

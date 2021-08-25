@@ -10,12 +10,12 @@ namespace ratl
 {
 namespace detail
 {
-struct ChannelIteratorTag
+struct channel_iterator_tag
 {
 };
 
-template<class Sample, bool Contiguous = false>
-using ChannelIterator = SampleIterator<ChannelIteratorTag, Sample, Contiguous>;
+template<class SampleType, bool Contiguous = false>
+using channel_iterator = sample_iterator<channel_iterator_tag, SampleType, Contiguous>;
 
 } // namespace detail
 } // namespace ratl

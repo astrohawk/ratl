@@ -132,12 +132,12 @@
 // RATL_LIKELY(x)
 // RATL_UNLIKELY(x)
 
-#if defined(RATL_CPP_COMPILER_MSVC)
-#    define RATL_LIKELY(x) (x)
-#    define RATL_UNLIKELY(x) (x)
-#elif defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
-#    define RATL_LIKELY(x) (__builtin_expect((x), 1))
-#    define RATL_UNLIKELY(x) (__builtin_expect((x), 0))
+#if defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
+#    define RATL_LIKELY(x) __builtin_expect(x, 1)
+#    define RATL_UNLIKELY(x) __builtin_expect(x, 0)
+#else
+#    define RATL_LIKELY(x) x
+#    define RATL_UNLIKELY(x) x
 #endif
 
 #endif // _ratl_detail_config_

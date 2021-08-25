@@ -11,7 +11,7 @@
 
 namespace ratl
 {
-using DitherGenerator = detail::BatchTriangularDitherGenerator;
+using dither_generator = detail::batch_triangular_dither_generator;
 
 }
 

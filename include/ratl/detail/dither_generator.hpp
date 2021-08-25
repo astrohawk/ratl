@@ -14,80 +14,82 @@ namespace ratl
 {
 namespace detail
 {
-class NullDitherGenerator
+class null_dither_generator
 {
 public:
-    static constexpr std::size_t Int16Bits = 0;
-    static constexpr float32_t MaxFloat32 = 0;
+    static constexpr std::size_t int16_bits = 0;
+    static constexpr float32_t float32_max = 0;
 
-    constexpr inline int32_t generateInt16() noexcept
+    inline constexpr int32_t generate_int16() noexcept
     {
         return 0;
     }
 
-    constexpr inline float32_t generateFloat32() noexcept
+    inline constexpr float32_t generate_float32() noexcept
     {
         return 0;
     }
 };
 
-class TriangularDitherGenerator
+class triangular_dither_generator
 {
 public:
-    static constexpr std::size_t Int16Bits = 15;
-    static constexpr float32_t MaxFloat32 = 1.0;
+    static constexpr std::size_t int16_bits = 15;
+    static constexpr float32_t float32_max = 1.0;
 
-    constexpr inline int32_t generateInt16() noexcept
+    inline constexpr int32_t generate_int16() noexcept
     {
-        return (static_cast<int32_t>(rng_()) >> Int16Shift) + (static_cast<int32_t>(rng_()) >> Int16Shift);
+        return (static_cast<int32_t>(rng_()) >> int16_shift) + (static_cast<int32_t>(rng_()) >> int16_shift);
     }
 
-    constexpr inline float32_t generateFloat32() noexcept
+    inline constexpr float32_t generate_float32() noexcept
     {
-        auto current = (static_cast<int32_t>(rng_()) >> Float32Shift) + (static_cast<int32_t>(rng_()) >> Float32Shift);
-        return static_cast<float32_t>(current) * Float32Scaler;
+        auto current =
+            (static_cast<int32_t>(rng_()) >> float32_shift) + (static_cast<int32_t>(rng_()) >> float32_shift);
+        return static_cast<float32_t>(current) * float32_scaler;
     }
 
 private:
-    static constexpr uint32_t DefaultSeed = 0x1942da21;
-    static constexpr std::size_t Int16Shift = (32 - Int16Bits);
-    static constexpr std::size_t Float32Shift = 1;
-    static constexpr float32_t Float32Scaler = detail::FloatConvertTraits<int32_t>::Divisor;
+    static constexpr uint32_t default_seed = 0x1942da21;
+    static constexpr std::size_t int16_shift = (32 - int16_bits);
+    static constexpr std::size_t float32_shift = 1;
+    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
 
-    detail::LinearCongruentialGenerator rng_{DefaultSeed};
+    detail::linear_congruential_generator rng_{default_seed};
 };
 
-class ShapedDitherGenerator
+class shaped_dither_generator
 {
 public:
-    static constexpr std::size_t Int16Bits = 15;
-    static constexpr float32_t MaxFloat32 = 1.0;
+    static constexpr std::size_t int16_bits = 15;
+    static constexpr float32_t float32_max = 1.0;
 
-    constexpr inline int32_t generateInt16() noexcept
+    inline constexpr int32_t generate_int16() noexcept
     {
-        return generateHighPass() >> Int16Shift;
+        return generate_high_pass() >> int16_shift;
     }
 
-    constexpr inline float32_t generateFloat32() noexcept
+    inline constexpr float32_t generate_float32() noexcept
     {
-        return static_cast<float32_t>(generateHighPass()) * Float32Scaler;
+        return static_cast<float32_t>(generate_high_pass()) * float32_scaler;
     }
 
 private:
-    constexpr inline int32_t generateHighPass() noexcept
+    inline constexpr int32_t generate_high_pass() noexcept
     {
-        auto current = (static_cast<int32_t>(rng_()) >> InitialShift) + (static_cast<int32_t>(rng_()) >> InitialShift);
+        auto current =
+            (static_cast<int32_t>(rng_()) >> initial_shift) + (static_cast<int32_t>(rng_()) >> initial_shift);
         auto high_pass = current - previous_;
         previous_ = current;
         return high_pass;
     }
 
-    static constexpr uint32_t DefaultSeed = 0xac9ad704;
-    static constexpr std::size_t InitialShift = 2;
-    static constexpr std::size_t Int16Shift = 32 - Int16Bits - (InitialShift - 1);
-    static constexpr float32_t Float32Scaler = detail::FloatConvertTraits<int32_t>::Divisor;
+    static constexpr uint32_t default_seed = 0xac9ad704;
+    static constexpr std::size_t initial_shift = 2;
+    static constexpr std::size_t int16_shift = 32 - int16_bits - (initial_shift - 1);
+    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
 
-    detail::LinearCongruentialGenerator rng_{DefaultSeed};
+    detail::linear_congruential_generator rng_{default_seed};
     int32_t previous_{};
 };
 

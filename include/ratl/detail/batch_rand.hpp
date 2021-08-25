@@ -5,7 +5,7 @@
 #include <cstdint>
 
 // ratl includes
-#include <ratl/detail/batch_base_traits.hpp>
+#include <ratl/detail/batch_value_traits.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/rand.hpp>
 
@@ -15,39 +15,39 @@ namespace ratl
 {
 namespace detail
 {
-class BatchLinearCongruentialGenerator
+class batch_linear_congruential_generator
 {
-    using Batch = xsimd::batch<uint32_t, BatchSize>;
+    using batch_type = xsimd::batch<uint32_t, batch_size>;
 
 public:
-    explicit BatchLinearCongruentialGenerator(uint32_t seed) noexcept :
-        state_(makeBatchState(seed, std::make_index_sequence<BatchSize>{}))
+    explicit batch_linear_congruential_generator(uint32_t seed) noexcept :
+        state_(make_batch_state(seed, std::make_index_sequence<batch_size>{}))
     {
     }
 
-    ~BatchLinearCongruentialGenerator() = default;
+    ~batch_linear_congruential_generator() = default;
 
-    BatchLinearCongruentialGenerator(const BatchLinearCongruentialGenerator&) = delete;
+    batch_linear_congruential_generator(const batch_linear_congruential_generator&) = delete;
 
-    BatchLinearCongruentialGenerator& operator=(const BatchLinearCongruentialGenerator&) = delete;
+    batch_linear_congruential_generator& operator=(const batch_linear_congruential_generator&) = delete;
 
-    BatchLinearCongruentialGenerator(BatchLinearCongruentialGenerator&&) noexcept = default;
+    batch_linear_congruential_generator(batch_linear_congruential_generator&&) noexcept = default;
 
-    BatchLinearCongruentialGenerator& operator=(BatchLinearCongruentialGenerator&&) noexcept = default;
+    batch_linear_congruential_generator& operator=(batch_linear_congruential_generator&&) noexcept = default;
 
-    inline Batch operator()() noexcept
+    inline batch_type operator()() noexcept
     {
-        state_ = (Multiplier * state_) + Increment;
+        state_ = (multiplier * state_) + increment;
         return state_;
     }
 
     inline void jump() noexcept
     {
-        state_ = (*this)() ^ JumpMask;
+        state_ = (*this)() ^ jump_mask;
     }
 
 private:
-    static uint32_t makeState(LinearCongruentialGenerator& gen, std::size_t)
+    static uint32_t make_state(linear_congruential_generator& gen, std::size_t)
     {
         auto state = gen();
         gen.jump();
@@ -55,21 +55,21 @@ private:
     }
 
     template<std::size_t... I>
-    static Batch makeBatchState(uint32_t seed, std::index_sequence<I...>)
+    static batch_type make_batch_state(uint32_t seed, std::index_sequence<I...>)
     {
-        LinearCongruentialGenerator gen{seed};
-        return Batch{makeState(gen, I)...};
+        linear_congruential_generator gen{seed};
+        return batch_type{make_state(gen, I)...};
     }
 
-    static constexpr uint32_t Multiplier = 0x0bb38435;
-    static constexpr uint32_t Increment = 0x3619636b;
-    static constexpr uint32_t JumpMask = 0x8739cbf1;
-    Batch state_;
+    static constexpr uint32_t multiplier = 0x0bb38435;
+    static constexpr uint32_t increment = 0x3619636b;
+    static constexpr uint32_t jump_mask = 0x8739cbf1;
+    batch_type state_;
 };
 
-constexpr uint32_t BatchLinearCongruentialGenerator::Multiplier;
-constexpr uint32_t BatchLinearCongruentialGenerator::Increment;
-constexpr uint32_t BatchLinearCongruentialGenerator::JumpMask;
+constexpr uint32_t batch_linear_congruential_generator::multiplier;
+constexpr uint32_t batch_linear_congruential_generator::increment;
+constexpr uint32_t batch_linear_congruential_generator::jump_mask;
 
 } // namespace detail
 } // namespace ratl

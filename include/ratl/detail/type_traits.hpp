@@ -1,5 +1,5 @@
-#ifndef _ratl_type_traits_
-#define _ratl_type_traits_
+#ifndef _ratl_detail_type_traits_
+#define _ratl_detail_type_traits_
 
 // C++ Standard Library includes
 #include <array>
@@ -7,8 +7,7 @@
 
 // ratl includes
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/type_traits.hpp>
-#include <ratl/detail/types.hpp>
+#include <ratl/detail/sample_value_traits.hpp>
 #include <ratl/types.hpp>
 
 namespace ratl
@@ -33,136 +32,24 @@ template<class... Ts>
 using void_t = typename detail::void_impl<Ts...>::type;
 #endif
 
-// IsComplete
+// is_complete
 
 template<typename Tp, class = void>
-struct IsComplete : std::false_type
+struct is_complete : std::false_type
 {
 };
 
 template<typename Tp>
-struct IsComplete<Tp, decltype(void(sizeof(Tp)))> : std::true_type
+struct is_complete<Tp, decltype(void(sizeof(Tp)))> : std::true_type
 {
 };
 
-// IsComplete_v
+// is_complete_v
 
 template<class Tp>
-static constexpr bool IsComplete_v = IsComplete<Tp>::value;
-
-template<class SampleType>
-struct IsSampleTypeImpl : public std::false_type
-{
-};
-template<>
-struct IsSampleTypeImpl<int16_t> : public std::true_type
-{
-};
-template<>
-struct IsSampleTypeImpl<int24_t> : public std::true_type
-{
-};
-template<>
-struct IsSampleTypeImpl<int32_t> : public std::true_type
-{
-};
-template<>
-struct IsSampleTypeImpl<float32_t> : public std::true_type
-{
-};
-
-// SampleTypeDecay
-
-template<class SampleType>
-struct SampleTypeDecay
-{
-    using type = std::remove_cv_t<SampleType>;
-
-    static_assert(detail::IsSampleTypeImpl<type>::value, "SampleType is not a valid Sample type");
-};
-
-// SampleTypeDecay_t
-
-template<class SampleType>
-using SampleTypeDecay_t = typename SampleTypeDecay<SampleType>::type;
-
-// IsSampleType
-
-template<class SampleType>
-struct IsSampleType : public detail::IsSampleTypeImpl<SampleTypeDecay_t<SampleType>>
-{
-};
-
-// IsSampleType_v
-
-template<class SampleType>
-static constexpr bool IsSampleType_v = IsSampleType<SampleType>::value;
-
-// NetworkSampleValueUnderlyingType
-
-template<class SampleType>
-struct NetworkSampleValueUnderlyingType;
-
-template<>
-struct NetworkSampleValueUnderlyingType<int16_t>
-{
-    using type = uint16_t;
-};
-
-template<>
-struct NetworkSampleValueUnderlyingType<int24_t>
-{
-    using type = uint24_t;
-};
-
-template<>
-struct NetworkSampleValueUnderlyingType<int32_t>
-{
-    using type = uint32_t;
-};
-
-template<>
-struct NetworkSampleValueUnderlyingType<float32_t>
-{
-    using type = uint32_t;
-};
-
-// NetworkSampleValueUnderlyingType_t
-
-template<class SampleType>
-using NetworkSampleValueUnderlyingType_t = typename NetworkSampleValueUnderlyingType<SampleType>::type;
-
-// NetworkSampleValueType
-
-template<class SampleType>
-struct NetworkSampleValueType
-{
-    static_assert(IsSampleType_v<SampleType>, "SampleType is not a valid Sample type");
-
-    // opaque type
-    class type final
-    {
-    public:
-        constexpr bool operator==(const type& other) const noexcept
-        {
-            return storage_ == other.storage_;
-        }
-
-        constexpr bool operator!=(const type& other) const noexcept
-        {
-            return storage_ != other.storage_;
-        }
-
-        NetworkSampleValueUnderlyingType_t<SampleType> storage_;
-    };
-};
-
-// NetworkSampleValueType_t
-
-template<class SampleType>
-using NetworkSampleValueType_t = typename NetworkSampleValueType<SampleType>::type;
+static constexpr bool is_complete_v = is_complete<Tp>::value;
 
 } // namespace detail
 } // namespace ratl
 
-#endif // _ratl_type_traits_
+#endif // _ratl_detail_type_traits_

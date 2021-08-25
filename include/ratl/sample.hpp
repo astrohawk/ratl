@@ -7,41 +7,44 @@
 
 // ratl includes
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/type_traits.hpp>
+#include <ratl/detail/sample_value_traits.hpp>
 
 namespace ratl
 {
-template<class SampleType>
-class Sample final
+template<class SampleValueType>
+class sample final
 {
-public:
-    using sample_type = detail::SampleTypeDecay_t<SampleType>;
+    static_assert(
+        detail::is_valid_sample_value_type_v<SampleValueType>, "SampleValueType is not a valid sample value type");
 
-    using value_type = sample_type;
+public:
+    using sample_value_type = SampleValueType;
+
+    using value_type = sample_value_type;
     using reference = value_type&;
     using const_reference = const value_type&;
     using pointer = value_type*;
     using const_pointer = const value_type*;
 
-    Sample() noexcept = default;
+    sample() noexcept = default;
 
-    constexpr Sample(const Sample&) noexcept = default;
+    constexpr sample(const sample&) noexcept = default;
 
-    constexpr Sample(Sample&&) noexcept = default;
+    constexpr sample(sample&&) noexcept = default;
 
-    constexpr Sample& operator=(const Sample&) noexcept = default;
+    constexpr sample& operator=(const sample&) noexcept = default;
 
-    constexpr Sample& operator=(Sample&&) noexcept = default;
+    constexpr sample& operator=(sample&&) noexcept = default;
 
-    ~Sample() = default;
+    ~sample() = default;
 
     template<class Up, class = typename std::enable_if<std::is_convertible<Up, value_type>::value>::type>
-    constexpr explicit Sample(const Up& other) noexcept : sample_(other)
+    constexpr explicit sample(const Up& other) noexcept : sample_(other)
     {
     }
 
     template<class Up, class = typename std::enable_if<std::is_convertible<Up, value_type>::value>::type>
-    constexpr Sample& operator=(const Up& other) noexcept
+    constexpr sample& operator=(const Up& other) noexcept
     {
         sample_ = other;
         return *this;
@@ -59,71 +62,71 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline bool operator==(const Sample& other) const noexcept
+    inline bool operator==(const sample& other) const noexcept
     {
         return sample_ == other.sample_;
     }
 
-    inline bool operator!=(const Sample& other) const noexcept
+    inline bool operator!=(const sample& other) const noexcept
     {
         return sample_ != other.sample_;
     }
 
-    inline bool operator<(const Sample& other) const noexcept
+    inline bool operator<(const sample& other) const noexcept
     {
         return sample_ < other.sample_;
     }
 
-    inline bool operator<=(const Sample& other) const noexcept
+    inline bool operator<=(const sample& other) const noexcept
     {
         return sample_ <= other.sample_;
     }
 
-    inline bool operator>(const Sample& other) const noexcept
+    inline bool operator>(const sample& other) const noexcept
     {
         return sample_ > other.sample_;
     }
 
-    inline bool operator>=(const Sample& other) const noexcept
+    inline bool operator>=(const sample& other) const noexcept
     {
         return sample_ >= other.sample_;
     }
 
 #else
 
-    friend inline constexpr bool operator==(const Sample& x, const Sample& y) noexcept
+    friend inline constexpr bool operator==(const sample& x, const sample& y) noexcept
     {
         return x.sample_ == y.sample_;
     }
 
-    friend inline constexpr bool operator!=(const Sample& x, const Sample& y) noexcept
+    friend inline constexpr bool operator!=(const sample& x, const sample& y) noexcept
     {
         return x.sample_ != y.sample_;
     }
 
-    friend inline constexpr bool operator<(const Sample& x, const Sample& y) noexcept
+    friend inline constexpr bool operator<(const sample& x, const sample& y) noexcept
     {
         return x.sample_ < y.sample_;
     }
 
-    friend inline constexpr bool operator<=(const Sample& x, const Sample& y) noexcept
+    friend inline constexpr bool operator<=(const sample& x, const sample& y) noexcept
     {
         return x.sample_ <= y.sample_;
     }
 
-    friend inline constexpr bool operator>(const Sample& x, const Sample& y) noexcept
+    friend inline constexpr bool operator>(const sample& x, const sample& y) noexcept
     {
         return x.sample_ > y.sample_;
     }
 
-    friend inline constexpr bool operator>=(const Sample& x, const Sample& y) noexcept
+    friend inline constexpr bool operator>=(const sample& x, const sample& y) noexcept
     {
         return x.sample_ >= y.sample_;
     }
 
 #endif
 
-    friend inline std::ostream& operator<<(std::ostream& os, const Sample& sample)
+    friend inline std::ostream& operator<<(std::ostream& os, const sample& sample)
     {
         return os << sample.sample_;
     }
@@ -132,36 +135,36 @@ public:
     value_type sample_;
 };
 
-static_assert(std::is_trivial<Sample<int16_t>>::value, "Sample<int16_t> is not a trivial type");
+static_assert(std::is_trivial<sample<int16_t>>::value, "sample<int16_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<Sample<int16_t>>::value,
-    "Sample<int16_t> is not a trivially default constructible type");
-static_assert(std::is_trivially_copyable<Sample<int16_t>>::value, "Sample<int16_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<Sample<int16_t>>::value, "Sample<int16_t> is not a standard layout type");
-static_assert(std::is_trivial<Sample<int24_t>>::value, "Sample<int24_t> is not a trivial type");
+    std::is_trivially_default_constructible<sample<int16_t>>::value,
+    "sample<int16_t> is not a trivially default constructible type");
+static_assert(std::is_trivially_copyable<sample<int16_t>>::value, "sample<int16_t> is not a trivially copyable type");
+static_assert(std::is_standard_layout<sample<int16_t>>::value, "sample<int16_t> is not a standard layout type");
+static_assert(std::is_trivial<sample<int24_t>>::value, "sample<int24_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<Sample<int24_t>>::value,
-    "Sample<int24_t> is not a trivially default constructible type");
-static_assert(std::is_trivially_copyable<Sample<int24_t>>::value, "Sample<int24_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<Sample<int24_t>>::value, "Sample<int24_t> is not a standard layout type");
-static_assert(std::is_trivial<Sample<int32_t>>::value, "Sample<int32_t> is not a trivial type");
+    std::is_trivially_default_constructible<sample<int24_t>>::value,
+    "sample<int24_t> is not a trivially default constructible type");
+static_assert(std::is_trivially_copyable<sample<int24_t>>::value, "sample<int24_t> is not a trivially copyable type");
+static_assert(std::is_standard_layout<sample<int24_t>>::value, "sample<int24_t> is not a standard layout type");
+static_assert(std::is_trivial<sample<int32_t>>::value, "sample<int32_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<Sample<int32_t>>::value,
-    "Sample<int32_t> is not a trivially default constructible type");
-static_assert(std::is_trivially_copyable<Sample<int32_t>>::value, "Sample<int32_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<Sample<int32_t>>::value, "Sample<int32_t> is not a standard layout type");
-static_assert(std::is_trivial<Sample<float32_t>>::value, "Sample<float32_t> is not a trivial type");
+    std::is_trivially_default_constructible<sample<int32_t>>::value,
+    "sample<int32_t> is not a trivially default constructible type");
+static_assert(std::is_trivially_copyable<sample<int32_t>>::value, "sample<int32_t> is not a trivially copyable type");
+static_assert(std::is_standard_layout<sample<int32_t>>::value, "sample<int32_t> is not a standard layout type");
+static_assert(std::is_trivial<sample<float32_t>>::value, "sample<float32_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<Sample<float32_t>>::value,
-    "Sample<float32_t> is not a trivially default constructible type");
+    std::is_trivially_default_constructible<sample<float32_t>>::value,
+    "sample<float32_t> is not a trivially default constructible type");
 static_assert(
-    std::is_trivially_copyable<Sample<float32_t>>::value, "Sample<float32_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<Sample<float32_t>>::value, "Sample<float32_t> is not a standard layout type");
+    std::is_trivially_copyable<sample<float32_t>>::value, "sample<float32_t> is not a trivially copyable type");
+static_assert(std::is_standard_layout<sample<float32_t>>::value, "sample<float32_t> is not a standard layout type");
 
-using SampleInt16 = Sample<int16_t>;
-using SampleInt24 = Sample<int24_t>;
-using SampleInt32 = Sample<int32_t>;
-using SampleFloat32 = Sample<float32_t>;
+using sample_int16 = sample<int16_t>;
+using sample_int24 = sample<int24_t>;
+using sample_int32 = sample<int32_t>;
+using sample_float32 = sample<float32_t>;
 
 } // namespace ratl
 

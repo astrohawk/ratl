@@ -25,10 +25,10 @@ double sawtooth(double position)
     return 2 * (std::fmod(position, 1.0) - 1);
 }
 
-static constexpr std::size_t FrameSize = 65536;
-static constexpr std::size_t SampleRate = 44100;
-static constexpr std::size_t Frequency = 1000;
-static constexpr double Amplitude = 0.8;
+static constexpr std::size_t frame_size = 65536;
+static constexpr std::size_t sample_rate = 44100;
+static constexpr std::size_t frequency = 1000;
+static constexpr double amplitude = 0.8;
 
 PYBIND11_MODULE(ratl_pybind, m)
 {
@@ -38,11 +38,11 @@ PYBIND11_MODULE(ratl_pybind, m)
         "triangular_pdf",
         []()
         {
-            ratl::detail::TriangularDitherGenerator gen;
+            ratl::detail::triangular_dither_generator gen;
             std::vector<double> samples(1000000);
             for (auto& sample : samples)
             {
-                sample = gen.generateFloat32();
+                sample = gen.generate_float32();
             }
             return samples;
         });
@@ -50,11 +50,11 @@ PYBIND11_MODULE(ratl_pybind, m)
         "gaussian_pdf",
         []()
         {
-            ratl::detail::ShapedDitherGenerator gen;
+            ratl::detail::shaped_dither_generator gen;
             std::vector<double> samples(1000000);
             for (auto& sample : samples)
             {
-                sample = gen.generateFloat32();
+                sample = gen.generate_float32();
             }
             return samples;
         });
@@ -62,23 +62,23 @@ PYBIND11_MODULE(ratl_pybind, m)
         "samplerate",
         []()
         {
-            return SampleRate;
+            return sample_rate;
         });
     m.def(
         "num_samples",
         []()
         {
-            return FrameSize;
+            return frame_size;
         });
     m.def(
         "reference_double_tone",
         []()
         {
-            std::vector<double> samples(FrameSize);
-            double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
+            std::vector<double> samples(frame_size);
+            double samples_per_cycle = static_cast<double>(sample_rate) / static_cast<double>(frequency);
             for (std::size_t i = 0; i < samples.size(); ++i)
             {
-                samples[i] = Amplitude * tone(static_cast<double>(i) / samples_per_cycle);
+                samples[i] = amplitude * tone(static_cast<double>(i) / samples_per_cycle);
             }
 
             return samples;
@@ -87,24 +87,24 @@ PYBIND11_MODULE(ratl_pybind, m)
         "reference_int16_tone",
         []()
         {
-            ratl::Interleaved<ratl::float32_t> input(1, FrameSize);
-            double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
+            ratl::interleaved<ratl::float32_t> input(1, frame_size);
+            double samples_per_cycle = static_cast<double>(sample_rate) / static_cast<double>(frequency);
             for (std::size_t i = 0; i < input.frames(); ++i)
             {
                 input.channel(0)[i].get() =
-                    static_cast<float>(Amplitude * tone(static_cast<double>(i) / samples_per_cycle));
+                    static_cast<float>(amplitude * tone(static_cast<double>(i) / samples_per_cycle));
             }
 
-            ratl::Interleaved<ratl::int32_t> temp1(1, FrameSize);
+            ratl::interleaved<ratl::int32_t> temp1(1, frame_size);
             ratl::transform(input.begin(), input.end(), temp1.begin());
 
-            ratl::Interleaved<ratl::int16_t> temp2(1, FrameSize);
+            ratl::interleaved<ratl::int16_t> temp2(1, frame_size);
             ratl::transform(temp1.begin(), temp1.end(), temp2.begin());
 
-            ratl::Interleaved<ratl::float32_t> output(1, FrameSize);
+            ratl::interleaved<ratl::float32_t> output(1, frame_size);
             ratl::transform(temp2.begin(), temp2.end(), output.begin());
 
-            std::vector<float> samples(FrameSize);
+            std::vector<float> samples(frame_size);
             for (std::size_t i = 0; i < samples.size(); ++i)
             {
                 samples[i] = output.channel(0)[i].get();
@@ -115,26 +115,26 @@ PYBIND11_MODULE(ratl_pybind, m)
         "dither_int16_tone",
         []()
         {
-            ratl::DitherGenerator dither_generator;
+            ratl::dither_generator dither_gen;
 
-            ratl::Interleaved<ratl::float32_t> input(1, FrameSize);
-            double samples_per_cycle = static_cast<double>(SampleRate) / static_cast<double>(Frequency);
+            ratl::interleaved<ratl::float32_t> input(1, frame_size);
+            double samples_per_cycle = static_cast<double>(sample_rate) / static_cast<double>(frequency);
             for (std::size_t i = 0; i < input.frames(); ++i)
             {
                 input.channel(0)[i].get() =
-                    static_cast<float>(Amplitude * tone(static_cast<double>(i) / samples_per_cycle));
+                    static_cast<float>(amplitude * tone(static_cast<double>(i) / samples_per_cycle));
             }
 
-            ratl::Interleaved<ratl::int32_t> temp1(1, FrameSize);
-            ratl::transform(input.begin(), input.end(), temp1.begin(), dither_generator);
+            ratl::interleaved<ratl::int32_t> temp1(1, frame_size);
+            ratl::transform(input.begin(), input.end(), temp1.begin(), dither_gen);
 
-            ratl::Interleaved<ratl::int16_t> temp2(1, FrameSize);
-            ratl::transform(temp1.begin(), temp1.end(), temp2.begin(), dither_generator);
+            ratl::interleaved<ratl::int16_t> temp2(1, frame_size);
+            ratl::transform(temp1.begin(), temp1.end(), temp2.begin(), dither_gen);
 
-            ratl::Interleaved<ratl::float32_t> output(1, FrameSize);
-            ratl::transform(temp2.begin(), temp2.end(), output.begin(), dither_generator);
+            ratl::interleaved<ratl::float32_t> output(1, frame_size);
+            ratl::transform(temp2.begin(), temp2.end(), output.begin(), dither_gen);
 
-            std::vector<float> samples(FrameSize);
+            std::vector<float> samples(frame_size);
             for (std::size_t i = 0; i < samples.size(); ++i)
             {
                 samples[i] = output.channel(0)[i].get();

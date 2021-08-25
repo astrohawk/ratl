@@ -9,7 +9,7 @@ ways to convert audio data between these various types.
 Support for:
 1. 16 bit, 24 bit, and 32 bit integer, and 32 bit floating point samples
 1. Host byte order and network byte order samples
-1. Interleaved and non-interleaved audio buffers
+1. interleaved and non-interleaved audio buffers
 1. Optional sample dithering
 
 ## Getting Started
@@ -21,10 +21,10 @@ dithering:
 ```cpp
 std::size_t channels = 4;
 std::size_t frames = 32;
-ratl::Interleaved<ratl::float32_t> input = generate_tone(channels, frames);
-ratl::NetworkInterleaved<ratl::int16_t> output(channels, frames);
-ratl::DitherGenerator dither_generator;
-ratl::transform(input.begin(), input.end(), output.begin(), dither_generator);
+ratl::interleaved<ratl::float32_t> input = generate_tone(channels, frames);
+ratl::network_interleaved<ratl::int16_t> output(channels, frames);
+ratl::DitherGenerator DitherGenerator;
+ratl::transform(input.begin(), input.end(), output.begin(), DitherGenerator);
 ```
 
 Converting a 4 channel, 32 frame pre-allocated interleaved buffer of network-order 24-bit integers to a non-interleaved
@@ -33,8 +33,8 @@ buffer of host-order 32-bit floats:
 std::size_t channels = 4;
 std::size_t frames = 32;
 const unsigned char* data = read(sizeof(ratl::int24_t) * channels * frames);
-ratl::ConstNetworkInterleavedSpan<ratl::int24_t> input(data, channels, frames);
-ratl::Noninterleaved<ratl::float32_t> output(channels, frames);
+ratl::const_network_interleaved_span<ratl::int24_t> input(data, channels, frames);
+ratl::noninterleaved<ratl::float32_t> output(channels, frames);
 for (std::size_t i = 0; i < channels; ++i)
 {
     ratl::transform(input.channel(i).begin(), input.channel(i).end(), output.channel(i).begin());
@@ -49,10 +49,10 @@ for (std::size_t i = 0; i < channels; ++i)
 
 ### Buffers
 
-#### Channel Buffer
+#### channel Buffer
 
-#### Frame Buffer
+#### frame Buffer
 
-#### Interleaved Buffer
+#### interleaved Buffer
 
 #### Non-interleaved buffer

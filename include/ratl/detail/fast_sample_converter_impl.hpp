@@ -13,171 +13,172 @@
 #include <ratl/detail/round.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
-#include <ratl/sample_type_limits.hpp>
+#include <ratl/sample_limits.hpp>
 
 namespace ratl
 {
 namespace detail
 {
-// FastSampleConverterImpl
+// fast_sample_converter_impl
 
-template<class InputSample, class OutputSample, class DitherGenerator>
-struct FastSampleConverterImpl;
+template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+struct fast_sample_converter_impl;
 
-template<class SampleType, class DitherGenerator>
-struct FastSampleConverterImpl<Sample<SampleType>, Sample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct fast_sample_converter_impl<sample<SampleValueType>, sample<SampleValueType>, DitherGenerator>
 {
-    static const SampleType& convert(const SampleType& sample, DitherGenerator&) noexcept
+    static const SampleValueType& convert(const SampleValueType& input, DitherGenerator&) noexcept
     {
-        return sample;
+        return input;
     }
 };
 
 template<class DitherGenerator>
-struct FastSampleConverterImpl<Sample<int16_t>, Sample<int24_t>, DitherGenerator>
+struct fast_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherGenerator>
 {
-    static int24_t convert(int32_t sample, DitherGenerator&) noexcept
+    static int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return static_cast<int24_t>(sample << 8);
+        return static_cast<int24_t>(input << 8);
     }
 };
 
 template<class DitherGenerator>
-struct FastSampleConverterImpl<Sample<int16_t>, Sample<int32_t>, DitherGenerator>
+struct fast_sample_converter_impl<sample<int16_t>, sample<int32_t>, DitherGenerator>
 {
-    static int32_t convert(int32_t sample, DitherGenerator&) noexcept
+    static int32_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return sample << 16;
+        return input << 16;
     }
 };
 
 template<class DitherGenerator>
-struct FastSampleConverterImpl<Sample<int24_t>, Sample<int16_t>, DitherGenerator>
+struct fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
-    static constexpr std::size_t TotalShift = 8;
-    static constexpr std::size_t PreDitherShift =
-        DitherGenerator::Int16Bits > 0 ? DitherGenerator::Int16Bits - TotalShift : 0;
-    static constexpr std::size_t PostDitherShift = TotalShift + PreDitherShift;
+    static constexpr std::size_t total_shift = 8;
+    static constexpr std::size_t pre_dither_shift =
+        DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
+    static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
 
-    static int16_t convert(int32_t sample, DitherGenerator& dither_generator) noexcept
+    static int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return static_cast<int24_t>(((sample << PreDitherShift) + dither_generator.generateInt16()) >> PostDitherShift);
+        return static_cast<int24_t>(((input << pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
 
 template<class DitherGenerator>
-struct FastSampleConverterImpl<Sample<int24_t>, Sample<int32_t>, DitherGenerator>
+struct fast_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherGenerator>
 {
-    static int32_t convert(int32_t sample, DitherGenerator&) noexcept
+    static int32_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return sample << 8;
+        return input << 8;
     }
 };
 
 template<class DitherGenerator>
-struct FastSampleConverterImpl<Sample<int32_t>, Sample<int16_t>, DitherGenerator>
+struct fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
-    static constexpr std::size_t TotalShift = 16;
-    static constexpr std::size_t PreDitherShift = TotalShift - DitherGenerator::Int16Bits;
-    static constexpr std::size_t PostDitherShift = TotalShift - PreDitherShift;
+    static constexpr std::size_t total_shift = 16;
+    static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
+    static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 
-    static int16_t convert(int32_t sample, DitherGenerator& dither_generator) noexcept
+    static int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return static_cast<int16_t>(((sample >> PreDitherShift) + dither_generator.generateInt16()) >> PostDitherShift);
+        return static_cast<int16_t>(((input >> pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
 
 template<class DitherGenerator>
-struct FastSampleConverterImpl<Sample<int32_t>, Sample<int24_t>, DitherGenerator>
+struct fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
 {
-    static int24_t convert(int32_t sample, DitherGenerator&) noexcept
+    static int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return static_cast<int24_t>(sample >> 8);
+        return static_cast<int24_t>(input >> 8);
     }
 };
 
-template<class SampleType, class DitherGenerator>
-struct FastSampleConverterImpl<Sample<SampleType>, Sample<float32_t>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct fast_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
 {
-    static constexpr float32_t Scaler = FloatConvertTraits<SampleType>::Divisor;
+    static constexpr float32_t scaler = float_convert_traits<SampleValueType>::divisor;
 
-    static inline float32_t convert(SampleType sample, DitherGenerator&) noexcept
+    static inline float32_t convert(SampleValueType input, DitherGenerator&) noexcept
     {
-        return static_cast<float32_t>(sample) * Scaler;
+        return static_cast<float32_t>(input) * scaler;
     }
 };
 
-template<class SampleType, class DitherGenerator>
-struct FastSampleConverterImpl<Sample<float32_t>, Sample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
 {
 private:
-    static constexpr float32_t PositiveScaler =
-        static_cast<float32_t>(SampleTypeLimits<SampleType>::max) - DitherGenerator::MaxFloat32;
-    static constexpr float32_t NegativeScaler =
-        -static_cast<float32_t>(SampleTypeLimits<SampleType>::min) - DitherGenerator::MaxFloat32;
+    static constexpr float32_t positive_scaler =
+        static_cast<float32_t>(sample_limits<SampleValueType>::max) - DitherGenerator::float32_max;
+    static constexpr float32_t negative_scaler =
+        -static_cast<float32_t>(sample_limits<SampleValueType>::min) - DitherGenerator::float32_max;
 
 public:
-    static inline int32_t convert(float32_t sample, DitherGenerator& dither_generator) noexcept
+    static inline int32_t convert(float32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return roundFloat32ToInt32Fast(
-            (sample * (sample < 0 ? NegativeScaler : PositiveScaler)) + dither_generator.generateFloat32());
+        return round_float32_to_int32_fast(
+            (input * (input < 0 ? negative_scaler : positive_scaler)) + dither_gen.generate_float32());
     }
 };
 
-// This is required as SampleConverter<float32_t, SampleType> is more specific than
-// SampleConverter<SampleType, SampleType>
+// This is required as sample_converter<float32_t, sample_type> is more specific than
+// sample_converter<sample_type, sample_type>
 
 template<class DitherGenerator>
-struct FastSampleConverterImpl<Sample<float32_t>, Sample<float32_t>, DitherGenerator>
+struct fast_sample_converter_impl<sample<float32_t>, sample<float32_t>, DitherGenerator>
 {
-    static inline float32_t convert(float32_t sample, DitherGenerator&) noexcept
+    static inline float32_t convert(float32_t input, DitherGenerator&) noexcept
     {
-        return sample;
+        return input;
     }
 };
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-struct FastSampleConverterImpl<Sample<InputSampleType>, NetworkSample<OutputSampleType>, DitherGenerator>
+struct fast_sample_converter_impl<sample<InputSampleType>, network_sample<OutputSampleType>, DitherGenerator>
 {
-    static inline NetworkSampleValueType_t<OutputSampleType> convert(
-        InputSampleType sample, DitherGenerator& dither_generator) noexcept
+    static inline network_sample_value_type_t<OutputSampleType> convert(
+        InputSampleType input, DitherGenerator& dither_gen) noexcept
     {
-        return FastSampleConverterImpl<Sample<OutputSampleType>, NetworkSample<OutputSampleType>, DitherGenerator>::
+        return fast_sample_converter_impl<sample<OutputSampleType>, network_sample<OutputSampleType>, DitherGenerator>::
             convert(
-                FastSampleConverterImpl<Sample<InputSampleType>, Sample<OutputSampleType>, DitherGenerator>::convert(
-                    sample, dither_generator),
-                dither_generator);
+                fast_sample_converter_impl<sample<InputSampleType>, sample<OutputSampleType>, DitherGenerator>::convert(
+                    input, dither_gen),
+                dither_gen);
     }
 };
 
-template<class SampleType, class DitherGenerator>
-struct FastSampleConverterImpl<Sample<SampleType>, NetworkSample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct fast_sample_converter_impl<sample<SampleValueType>, network_sample<SampleValueType>, DitherGenerator>
 {
-    static inline NetworkSampleValueType_t<SampleType> convert(SampleType sample, DitherGenerator&) noexcept
+    static inline network_sample_value_type_t<SampleValueType> convert(
+        SampleValueType sample, DitherGenerator&) noexcept
     {
-        return sampleToNetworkSample<SampleType>(sample);
+        return sample_to_network_sample<SampleValueType>(sample);
     }
 };
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>
-struct FastSampleConverterImpl<NetworkSample<InputSampleType>, Sample<OutputSampleType>, DitherGenerator>
+struct fast_sample_converter_impl<network_sample<InputSampleType>, sample<OutputSampleType>, DitherGenerator>
 {
     static inline OutputSampleType convert(
-        NetworkSampleValueType_t<InputSampleType> sample, DitherGenerator& dither_generator) noexcept
+        network_sample_value_type_t<InputSampleType> input, DitherGenerator& dither_gen) noexcept
     {
-        return FastSampleConverterImpl<Sample<InputSampleType>, Sample<OutputSampleType>, DitherGenerator>::convert(
-            FastSampleConverterImpl<NetworkSample<InputSampleType>, Sample<InputSampleType>, DitherGenerator>::convert(
-                sample, dither_generator),
-            dither_generator);
+        return fast_sample_converter_impl<sample<InputSampleType>, sample<OutputSampleType>, DitherGenerator>::convert(
+            fast_sample_converter_impl<network_sample<InputSampleType>, sample<InputSampleType>, DitherGenerator>::
+                convert(input, dither_gen),
+            dither_gen);
     }
 };
 
-template<class SampleType, class DitherGenerator>
-struct FastSampleConverterImpl<NetworkSample<SampleType>, Sample<SampleType>, DitherGenerator>
+template<class SampleValueType, class DitherGenerator>
+struct fast_sample_converter_impl<network_sample<SampleValueType>, sample<SampleValueType>, DitherGenerator>
 {
-    static inline SampleType convert(NetworkSampleValueType_t<SampleType> sample, DitherGenerator&) noexcept
+    static inline SampleValueType convert(network_sample_value_type_t<SampleValueType> input, DitherGenerator&) noexcept
     {
-        return networkSampleToSample<SampleType>(sample);
+        return network_sample_to_sample<SampleValueType>(input);
     }
 };
 

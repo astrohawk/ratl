@@ -12,9 +12,9 @@ namespace ratl
 {
 namespace detail
 {
-// reverseEndianness
+// reverse_endianness
 
-inline uint16_t reverseEndianness(uint16_t input) noexcept
+inline uint16_t reverse_endianness(uint16_t input) noexcept
 {
 #if defined(RATL_CPP_COMPILER_MSVC)
     return _byteswap_ushort(input);
@@ -23,7 +23,7 @@ inline uint16_t reverseEndianness(uint16_t input) noexcept
 #endif
 }
 
-inline uint32_t reverseEndianness(uint32_t input) noexcept
+inline uint32_t reverse_endianness(uint32_t input) noexcept
 {
 #if defined(RATL_CPP_COMPILER_MSVC)
     return _byteswap_ulong(input);
@@ -32,49 +32,51 @@ inline uint32_t reverseEndianness(uint32_t input) noexcept
 #endif
 }
 
-inline uint24_t reverseEndianness(uint24_t input) noexcept
+inline uint24_t reverse_endianness(uint24_t input) noexcept
 {
-    return static_cast<uint24_t>(reverseEndianness(static_cast<uint32_t>(input) << 8));
+    return static_cast<uint24_t>(reverse_endianness(static_cast<uint32_t>(input) << 8));
 }
 
-// hostToNetwork
+// host_to_network
 
-template<class NetworkSampleValueUnderlyingType>
-inline NetworkSampleValueUnderlyingType hostToNetwork(NetworkSampleValueUnderlyingType input) noexcept
+template<class network_sample_value_underlying_type>
+inline network_sample_value_underlying_type host_to_network(network_sample_value_underlying_type input) noexcept
 {
 #if defined(RATL_CPP_LITTLE_ENDIAN)
-    return reverseEndianness(input);
+    return reverse_endianness(input);
 #else
     return input;
 #endif
 }
 
-// networkToHost
+// network_to_host
 
-template<class NetworkSampleValueUnderlyingType>
-inline NetworkSampleValueUnderlyingType networkToHost(NetworkSampleValueUnderlyingType input) noexcept
+template<class network_sample_value_underlying_type>
+inline network_sample_value_underlying_type network_to_host(network_sample_value_underlying_type input) noexcept
 {
 #if defined(RATL_CPP_LITTLE_ENDIAN)
-    return reverseEndianness(input);
+    return reverse_endianness(input);
 #else
     return input;
 #endif
 }
 
-// sampleToNetworkSample
+// sample_to_network_sample
 
-template<class SampleType>
-inline NetworkSampleValueType_t<SampleType> sampleToNetworkSample(SampleType input) noexcept
+template<class SampleValueType>
+inline network_sample_value_type_t<SampleValueType> sample_to_network_sample(SampleValueType input) noexcept
 {
-    return networkUnderlyingToNetworkCast<SampleType>(hostToNetwork(sampleToNetworkUnderlyingCast<SampleType>(input)));
+    return network_underlying_to_network_cast<SampleValueType>(
+        host_to_network(sample_to_network_underlying_cast<SampleValueType>(input)));
 }
 
-// networkSampleToSample
+// network_sample_to_sample
 
-template<class SampleType>
-inline SampleType networkSampleToSample(NetworkSampleValueType_t<SampleType> input) noexcept
+template<class SampleValueType>
+inline SampleValueType network_sample_to_sample(network_sample_value_type_t<SampleValueType> input) noexcept
 {
-    return networkUnderlyingToSampleCast<SampleType>(networkToHost(networkToNetworkUnderlyingCast<SampleType>(input)));
+    return network_underlying_to_sample_cast<SampleValueType>(
+        network_to_host(network_to_network_underlying_cast<SampleValueType>(input)));
 }
 
 } // namespace detail

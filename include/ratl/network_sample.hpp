@@ -8,37 +8,40 @@
 // ratl includes
 #include <ratl/detail/cast.hpp>
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/type_traits.hpp>
+#include <ratl/detail/sample_value_traits.hpp>
 
 namespace ratl
 {
-template<class SampleType>
-class NetworkSample final
+template<class SampleValueType>
+class network_sample final
 {
-public:
-    using sample_type = detail::SampleTypeDecay_t<SampleType>;
+    static_assert(
+        detail::is_valid_sample_value_type_v<SampleValueType>, "SampleValueType is not a valid sample value type");
 
-    using value_type = detail::NetworkSampleValueType_t<SampleType>;
+public:
+    using sample_value_type = SampleValueType;
+
+    using value_type = detail::network_sample_value_type_t<sample_value_type>;
     using reference = value_type&;
     using const_reference = const value_type&;
     using pointer = value_type*;
     using const_pointer = const value_type*;
 
-    NetworkSample() noexcept = default;
+    network_sample() noexcept = default;
 
-    constexpr NetworkSample(const NetworkSample&) noexcept = default;
+    constexpr network_sample(const network_sample&) noexcept = default;
 
-    constexpr NetworkSample(NetworkSample&&) noexcept = default;
+    constexpr network_sample(network_sample&&) noexcept = default;
 
-    constexpr NetworkSample& operator=(const NetworkSample&) noexcept = default;
+    constexpr network_sample& operator=(const network_sample&) noexcept = default;
 
-    constexpr NetworkSample& operator=(NetworkSample&&) noexcept = default;
+    constexpr network_sample& operator=(network_sample&&) noexcept = default;
 
-    ~NetworkSample() = default;
+    ~network_sample() = default;
 
-    constexpr explicit NetworkSample(const value_type& other) noexcept : sample_(other) {}
+    constexpr explicit network_sample(const value_type& other) noexcept : sample_(other) {}
 
-    constexpr NetworkSample& operator=(const value_type& other) noexcept
+    constexpr network_sample& operator=(const value_type& other) noexcept
     {
         sample_ = other;
         return *this;
@@ -56,74 +59,75 @@ public:
 
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
 
-    inline constexpr bool operator==(const NetworkSample& other) const noexcept = default;
+    inline constexpr bool operator==(const network_sample& other) const noexcept = default;
 
-    inline constexpr bool operator!=(const NetworkSample& other) const noexcept = default;
+    inline constexpr bool operator!=(const network_sample& other) const noexcept = default;
 
 #else
 
-    friend inline constexpr bool operator==(const NetworkSample& x, const NetworkSample& y) noexcept
+    friend inline constexpr bool operator==(const network_sample& x, const network_sample& y) noexcept
     {
         return x.sample_ == y.sample_;
     }
 
-    friend inline constexpr bool operator!=(const NetworkSample& x, const NetworkSample& y) noexcept
+    friend inline constexpr bool operator!=(const network_sample& x, const network_sample& y) noexcept
     {
         return x.sample_ != y.sample_;
     }
 
 #endif
 
-    friend inline std::ostream& operator<<(std::ostream& os, const NetworkSample& network_sample)
+    friend inline std::ostream& operator<<(std::ostream& os, const network_sample& network_sample)
     {
-        return os << detail::networkToNetworkUnderlyingCast<SampleType>(network_sample.sample_);
+        return os << detail::network_to_network_underlying_cast<sample_value_type>(network_sample.sample_);
     }
 
     // not private as gcc requires memcpyable types to not have any private members
     value_type sample_;
 };
 
-static_assert(std::is_trivial<NetworkSample<int16_t>>::value, "NetworkSample<int16_t> is not a trivial type");
+static_assert(std::is_trivial<network_sample<int16_t>>::value, "network_sample<int16_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<NetworkSample<int16_t>>::value,
-    "NetworkSample<int16_t> is not a trivially default constructible type");
+    std::is_trivially_default_constructible<network_sample<int16_t>>::value,
+    "network_sample<int16_t> is not a trivially default constructible type");
 static_assert(
-    std::is_trivially_copyable<NetworkSample<int16_t>>::value,
-    "NetworkSample<int16_t> is not a trivially copyable type");
+    std::is_trivially_copyable<network_sample<int16_t>>::value,
+    "network_sample<int16_t> is not a trivially copyable type");
 static_assert(
-    std::is_standard_layout<NetworkSample<int16_t>>::value, "NetworkSample<int16_t> is not a standard layout type");
-static_assert(std::is_trivial<NetworkSample<int24_t>>::value, "NetworkSample<int24_t> is not a trivial type");
+    std::is_standard_layout<network_sample<int16_t>>::value, "network_sample<int16_t> is not a standard layout type");
+static_assert(std::is_trivial<network_sample<int24_t>>::value, "network_sample<int24_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<NetworkSample<int24_t>>::value,
-    "NetworkSample<int24_t> is not a trivially default constructible type");
+    std::is_trivially_default_constructible<network_sample<int24_t>>::value,
+    "network_sample<int24_t> is not a trivially default constructible type");
 static_assert(
-    std::is_trivially_copyable<NetworkSample<int24_t>>::value,
-    "NetworkSample<int24_t> is not a trivially copyable type");
+    std::is_trivially_copyable<network_sample<int24_t>>::value,
+    "network_sample<int24_t> is not a trivially copyable type");
 static_assert(
-    std::is_standard_layout<NetworkSample<int24_t>>::value, "NetworkSample<int24_t> is not a standard layout type");
-static_assert(std::is_trivial<NetworkSample<int32_t>>::value, "NetworkSample<int32_t> is not a trivial type");
+    std::is_standard_layout<network_sample<int24_t>>::value, "network_sample<int24_t> is not a standard layout type");
+static_assert(std::is_trivial<network_sample<int32_t>>::value, "network_sample<int32_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<NetworkSample<int32_t>>::value,
-    "NetworkSample<int32_t> is not a trivially default constructible type");
+    std::is_trivially_default_constructible<network_sample<int32_t>>::value,
+    "network_sample<int32_t> is not a trivially default constructible type");
 static_assert(
-    std::is_trivially_copyable<NetworkSample<int32_t>>::value,
-    "NetworkSample<int32_t> is not a trivially copyable type");
+    std::is_trivially_copyable<network_sample<int32_t>>::value,
+    "network_sample<int32_t> is not a trivially copyable type");
 static_assert(
-    std::is_standard_layout<NetworkSample<int32_t>>::value, "NetworkSample<int32_t> is not a standard layout type");
-static_assert(std::is_trivial<NetworkSample<float32_t>>::value, "NetworkSample<float32_t> is not a trivial type");
+    std::is_standard_layout<network_sample<int32_t>>::value, "network_sample<int32_t> is not a standard layout type");
+static_assert(std::is_trivial<network_sample<float32_t>>::value, "network_sample<float32_t> is not a trivial type");
 static_assert(
-    std::is_trivially_default_constructible<NetworkSample<float32_t>>::value,
-    "NetworkSample<float32_t> is not a trivially default constructible type");
+    std::is_trivially_default_constructible<network_sample<float32_t>>::value,
+    "network_sample<float32_t> is not a trivially default constructible type");
 static_assert(
-    std::is_trivially_copyable<NetworkSample<float32_t>>::value,
-    "NetworkSample<float32_t> is not a trivially copyable type");
+    std::is_trivially_copyable<network_sample<float32_t>>::value,
+    "network_sample<float32_t> is not a trivially copyable type");
 static_assert(
-    std::is_standard_layout<NetworkSample<float32_t>>::value, "NetworkSample<float32_t> is not a standard layout type");
+    std::is_standard_layout<network_sample<float32_t>>::value,
+    "network_sample<float32_t> is not a standard layout type");
 
-using NetworkSampleInt16 = NetworkSample<int16_t>;
-using NetworkSampleInt24 = NetworkSample<int24_t>;
-using NetworkSampleInt32 = NetworkSample<int32_t>;
-using NetworkSampleFloat32 = NetworkSample<float32_t>;
+using network_sample_int16 = network_sample<int16_t>;
+using network_sample_int24 = network_sample<int24_t>;
+using network_sample_int32 = network_sample<int32_t>;
+using network_sample_float32 = network_sample<float32_t>;
 
 } // namespace ratl
 
