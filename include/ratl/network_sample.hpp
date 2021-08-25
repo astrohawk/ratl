@@ -93,44 +93,6 @@ public:
     value_type sample_;
 };
 
-static_assert(std::is_trivial<network_sample<int16_t>>::value, "network_sample<int16_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<network_sample<int16_t>>::value,
-    "network_sample<int16_t> is not a trivially default constructible type");
-static_assert(
-    std::is_trivially_copyable<network_sample<int16_t>>::value,
-    "network_sample<int16_t> is not a trivially copyable type");
-static_assert(
-    std::is_standard_layout<network_sample<int16_t>>::value, "network_sample<int16_t> is not a standard layout type");
-static_assert(std::is_trivial<network_sample<int24_t>>::value, "network_sample<int24_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<network_sample<int24_t>>::value,
-    "network_sample<int24_t> is not a trivially default constructible type");
-static_assert(
-    std::is_trivially_copyable<network_sample<int24_t>>::value,
-    "network_sample<int24_t> is not a trivially copyable type");
-static_assert(
-    std::is_standard_layout<network_sample<int24_t>>::value, "network_sample<int24_t> is not a standard layout type");
-static_assert(std::is_trivial<network_sample<int32_t>>::value, "network_sample<int32_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<network_sample<int32_t>>::value,
-    "network_sample<int32_t> is not a trivially default constructible type");
-static_assert(
-    std::is_trivially_copyable<network_sample<int32_t>>::value,
-    "network_sample<int32_t> is not a trivially copyable type");
-static_assert(
-    std::is_standard_layout<network_sample<int32_t>>::value, "network_sample<int32_t> is not a standard layout type");
-static_assert(std::is_trivial<network_sample<float32_t>>::value, "network_sample<float32_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<network_sample<float32_t>>::value,
-    "network_sample<float32_t> is not a trivially default constructible type");
-static_assert(
-    std::is_trivially_copyable<network_sample<float32_t>>::value,
-    "network_sample<float32_t> is not a trivially copyable type");
-static_assert(
-    std::is_standard_layout<network_sample<float32_t>>::value,
-    "network_sample<float32_t> is not a standard layout type");
-
 using network_sample_int16 = network_sample<int16_t>;
 using network_sample_int24 = network_sample<int24_t>;
 using network_sample_int32 = network_sample<int32_t>;

@@ -142,32 +142,6 @@ public:
     value_type sample_;
 };
 
-static_assert(std::is_trivial<sample<int16_t>>::value, "sample<int16_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<sample<int16_t>>::value,
-    "sample<int16_t> is not a trivially default constructible type");
-static_assert(std::is_trivially_copyable<sample<int16_t>>::value, "sample<int16_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<sample<int16_t>>::value, "sample<int16_t> is not a standard layout type");
-static_assert(std::is_trivial<sample<int24_t>>::value, "sample<int24_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<sample<int24_t>>::value,
-    "sample<int24_t> is not a trivially default constructible type");
-static_assert(std::is_trivially_copyable<sample<int24_t>>::value, "sample<int24_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<sample<int24_t>>::value, "sample<int24_t> is not a standard layout type");
-static_assert(std::is_trivial<sample<int32_t>>::value, "sample<int32_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<sample<int32_t>>::value,
-    "sample<int32_t> is not a trivially default constructible type");
-static_assert(std::is_trivially_copyable<sample<int32_t>>::value, "sample<int32_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<sample<int32_t>>::value, "sample<int32_t> is not a standard layout type");
-static_assert(std::is_trivial<sample<float32_t>>::value, "sample<float32_t> is not a trivial type");
-static_assert(
-    std::is_trivially_default_constructible<sample<float32_t>>::value,
-    "sample<float32_t> is not a trivially default constructible type");
-static_assert(
-    std::is_trivially_copyable<sample<float32_t>>::value, "sample<float32_t> is not a trivially copyable type");
-static_assert(std::is_standard_layout<sample<float32_t>>::value, "sample<float32_t> is not a standard layout type");
-
 using sample_int16 = sample<int16_t>;
 using sample_int24 = sample<int24_t>;
 using sample_int32 = sample<int32_t>;
