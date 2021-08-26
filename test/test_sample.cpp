@@ -122,96 +122,96 @@ TEST(SampleLimits, Float32Max)
 
 TEST(sample_int16, CopySampleInt16Pos)
 {
-    ratl::sample<int16_t> sample{1};
-    EXPECT_EQ(ratl::sample<int16_t>{sample}, ratl::sample<int16_t>{1});
+    ratl::sample<int16_t> sample(1);
+    EXPECT_EQ(ratl::sample<int16_t>(sample), ratl::sample<int16_t>(1));
 }
 
 TEST(sample_int16, EqualSampleInt16Pos)
 {
-    EXPECT_EQ(ratl::sample<int16_t>{1}, ratl::sample<int16_t>{1});
+    EXPECT_EQ(ratl::sample<int16_t>(1), ratl::sample<int16_t>(1));
 }
 
 TEST(sample_int16, CopySampleInt16Neg)
 {
-    ratl::sample<int16_t> sample{-1};
-    EXPECT_EQ(ratl::sample<int16_t>{sample}, ratl::sample<int16_t>{-1});
+    ratl::sample<int16_t> sample(-1);
+    EXPECT_EQ(ratl::sample<int16_t>(sample), ratl::sample<int16_t>(-1));
 }
 
 TEST(sample_int16, EqualSampleInt16Neg)
 {
-    EXPECT_EQ(ratl::sample<int16_t>{-1}, ratl::sample<int16_t>{-1});
+    EXPECT_EQ(ratl::sample<int16_t>(-1), ratl::sample<int16_t>(-1));
 }
 
 // sample_int24
 
 TEST(sample_int24, CopySampleInt24Pos)
 {
-    ratl::sample<int24_t> sample{1};
-    EXPECT_EQ(ratl::sample<int24_t>{sample}, ratl::sample<int24_t>{1});
+    ratl::sample<int24_t> sample(1);
+    EXPECT_EQ(ratl::sample<int24_t>(sample), ratl::sample<int24_t>(1));
 }
 
 TEST(sample_int24, EqualSampleInt24Pos)
 {
-    EXPECT_EQ(ratl::sample<int24_t>{1}, ratl::sample<int24_t>{1});
+    EXPECT_EQ(ratl::sample<int24_t>(1), ratl::sample<int24_t>(1));
 }
 
 TEST(sample_int24, CopySampleInt24Neg)
 {
-    ratl::sample<int24_t> sample{-1};
-    EXPECT_EQ(ratl::sample<int24_t>{sample}, ratl::sample<int24_t>{-1});
+    ratl::sample<int24_t> sample(-1);
+    EXPECT_EQ(ratl::sample<int24_t>(sample), ratl::sample<int24_t>(-1));
 }
 
 TEST(sample_int24, EqualSampleInt24Neg)
 {
-    EXPECT_EQ(ratl::sample<int24_t>{-1}, ratl::sample<int24_t>{-1});
+    EXPECT_EQ(ratl::sample<int24_t>(-1), ratl::sample<int24_t>(-1));
 }
 
 // sample_int32
 
 TEST(sample_int32, CopySampleInt32Pos)
 {
-    ratl::sample<int32_t> sample{1};
-    EXPECT_EQ(ratl::sample<int32_t>{sample}, ratl::sample<int32_t>{1});
+    ratl::sample<int32_t> sample(1);
+    EXPECT_EQ(ratl::sample<int32_t>(sample), ratl::sample<int32_t>(1));
 }
 
 TEST(sample_int32, EqualSampleInt32Pos)
 {
-    EXPECT_EQ(ratl::sample<int32_t>{1}, ratl::sample<int32_t>{1});
+    EXPECT_EQ(ratl::sample<int32_t>(1), ratl::sample<int32_t>(1));
 }
 
 TEST(sample_int32, CopySampleInt32Neg)
 {
-    ratl::sample<int32_t> sample{-1};
-    EXPECT_EQ(ratl::sample<int32_t>{sample}, ratl::sample<int32_t>{-1});
+    ratl::sample<int32_t> sample(-1);
+    EXPECT_EQ(ratl::sample<int32_t>(sample), ratl::sample<int32_t>(-1));
 }
 
 TEST(sample_int32, EqualSampleInt32Neg)
 {
-    EXPECT_EQ(ratl::sample<int32_t>{-1}, ratl::sample<int32_t>{-1});
+    EXPECT_EQ(ratl::sample<int32_t>(-1), ratl::sample<int32_t>(-1));
 }
 
 // sample_float32
 
 TEST(sample_float32, CopySampleFloat32Pos)
 {
-    ratl::sample<float32_t> sample{1.f};
-    EXPECT_EQ(ratl::sample<float32_t>{sample}, ratl::sample<float32_t>{1.f});
+    ratl::sample<float32_t> sample(1.f);
+    EXPECT_EQ(ratl::sample<float32_t>(sample), ratl::sample<float32_t>(1.f));
 }
 
 TEST(sample_float32, EqualSampleFloat32Pos)
 {
-    EXPECT_EQ(ratl::sample<float32_t>{1.f}, ratl::sample<float32_t>{1.f});
+    EXPECT_EQ(ratl::sample<float32_t>(1.f), ratl::sample<float32_t>(1.f));
 }
 
 TEST(sample_float32, CopySampleFloat32Neg)
 {
-    ratl::sample<float32_t> sample{-1.f};
-    EXPECT_EQ(ratl::sample<float32_t>{sample}, ratl::sample<float32_t>{-1.f});
+    ratl::sample<float32_t> sample(-1.f);
+    EXPECT_EQ(ratl::sample<float32_t>(sample), ratl::sample<float32_t>(-1.f));
 }
 
 TEST(sample_float32, EqualSampleFloat32Neg)
 {
-    EXPECT_EQ(ratl::sample<float32_t>{-1.f}, ratl::sample<float32_t>{-1.f});
+    EXPECT_EQ(ratl::sample<float32_t>(-1.f), ratl::sample<float32_t>(-1.f));
 }
 
 } // namespace test

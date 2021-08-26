@@ -15,7 +15,7 @@
 template<class Generator>
 void benchPrng(benchmark::State& state)
 {
-    Generator gen{0x12345678};
+    Generator gen(0x12345678);
     for (auto _ : state)
     {
         benchmark::DoNotOptimize(gen());

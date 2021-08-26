@@ -132,8 +132,8 @@ int main(int argc, char** argv)
     snd_pcm_uframes_t frames;
     snd_pcm_hw_params_get_period_size(params, &frames, nullptr);
 
-    ratl::interleaved<ratl::float32_t> float_interleaved{tmp_channels, frames};
-    ratl::interleaved<ratl::int16_t> int_interleaved{tmp_channels, frames};
+    ratl::interleaved<ratl::float32_t> float_interleaved(tmp_channels, frames);
+    ratl::interleaved<ratl::int16_t> int_interleaved(tmp_channels, frames);
 
     unsigned int tmp_period;
     snd_pcm_hw_params_get_period_time(params, &tmp_period, nullptr);
@@ -146,8 +146,8 @@ int main(int argc, char** argv)
     {
         for (auto frame : float_interleaved)
         {
-            auto sine_sample = ratl::sample<ratl::float32_t>{static_cast<float>(
-                sine(static_cast<double>(wave_position) / static_cast<double>(wave_frames)) * Amplitude)};
+            auto sine_sample = ratl::sample<ratl::float32_t>(static_cast<float>(
+                sine(static_cast<double>(wave_position) / static_cast<double>(wave_frames)) * Amplitude));
             for (auto& sample : frame)
             {
                 sample = sine_sample;

@@ -29,13 +29,13 @@ protected:
         for (size_t i = 0; i < super_type::container_.samples(); ++i)
         {
             super_type::container_.data()[i] =
-                reference_convert<input_sample_type>(sample<output_sample_type>{i + 1}).get();
+                reference_convert<input_sample_type>(sample<output_sample_type>(i + 1)).get();
         }
     }
 
     static output_buffer generate_output(size_t channels, size_t frames)
     {
-        return output_buffer{channels, frames};
+        return output_buffer(channels, frames);
     }
 };
 
@@ -106,7 +106,7 @@ TYPED_TEST(TransformInterleaved, MoreOutputFrames)
     auto extra_frame = output_buffer.frame(input_buffer.frames());
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -133,7 +133,7 @@ TYPED_TEST(TransformInterleaved, MoreOutputChannels)
     auto extra_channel = output_buffer.channel(input_buffer.channels());
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -160,14 +160,14 @@ TYPED_TEST(TransformInterleaved, MoreOutputFramesMoreOutputChannels)
     auto extra_channel = output_buffer.channel(input_buffer.channels());
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 
     // verify extra output frame is still empty
     auto extra_frame = output_buffer.frame(input_buffer.frames());
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -226,7 +226,7 @@ TYPED_TEST(TransformFrame, Typical)
     {
         for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 }
@@ -255,7 +255,7 @@ TYPED_TEST(TransformFrame, MoreOutputFrames)
     {
         for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 }
@@ -284,12 +284,12 @@ TYPED_TEST(TransformFrame, MoreOutputChannels)
     {
         for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformFrame, MoreOutputFramesMoreOutputChannels)
@@ -316,12 +316,12 @@ TYPED_TEST(TransformFrame, MoreOutputFramesMoreOutputChannels)
     {
         for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformFrame, ConstInputIterators)
@@ -352,7 +352,7 @@ TYPED_TEST(TransformFrame, ConstInputIterators)
     {
         for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 }
@@ -388,7 +388,7 @@ TYPED_TEST(TransformChannel, Typical)
     {
         for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 }
@@ -417,12 +417,12 @@ TYPED_TEST(TransformChannel, MoreOutputFrames)
     {
         for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformChannel, MoreOutputChannels)
@@ -449,7 +449,7 @@ TYPED_TEST(TransformChannel, MoreOutputChannels)
     {
         for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 }
@@ -478,12 +478,12 @@ TYPED_TEST(TransformChannel, MoreOutputFramesMoreOutputChannels)
     {
         for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformChannel, ConstInputIterators)
@@ -514,7 +514,7 @@ TYPED_TEST(TransformChannel, ConstInputIterators)
     {
         for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 }
@@ -563,7 +563,7 @@ TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputFrames)
     auto extra_frame = output_buffer.frame(1);
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -584,7 +584,7 @@ TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputChannels)
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_buffer[0][input_buffer.channels()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_buffer[0][input_buffer.channels()], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputFramesMoreOutputChannels)
@@ -607,11 +607,11 @@ TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputFramesMoreOutputChannels)
     auto extra_frame = output_buffer.frame(1);
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_buffer[0][input_buffer.channels()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_buffer[0][input_buffer.channels()], typename TestFixture::output_sample());
 }
 
 template<class SampleTypeCombination>
@@ -664,7 +664,7 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputFrames)
     auto extra_frame = output_buffer.frame(1);
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -692,12 +692,12 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputChannels)
     {
         for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
         {
-            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+            EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
         }
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformFrameSingleFrame, MoreOutputFramesMoreOutputChannels)
@@ -723,11 +723,11 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputFramesMoreOutputChannels)
     auto extra_frame = output_buffer.frame(1);
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample());
 }
 
 template<class SampleTypeCombination>
@@ -754,7 +754,7 @@ TYPED_TEST(TransformChannelSingleFrame, Typical)
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
     {
-        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -775,14 +775,14 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputFrames)
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
     {
-        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample());
     }
 
     // verify extra output frame is still empty
     auto extra_frame = output_buffer.frame(1);
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -803,7 +803,7 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputChannels)
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
     {
-        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -824,14 +824,14 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputFramesMoreOutputChannels)
     // verify all other output channels are still empty
     for (auto channel_iter = output_channel.begin() + 1; channel_iter != output_channel.end(); ++channel_iter)
     {
-        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*channel_iter, typename TestFixture::output_sample());
     }
 
     // verify extra output frame is still empty
     auto extra_frame = output_buffer.frame(1);
     for (auto sample_iter = extra_frame.begin(); sample_iter != extra_frame.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -876,7 +876,7 @@ TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputFrames)
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_buffer[input_buffer.frames()][0], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_buffer[input_buffer.frames()][0], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputChannels)
@@ -899,7 +899,7 @@ TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputChannels)
     auto extra_channel = output_buffer.channel(1);
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -920,13 +920,13 @@ TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputFramesMoreOutputChannels
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_buffer[input_buffer.frames()][0], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_buffer[input_buffer.frames()][0], typename TestFixture::output_sample());
 
     // verify extra output channel is still empty
     auto extra_channel = output_buffer.channel(1);
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -954,7 +954,7 @@ TYPED_TEST(TransformFrameSingleChannel, Typical)
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
     {
-        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample{});
+        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample());
     }
 }
 
@@ -975,7 +975,7 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputFrames)
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
     {
-        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample{});
+        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample());
     }
 }
 
@@ -996,14 +996,14 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputChannels)
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
     {
-        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample{});
+        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample());
     }
 
     // verify extra output channel is still empty
     auto extra_channel = output_buffer.channel(1);
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -1024,14 +1024,14 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputFramesMoreOutputChannels)
     // verify all other output frames are still empty
     for (auto frame_iter = output_buffer.begin() + 1; frame_iter != output_buffer.end(); ++frame_iter)
     {
-        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample{});
+        EXPECT_EQ((*frame_iter)[0], typename TestFixture::output_sample());
     }
 
     // verify extra output channel is still empty
     auto extra_channel = output_buffer.channel(1);
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -1082,7 +1082,7 @@ TYPED_TEST(TransformChannelSingleChannel, MoreOutputFrames)
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample());
 }
 
 TYPED_TEST(TransformChannelSingleChannel, MoreOutputChannels)
@@ -1108,7 +1108,7 @@ TYPED_TEST(TransformChannelSingleChannel, MoreOutputChannels)
     auto extra_channel = output_buffer.channel(1);
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 
@@ -1132,13 +1132,13 @@ TYPED_TEST(TransformChannelSingleChannel, MoreOutputFramesMoreOutputChannels)
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample{});
+    EXPECT_EQ(output_channel[input_channel.samples()], typename TestFixture::output_sample());
 
     // verify extra output channel is still empty
     auto extra_channel = output_buffer.channel(1);
     for (auto sample_iter = extra_channel.begin(); sample_iter != extra_channel.end(); ++sample_iter)
     {
-        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample{});
+        EXPECT_EQ(*sample_iter, typename TestFixture::output_sample());
     }
 }
 

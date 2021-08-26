@@ -71,7 +71,7 @@ protected:
     using container_type = ContainerType<SampleValueType>;
     using sample_type = typename container_type::sample_type;
 
-    TestBase() : container_{generate()} {}
+    TestBase() : container_(generate()) {}
 
     static constexpr size_t channels()
     {
@@ -90,12 +90,12 @@ protected:
 
     static container_type generate_empty()
     {
-        return container_type{};
+        return container_type();
     }
 
     static container_type generate()
     {
-        return container_type{Channels, Frames};
+        return container_type(Channels, Frames);
     }
 
     container_type container_;

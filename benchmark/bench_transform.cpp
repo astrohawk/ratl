@@ -23,16 +23,16 @@ basic_interleaved<InputSampleType> generateRandomInterleaved(std::size_t num_cha
     std::default_random_engine random_engine(random_device());
     std::uniform_real_distribution<float32_t> uniform_dist(-0.8, 0.8);
 
-    interleaved<float32_t> float_interleaved{num_channels, num_frames};
+    interleaved<float32_t> float_interleaved(num_channels, num_frames);
     for (auto frame : float_interleaved)
     {
         for (auto& input : frame)
         {
-            input = sample<float32_t>{uniform_dist(random_engine)};
+            input = sample<float32_t>(uniform_dist(random_engine));
         }
     }
 
-    basic_interleaved<InputSampleType> input_interleaved{num_channels, num_frames};
+    basic_interleaved<InputSampleType> input_interleaved(num_channels, num_frames);
     transform(float_interleaved.begin(), float_interleaved.end(), input_interleaved.begin());
     return input_interleaved;
 }
@@ -44,7 +44,7 @@ void benchSampleTransform(benchmark::State& state)
     static constexpr std::size_t num_frames = 480;
 
     auto input = generateRandomInterleaved<InputSampleType>(num_channels, num_frames);
-    auto output = basic_noninterleaved<OutputSampleType>{num_channels, num_frames};
+    auto output = basic_noninterleaved<OutputSampleType>(num_channels, num_frames);
     dither_generator dither_gen;
     for (auto _ : state)
     {

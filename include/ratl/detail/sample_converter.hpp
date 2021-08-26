@@ -29,23 +29,23 @@ class basic_sample_converter
     using sample_converter_impl = SampleConverterImpl<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
-    explicit basic_sample_converter(DitherGenerator& dither_gen) : dither_generator_(dither_gen) {}
+    explicit basic_sample_converter(DitherGenerator& dither_gen) : dither_gen_(dither_gen) {}
 
 #if defined(RATL_HAS_XSIMD)
     inline batch_sample_type_t<OutputSampleType> operator()(
         const batch_sample_type_t<InputSampleType>& input) const noexcept
     {
-        return sample_converter_impl::batch_convert(input, dither_generator_);
+        return sample_converter_impl::batch_convert(input, dither_gen_);
     }
 #endif
 
     inline OutputSampleType operator()(const InputSampleType& input) const noexcept
     {
-        return OutputSampleType{sample_converter_impl::convert(input.get(), dither_generator_)};
+        return OutputSampleType(sample_converter_impl::convert(input.get(), dither_gen_));
     }
 
 private:
-    std::reference_wrapper<DitherGenerator> dither_generator_;
+    std::reference_wrapper<DitherGenerator> dither_gen_;
 };
 
 template<class InputSampleType, class OutputSampleType, class DitherGenerator>

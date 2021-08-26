@@ -21,7 +21,7 @@ namespace detail
 class linear_congruential_generator
 {
 public:
-    explicit constexpr linear_congruential_generator(uint32_t seed) noexcept : state_{seed} {}
+    explicit constexpr linear_congruential_generator(uint32_t seed) noexcept : state_(seed) {}
 
     ~linear_congruential_generator() = default;
 

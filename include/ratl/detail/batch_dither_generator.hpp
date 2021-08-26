@@ -30,12 +30,12 @@ class batch_null_dither_generator : public null_dither_generator
 public:
     inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return detail::batch_sample_value_type_t<int32_t>{0};
+        return detail::batch_sample_value_type_t<int32_t>(0);
     }
 
     inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
     {
-        return detail::batch_sample_value_type_t<float32_t>{0.f};
+        return detail::batch_sample_value_type_t<float32_t>(0.f);
     }
 };
 

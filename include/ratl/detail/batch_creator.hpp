@@ -35,13 +35,13 @@ struct base_batch_creator<sample<SampleValueType>>
     template<typename Iterator>
     static inline batch_type load(Iterator input) noexcept
     {
-        return load_impl(input, std::make_index_sequence<batch_size>{});
+        return load_impl(input, std::make_index_sequence<batch_size>());
     }
 
     template<typename Iterator>
     static inline void store(const batch_type& input, Iterator output) noexcept
     {
-        store_impl(input, output, std::make_index_sequence<batch_size>{});
+        store_impl(input, output, std::make_index_sequence<batch_size>());
     }
 
 private:
@@ -58,7 +58,7 @@ private:
     template<typename Iterator, std::size_t... I>
     static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
     {
-        return batch_type{convert_input(input[I].get())...};
+        return batch_type(convert_input(input[I].get())...);
     }
 
     template<std::size_t I, typename Iterator>
@@ -87,13 +87,13 @@ struct base_batch_creator<network_sample<SampleValueType>>
     template<typename Iterator>
     static inline batch_type load(Iterator input) noexcept
     {
-        return load_impl(input, std::make_index_sequence<batch_size>{});
+        return load_impl(input, std::make_index_sequence<batch_size>());
     }
 
     template<typename Iterator>
     static inline void store(const batch_type& input, Iterator output) noexcept
     {
-        store_impl(input, output, std::make_index_sequence<batch_size>{});
+        store_impl(input, output, std::make_index_sequence<batch_size>());
     }
 
 private:
@@ -110,7 +110,7 @@ private:
     template<typename Iterator, std::size_t... I>
     static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
     {
-        return batch_type{convert_input(network_to_network_underlying_cast<SampleValueType>(input[I].get()))...};
+        return batch_type(convert_input(network_to_network_underlying_cast<SampleValueType>(input[I].get()))...);
     }
 
     template<std::size_t I, typename Iterator>
@@ -152,12 +152,12 @@ struct batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_
 
     static inline batch_type load(sample<SampleValueType>* input) noexcept
     {
-        return batch_type(reinterpret_cast<SampleValueType*>(input), xsimd::unaligned_mode{});
+        return batch_type(reinterpret_cast<SampleValueType*>(input), xsimd::unaligned_mode());
     }
 
     static inline batch_type load(const sample<SampleValueType>* input) noexcept
     {
-        return batch_type(reinterpret_cast<const SampleValueType*>(input), xsimd::unaligned_mode{});
+        return batch_type(reinterpret_cast<const SampleValueType*>(input), xsimd::unaligned_mode());
     }
 
     static inline void store(const batch_type& input, sample<SampleValueType>* output) noexcept
@@ -181,14 +181,14 @@ struct batch_creator<
     static inline batch_type load(network_sample<SampleValueType>* input) noexcept
     {
         return batch_type(
-            reinterpret_cast<network_sample_value_underlying_type_t<SampleValueType>*>(input), xsimd::unaligned_mode{});
+            reinterpret_cast<network_sample_value_underlying_type_t<SampleValueType>*>(input), xsimd::unaligned_mode());
     }
 
     static inline batch_type load(const network_sample<SampleValueType>* input) noexcept
     {
         return batch_type(
             reinterpret_cast<const network_sample_value_underlying_type_t<SampleValueType>*>(input),
-            xsimd::unaligned_mode{});
+            xsimd::unaligned_mode());
     }
 
     static inline void store(const batch_type& input, network_sample<SampleValueType>* output) noexcept

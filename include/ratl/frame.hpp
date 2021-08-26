@@ -85,7 +85,7 @@ public:
     {
     }
 #else
-    basic_frame(basic_frame&& other, const allocator_type& alloc) : basic_frame(other, alloc, std::false_type{}) {}
+    basic_frame(basic_frame&& other, const allocator_type& alloc) : basic_frame(other, alloc, std::false_type()) {}
 #endif
 
     ~basic_frame()
@@ -250,7 +250,7 @@ private:
 
     void copy_assign_alloc(const basic_frame& other)
     {
-        copy_assign_alloc(other, typename alloc_traits::propagate_on_container_copy_assignment{});
+        copy_assign_alloc(other, typename alloc_traits::propagate_on_container_copy_assignment());
     }
 
     void copy_assign_alloc(const basic_frame& other, std::true_type)
@@ -270,7 +270,7 @@ private:
 
     void move_assign_alloc(basic_frame& other) noexcept
     {
-        move_assign_alloc(other, typename alloc_traits::propagate_on_container_move_assignment{});
+        move_assign_alloc(other, typename alloc_traits::propagate_on_container_move_assignment());
     }
 
     void move_assign_alloc(basic_frame& other, std::true_type) noexcept
@@ -294,7 +294,7 @@ basic_frame<SampleType, Allocator>::basic_frame(size_type channels) : data_(chan
     if (channels() > 0)
     {
         allocate();
-        std::fill_n(data(), channels(), sample_type{});
+        std::fill_n(data(), channels(), sample_type());
     }
 }
 
@@ -305,7 +305,7 @@ basic_frame<SampleType, Allocator>::basic_frame(size_type channels, const alloca
     if (channels() > 0)
     {
         allocate();
-        std::fill_n(data(), channels(), sample_type{});
+        std::fill_n(data(), channels(), sample_type());
     }
 }
 

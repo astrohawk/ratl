@@ -160,7 +160,7 @@ class basic_transformer<
         basic_transformer<SampleConverter, input_frame_iterator, output_frame_iterator, DitherGenerator>;
 
 public:
-    explicit basic_transformer(DitherGenerator& dither_gen) : dither_generator_(dither_gen) {}
+    explicit basic_transformer(DitherGenerator& dither_gen) : dither_gen_(dither_gen) {}
 
     inline output_iterator operator()(input_iterator first, input_iterator last, output_iterator result) const noexcept
     {
@@ -169,14 +169,14 @@ public:
             // Input and output have same number of channels, so blit samples
 
             return output_iterator(
-                transformer_impl{dither_generator_}.transform(first.base(), last.base(), result.base()),
+                transformer_impl(dither_gen_).transform(first.base(), last.base(), result.base()),
                 result.channels());
         }
         else
         {
             // Input and output don't have same number of channels, so must transform frame by frame
 
-            frame_transformer frame_transformer{dither_generator_};
+            frame_transformer frame_transformer(dither_gen_);
             auto min_channels = std::min(first.channels(), result.channels());
             return detail::apply_op(
                 first,
@@ -192,7 +192,7 @@ public:
     }
 
 private:
-    std::reference_wrapper<DitherGenerator> dither_generator_;
+    std::reference_wrapper<DitherGenerator> dither_gen_;
 };
 
 // transformer for noninterleaved_iterator
@@ -228,7 +228,7 @@ class basic_transformer<
         basic_transformer<SampleConverter, input_channel_iterator, output_channel_iterator, DitherGenerator>;
 
 public:
-    explicit basic_transformer(DitherGenerator& dither_gen) : dither_generator_(dither_gen) {}
+    explicit basic_transformer(DitherGenerator& dither_gen) : dither_gen_(dither_gen) {}
 
     inline output_iterator operator()(input_iterator first, input_iterator last, output_iterator result) const noexcept
     {
@@ -237,14 +237,14 @@ public:
             // Input and output have same number of channels, so blit samples
 
             return output_iterator(
-                transformer_impl{dither_generator_}.transform(first.base(), last.base(), result.base()),
+                transformer_impl(dither_gen_).transform(first.base(), last.base(), result.base()),
                 result.frames());
         }
         else
         {
             // Input and output don't have same number of frames, so must transform channel by channel
 
-            channel_transformer channel_transformer{dither_generator_};
+            channel_transformer channel_transformer(dither_gen_);
             auto min_frames = std::min(first.frames(), result.frames());
             return detail::apply_op(
                 first,
@@ -260,7 +260,7 @@ public:
     }
 
 private:
-    std::reference_wrapper<DitherGenerator> dither_generator_;
+    std::reference_wrapper<DitherGenerator> dither_gen_;
 };
 
 // transformer for frame_iterator

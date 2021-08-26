@@ -28,7 +28,7 @@ class batch_linear_congruential_generator
 
 public:
     explicit batch_linear_congruential_generator(uint32_t seed) noexcept :
-        state_(make_batch_state(seed, std::make_index_sequence<batch_size>{}))
+        state_(make_batch_state(seed, std::make_index_sequence<batch_size>()))
     {
     }
 
@@ -64,8 +64,8 @@ private:
     template<std::size_t... I>
     static batch_type make_batch_state(uint32_t seed, std::index_sequence<I...>)
     {
-        linear_congruential_generator gen{seed};
-        return batch_type{make_state(gen, I)...};
+        linear_congruential_generator gen(seed);
+        return batch_type(make_state(gen, I)...);
     }
 
     static constexpr uint32_t multiplier = 0x0bb38435;

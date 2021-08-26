@@ -491,12 +491,12 @@ protected:
 
     static ratl::interleaved<sample_type> generate_default()
     {
-        return ratl::interleaved<sample_type>{};
+        return ratl::interleaved<sample_type>();
     }
 
     static ratl::interleaved<sample_type> generate_typical()
     {
-        return ratl::interleaved<sample_type>{TEST_RATL_TYPICAL_CHANNELS, TEST_RATL_TYPICAL_FRAMES};
+        return ratl::interleaved<sample_type>(TEST_RATL_TYPICAL_CHANNELS, TEST_RATL_TYPICAL_FRAMES);
     }
 };
 
@@ -514,20 +514,20 @@ TYPED_TEST(Equality, TypicalEqual)
 
 TYPED_TEST(Equality, DefaultZeroConstructorEqual)
 {
-    EXPECT_EQ(this->generate_default(), (ratl::interleaved<typename TestFixture::sample_type>{0, 0}));
+    EXPECT_EQ(this->generate_default(), (ratl::interleaved<typename TestFixture::sample_type>(0, 0)));
 }
 
 TYPED_TEST(Equality, DefaultZeroChannelsConstructorNotEqual)
 {
     EXPECT_NE(
-        this->generate_default(), (ratl::interleaved<typename TestFixture::sample_type>{0, TEST_RATL_TYPICAL_FRAMES}));
+        this->generate_default(), (ratl::interleaved<typename TestFixture::sample_type>(0, TEST_RATL_TYPICAL_FRAMES)));
 }
 
 TYPED_TEST(Equality, DefaultZeroFramesConstructorNotEqual)
 {
     EXPECT_NE(
         this->generate_default(),
-        (ratl::interleaved<typename TestFixture::sample_type>{TEST_RATL_TYPICAL_CHANNELS, 0}));
+        (ratl::interleaved<typename TestFixture::sample_type>(TEST_RATL_TYPICAL_CHANNELS, 0)));
 }
 
 TYPED_TEST(Equality, DefaultTypicalNotEqual)
@@ -656,7 +656,7 @@ protected:
 
     static interleaved_type generate_swap()
     {
-        return interleaved_type{super_type::generate().channels() + 10, super_type::generate().frames() + 50};
+        return interleaved_type(super_type::generate().channels() + 10, super_type::generate().frames() + 50);
     }
 };
 
@@ -706,7 +706,7 @@ protected:
         using propagate_on_container_move_assignment = std::true_type;
         using propagate_on_container_swap = std::true_type;
 
-        allocator() : n_{0}, p_{} {}
+        allocator() : n_(0), p_() {}
 
         virtual ~allocator()
         {
@@ -714,7 +714,7 @@ protected:
             EXPECT_EQ(p_, nullptr);
         }
 
-        allocator(const allocator& other) : allocator{}
+        allocator(const allocator& other) : allocator()
         {
             EXPECT_EQ(other.n_, 0);
             EXPECT_EQ(other.p_, nullptr);
@@ -722,7 +722,7 @@ protected:
 
         allocator& operator=(const allocator&) = delete;
 
-        allocator(allocator&& other) : n_{other.n_}, p_{other.p_}
+        allocator(allocator&& other) : n_(other.n_), p_(other.p_)
         {
             other.n_ = 0;
             other.p_ = nullptr;
@@ -757,7 +757,7 @@ protected:
 
         allocator select_on_container_copy_construction() const
         {
-            return allocator{};
+            return allocator();
         }
 
         bool operator==(const allocator& other) const
@@ -783,43 +783,43 @@ TYPED_TEST_SUITE(Allocate, PossibleSampleTypes, );
 TYPED_TEST(Allocate, TypicalAllocate)
 {
     using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type(this->channels(), this->frames(), typename TestFixture::allocator{});
+    interleaved_type(this->channels(), this->frames(), typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, CopyConstructor)
 {
     using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator{});
-    interleaved_type(interleaved_allocated, typename TestFixture::allocator{});
+    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator());
+    interleaved_type(interleaved_allocated, typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, CopyAssignmentOperator)
 {
     using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated_1(this->channels(), this->frames(), typename TestFixture::allocator{});
-    interleaved_type interleaved_allocated_2(this->channels(), this->frames(), typename TestFixture::allocator{});
+    interleaved_type interleaved_allocated_1(this->channels(), this->frames(), typename TestFixture::allocator());
+    interleaved_type interleaved_allocated_2(this->channels(), this->frames(), typename TestFixture::allocator());
     interleaved_allocated_1 = interleaved_allocated_2;
 }
 
 TYPED_TEST(Allocate, MoveConstructorOperator)
 {
     using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator{});
-    interleaved_type(interleaved_allocated, typename TestFixture::allocator{});
+    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator());
+    interleaved_type(interleaved_allocated, typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, MoveAssignmentOperator)
 {
     using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator{});
-    interleaved_allocated = interleaved_type(this->channels(), this->frames(), typename TestFixture::allocator{});
+    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator());
+    interleaved_allocated = interleaved_type(this->channels(), this->frames(), typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, Swap)
 {
     using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated_1(this->channels(), this->frames(), typename TestFixture::allocator{});
-    interleaved_type interleaved_allocated_2(this->channels(), this->frames(), typename TestFixture::allocator{});
+    interleaved_type interleaved_allocated_1(this->channels(), this->frames(), typename TestFixture::allocator());
+    interleaved_type interleaved_allocated_2(this->channels(), this->frames(), typename TestFixture::allocator());
     std::swap(interleaved_allocated_1, interleaved_allocated_2);
 }
 

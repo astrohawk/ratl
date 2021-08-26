@@ -129,12 +129,12 @@ public:
 #if defined(RATL_CPP_VERSION_HAS_CPP17)
     basic_interleaved(basic_interleaved&& other, const allocator_type& alloc) noexcept(
         alloc_traits::is_always_equal::value) :
-        basic_interleaved(other, alloc, typename alloc_traits::is_always_equal{})
+        basic_interleaved(other, alloc, typename alloc_traits::is_always_equal())
     {
     }
 #else
     basic_interleaved(basic_interleaved&& other, const allocator_type& alloc) :
-        basic_interleaved(other, alloc, std::false_type{})
+        basic_interleaved(other, alloc, std::false_type())
     {
     }
 #endif
@@ -327,7 +327,7 @@ private:
 
     void copy_assign_alloc(const basic_interleaved& other)
     {
-        copy_assign_alloc(other, typename alloc_traits::propagate_on_container_copy_assignment{});
+        copy_assign_alloc(other, typename alloc_traits::propagate_on_container_copy_assignment());
     }
 
     void copy_assign_alloc(const basic_interleaved& other, std::true_type)
@@ -347,7 +347,7 @@ private:
 
     void move_assign_alloc(basic_interleaved& other) noexcept
     {
-        move_assign_alloc(other, typename alloc_traits::propagate_on_container_move_assignment{});
+        move_assign_alloc(other, typename alloc_traits::propagate_on_container_move_assignment());
     }
 
     void move_assign_alloc(basic_interleaved& other, std::true_type) noexcept
@@ -372,7 +372,7 @@ basic_interleaved<SampleType, Allocator>::basic_interleaved(size_type channels, 
     if (!empty())
     {
         allocate();
-        std::fill_n(data(), samples(), sample_type{});
+        std::fill_n(data(), samples(), sample_type());
     }
 }
 
@@ -384,7 +384,7 @@ basic_interleaved<SampleType, Allocator>::basic_interleaved(
     if (!empty())
     {
         allocate();
-        std::fill_n(data(), samples(), sample_type{});
+        std::fill_n(data(), samples(), sample_type());
     }
 }
 
@@ -443,7 +443,7 @@ template<class SampleType, class Allocator>
 basic_interleaved<SampleType, Allocator>& basic_interleaved<SampleType, Allocator>::operator=(
     basic_interleaved&& other) noexcept(alloc_traits::propagate_on_container_move_assignment::value)
 {
-    move_assign(other, typename alloc_traits::propagate_on_container_move_assignment{});
+    move_assign(other, typename alloc_traits::propagate_on_container_move_assignment());
     return *this;
 }
 
@@ -483,7 +483,7 @@ void basic_interleaved<SampleType, Allocator>::move_assign(basic_interleaved& ot
 template<class SampleType, class Allocator>
 void basic_interleaved<SampleType, Allocator>::swap(basic_interleaved& other)
 {
-    swap_alloc(other, typename alloc_traits::propagate_on_container_swap{});
+    swap_alloc(other, typename alloc_traits::propagate_on_container_swap());
     data_.swap(other.data_);
 }
 

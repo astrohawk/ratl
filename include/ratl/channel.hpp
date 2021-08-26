@@ -85,7 +85,7 @@ public:
     {
     }
 #else
-    basic_channel(basic_channel&& other, const allocator_type& alloc) : basic_channel(other, alloc, std::false_type{})
+    basic_channel(basic_channel&& other, const allocator_type& alloc) : basic_channel(other, alloc, std::false_type())
     {
     }
 #endif
@@ -253,7 +253,7 @@ private:
 
     void copy_assign_alloc(const basic_channel& other)
     {
-        copy_assign_alloc(other, typename alloc_traits::propagate_on_container_copy_assignment{});
+        copy_assign_alloc(other, typename alloc_traits::propagate_on_container_copy_assignment());
     }
 
     void copy_assign_alloc(const basic_channel& other, std::true_type)
@@ -273,7 +273,7 @@ private:
 
     void move_assign_alloc(basic_channel& other) noexcept
     {
-        move_assign_alloc(other, typename alloc_traits::propagate_on_container_move_assignment{});
+        move_assign_alloc(other, typename alloc_traits::propagate_on_container_move_assignment());
     }
 
     void move_assign_alloc(basic_channel& other, std::true_type) noexcept
@@ -297,7 +297,7 @@ basic_channel<SampleType, Allocator>::basic_channel(size_type samples) : data_(s
     if (samples() > 0)
     {
         allocate();
-        std::fill_n(data(), samples(), sample_type{});
+        std::fill_n(data(), samples(), sample_type());
     }
 }
 
@@ -308,7 +308,7 @@ basic_channel<SampleType, Allocator>::basic_channel(size_type samples, const all
     if (samples() > 0)
     {
         allocate();
-        std::fill_n(data(), samples(), sample_type{});
+        std::fill_n(data(), samples(), sample_type());
     }
 }
 
