@@ -7,15 +7,22 @@
 
 cmake_minimum_required(VERSION 3.11)
 
-project(ratl)
+project(ratl
+        LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    set(RATL_CXX_STANDARD 14 CACHE STRING "C++ standard")
+    set(CMAKE_CXX_STANDARD ${RATL_CXX_STANDARD})
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic -Werror")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
+    if (MSVC)
+        add_compile_options(/W4 /WX)
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
+        add_compile_options(-march=native)
+        add_compile_options(-Wall -Wextra -Wpedantic -Wcast-qual -Wdeprecated -Wnon-virtual-dtor -Werror)
+    endif ()
+endif ()
 
 add_subdirectory(third_party)
 
