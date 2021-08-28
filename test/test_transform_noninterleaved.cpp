@@ -12,7 +12,7 @@ namespace ratl
 {
 namespace test
 {
-template<class SampleTypeCombination, template<typename InputSampleType> class NoninterleavedBaseType>
+template<typename SampleTypeCombination, template<typename InputSampleType> class NoninterleavedBaseType>
 class TransformNoninterleavedBase : public NoninterleavedBaseType<typename SampleTypeCombination::input_sample_type>
 {
 protected:
@@ -39,25 +39,25 @@ protected:
     }
 };
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformTypicalNoninterleavedBase :
     public TransformNoninterleavedBase<SampleTypeCombination, TypicalNoninterleavedBase>
 {
 };
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformSingleFrameNoninterleavedBase :
     public TransformNoninterleavedBase<SampleTypeCombination, SingleFrameNoninterleavedBase>
 {
 };
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformSingleChannelNoninterleavedBase :
     public TransformNoninterleavedBase<SampleTypeCombination, SingleChannelNoninterleavedBase>
 {
 };
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformNoninterleaved : public TransformTypicalNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -196,7 +196,7 @@ TYPED_TEST(TransformNoninterleaved, ConstInputIterators)
     }
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformFrame : public TransformTypicalNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -358,7 +358,7 @@ TYPED_TEST(TransformFrame, ConstInputIterators)
     }
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformChannel : public TransformTypicalNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -520,7 +520,7 @@ TYPED_TEST(TransformChannel, ConstInputIterators)
     }
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformNoninterleavedSingleFrame : public TransformSingleFrameNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -615,7 +615,7 @@ TYPED_TEST(TransformNoninterleavedSingleFrame, MoreOutputFramesMoreOutputChannel
     EXPECT_EQ(output_buffer[input_buffer.channels()][0], typename TestFixture::output_sample());
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformFrameSingleFrame : public TransformSingleFrameNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -731,7 +731,7 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputFramesMoreOutputChannels)
     EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample());
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformChannelSingleFrame : public TransformSingleFrameNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -836,7 +836,7 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputFramesMoreOutputChannels)
     }
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformNoninterleavedSingleChannel : public TransformSingleChannelNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -931,7 +931,7 @@ TYPED_TEST(TransformNoninterleavedSingleChannel, MoreOutputFramesMoreOutputChann
     }
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformFrameSingleChannel : public TransformSingleChannelNoninterleavedBase<SampleTypeCombination>
 {
 };
@@ -1036,7 +1036,7 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputFramesMoreOutputChannels)
     }
 }
 
-template<class SampleTypeCombination>
+template<typename SampleTypeCombination>
 class TransformChannelSingleChannel : public TransformSingleChannelNoninterleavedBase<SampleTypeCombination>
 {
 };

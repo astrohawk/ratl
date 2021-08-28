@@ -428,7 +428,7 @@ TYPED_TEST(ConvertFloat32Correct, Typical)
 
 // ConvertFloat32Transparent
 
-template<class SampleTypeArg>
+template<typename SampleTypeArg>
 class ConvertFloat32Transparent : public ::testing::Test
 {
 protected:
@@ -464,7 +464,7 @@ TYPED_TEST(ConvertFloat32Transparent, Typical)
 
 // ConvertFloatIntNoWrapping
 
-template<class SampleTypeArg>
+template<typename SampleTypeArg>
 class ConvertFloatIntNoWrapping : public ::testing::Test
 {
 protected:

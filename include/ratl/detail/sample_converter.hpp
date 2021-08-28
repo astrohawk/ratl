@@ -19,11 +19,11 @@ namespace ratl
 namespace detail
 {
 template<
-    template<class, class, class>
+    template<typename, typename, typename>
     class SampleConverterImpl,
-    class InputSampleType,
-    class OutputSampleType,
-    class DitherGenerator>
+    typename InputSampleType,
+    typename OutputSampleType,
+    typename DitherGenerator>
 class basic_sample_converter
 {
     using sample_converter_impl = SampleConverterImpl<InputSampleType, OutputSampleType, DitherGenerator>;
@@ -48,21 +48,21 @@ private:
     std::reference_wrapper<DitherGenerator> dither_gen_;
 };
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 using reference_sample_converter = basic_sample_converter<
     detail::batch_reference_sample_converter_impl,
     InputSampleType,
     OutputSampleType,
     DitherGenerator>;
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 using fast_sample_converter = basic_sample_converter<
     detail::batch_fast_sample_converter_impl,
     InputSampleType,
     OutputSampleType,
     DitherGenerator>;
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 using default_sample_converter = fast_sample_converter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 } // namespace detail

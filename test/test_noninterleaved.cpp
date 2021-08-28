@@ -14,7 +14,7 @@ namespace test
 {
 // DefaultConstructor
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class DefaultConstructor : public ::testing::Test
 {
 protected:
@@ -75,7 +75,7 @@ TYPED_TEST(DefaultConstructor, ConstReverseIteratorEqual)
 
 // ZeroConstructor
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class ZeroConstructor : public ZeroNoninterleavedBase<SampleValueType>
 {
 };
@@ -134,7 +134,7 @@ TYPED_TEST(ZeroConstructor, ConstReverseIteratorEqual)
 
 // ZeroChannelsConstructor
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class ZeroChannelsConstructor : public ZeroChannelsNoninterleavedBase<SampleValueType>
 {
 };
@@ -198,7 +198,7 @@ TYPED_TEST(ZeroChannelsConstructor, ConstReverseIteratorEqual)
 
 // ZeroFramesConstructor
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class ZeroFramesConstructor : public ZeroFramesNoninterleavedBase<SampleValueType>
 {
 };
@@ -257,7 +257,7 @@ TYPED_TEST(ZeroFramesConstructor, ConstReverseIteratorEqual)
 
 // TypedTypical
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class TypedTypical : public TypicalNoninterleavedBase<SampleValueType>
 {
 };
@@ -483,7 +483,7 @@ TYPED_TEST(TypedTypical, RangeBasedForLoopFrame)
 
 // Equality
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class Equality : public ::testing::Test
 {
 protected:
@@ -570,7 +570,7 @@ TYPED_TEST(Equality, TypicalOneWriteBackEqual)
 
 // CopyConstructor
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class CopyConstructor : public CopyNoninterleavedBase<SampleValueType>
 {
 protected:
@@ -589,7 +589,7 @@ TYPED_TEST(CopyConstructor, CopyConstructor)
 
 // CopyAssignmentOperator
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class CopyAssignmentOperator : public CopyNoninterleavedBase<SampleValueType>
 {
 protected:
@@ -609,7 +609,7 @@ TYPED_TEST(CopyAssignmentOperator, CopyAssignmentOperator)
 
 // MoveConstructor
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class MoveConstructor : public MoveNoninterleavedBase<SampleValueType>
 {
 protected:
@@ -628,7 +628,7 @@ TYPED_TEST(MoveConstructor, MoveConstructor)
 
 // MoveAssignmentOperator
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class MoveAssignmentOperator : public MoveNoninterleavedBase<SampleValueType>
 {
 protected:
@@ -648,7 +648,7 @@ TYPED_TEST(MoveAssignmentOperator, MoveAssignmentOperator)
 
 // Swap
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class Swap : public TypicalNoninterleavedBase<SampleValueType>
 {
 protected:
@@ -681,7 +681,7 @@ TYPED_TEST(Swap, SwapMember)
 
 // allocator
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class Allocate : public TypicalNoninterleavedBase<SampleValueType>
 {
 protected:
@@ -826,7 +826,7 @@ TYPED_TEST(Allocate, Swap)
 
 // ReadWrite
 
-template<class SampleValueType>
+template<typename SampleValueType>
 class RawReadWrite : public TypicalNoninterleavedBase<SampleValueType>
 {
 };

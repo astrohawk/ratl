@@ -18,7 +18,7 @@
 
 namespace ratl
 {
-template<class SampleValueType>
+template<typename SampleValueType>
 struct sample_limits;
 
 template<>

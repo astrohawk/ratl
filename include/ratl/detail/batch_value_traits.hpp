@@ -39,16 +39,16 @@ static constexpr bool has_batch_type_v = has_batch_type<SampleValueType>::value;
 
 // batch_sample_value_type
 
-template<class SampleValueType, class = void>
+template<typename SampleValueType, typename = void>
 struct batch_sample_value_type;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_sample_value_type<SampleValueType, typename std::enable_if<has_batch_type_v<SampleValueType>>::type>
 {
     using type = xsimd::batch<SampleValueType, batch_size>;
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_sample_value_type<SampleValueType, typename std::enable_if<!has_batch_type_v<SampleValueType>>::type>
 {
     using type = xsimd::batch<std::int32_t, batch_size>;
@@ -60,15 +60,15 @@ struct batch_sample_value_type<float32_t>
     using type = xsimd::batch<float, batch_size>;
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using batch_sample_value_type_t = typename batch_sample_value_type<SampleValueType>::type;
 
 // batch_network_sample_value_type
 
-template<class SampleValueType, class = void>
+template<typename SampleValueType, typename = void>
 struct batch_network_sample_value_type;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_network_sample_value_type<
     SampleValueType,
     typename std::enable_if<has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>::type>
@@ -76,7 +76,7 @@ struct batch_network_sample_value_type<
     using type = xsimd::batch<network_sample_value_underlying_type_t<SampleValueType>, batch_size>;
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_network_sample_value_type<
     SampleValueType,
     typename std::enable_if<!has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>::type>
@@ -84,7 +84,7 @@ struct batch_network_sample_value_type<
     using type = xsimd::batch<std::uint32_t, batch_size>;
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using batch_network_sample_value_type_t = typename batch_network_sample_value_type<SampleValueType>::type;
 
 } // namespace detail

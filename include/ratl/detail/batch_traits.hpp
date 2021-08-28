@@ -24,22 +24,22 @@ namespace detail
 {
 // batch_sample_type
 
-template<class SampleType>
+template<typename SampleType>
 struct batch_sample_type;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_sample_type<sample<SampleValueType>>
 {
     using type = batch_sample_value_type_t<SampleValueType>;
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_sample_type<network_sample<SampleValueType>>
 {
     using type = batch_network_sample_value_type_t<SampleValueType>;
 };
 
-template<class SampleType>
+template<typename SampleType>
 using batch_sample_type_t = typename batch_sample_type<SampleType>::type;
 
 } // namespace detail

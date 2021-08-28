@@ -23,7 +23,7 @@ namespace detail
 {
 // is_valid_sample_value_type_impl
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct is_valid_sample_value_type_impl : public std::false_type
 {
 };
@@ -46,19 +46,19 @@ struct is_valid_sample_value_type_impl<float32_t> : public std::true_type
 
 // is_valid_sample_value_type
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct is_valid_sample_value_type : public detail::is_valid_sample_value_type_impl<SampleValueType>
 {
 };
 
 // is_valid_sample_value_type_v
 
-template<class SampleValueType>
+template<typename SampleValueType>
 static constexpr bool is_valid_sample_value_type_v = is_valid_sample_value_type<SampleValueType>::value;
 
 // network_sample_value_underlying_type
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct network_sample_value_underlying_type;
 
 template<>
@@ -87,12 +87,12 @@ struct network_sample_value_underlying_type<float32_t>
 
 // network_sample_value_underlying_type_t
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using network_sample_value_underlying_type_t = typename network_sample_value_underlying_type<SampleValueType>::type;
 
 // network_sample_value_type
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct network_sample_value_type
 {
     static_assert(is_valid_sample_value_type_v<SampleValueType>, "sample_type is not a valid sample type");
@@ -122,7 +122,7 @@ struct network_sample_value_type
 
 // network_sample_value_type_t
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using network_sample_value_type_t = typename network_sample_value_type<SampleValueType>::type;
 
 } // namespace detail

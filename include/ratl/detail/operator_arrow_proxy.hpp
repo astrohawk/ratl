@@ -12,7 +12,7 @@ namespace ratl
 {
 namespace detail
 {
-template<class Tp>
+template<typename Tp>
 class operator_arrow_proxy
 {
 public:

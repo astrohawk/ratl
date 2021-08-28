@@ -20,34 +20,35 @@ namespace ratl
 {
 namespace detail
 {
-template<class Tag, class SampleType, bool Contiguous>
+template<typename Tag, typename SampleType, typename PointerTraits, bool Contiguous>
 class sample_iterator;
 
-template<class Tag, class SampleType>
-class sample_iterator<Tag, SampleType, false>
+template<typename Tag, typename SampleType, typename PointerTraits>
+class sample_iterator<Tag, SampleType, PointerTraits, false>
 {
     using sample_traits = detail::sample_traits<SampleType>;
     using sample_type = typename sample_traits::sample_type;
-    using sample_pointer = typename sample_traits::pointer;
-    using sample_reference = typename sample_traits::reference;
+    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+
+    using iter_traits = std::iterator_traits<sample_pointer>;
 
     using size_type = std::size_t;
 
 public:
-    using iterator_category = std::random_access_iterator_tag;
-    using value_type = sample_type;
-    using difference_type = std::ptrdiff_t;
-    using pointer = sample_pointer;
-    using reference = sample_reference;
+    using iterator_category = typename iter_traits::iterator_category;
+    using value_type = typename iter_traits::value_type;
+    using difference_type = typename iter_traits::difference_type;
+    using pointer = typename iter_traits::pointer;
+    using reference = typename iter_traits::reference;
 
 private:
-    pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
     size_type stride_ = 0;
 
 public:
     sample_iterator() noexcept = default;
 
-    sample_iterator(pointer data, size_type stride) noexcept : data_(data), stride_(stride) {}
+    sample_iterator(sample_pointer data, size_type stride) noexcept : data_(data), stride_(stride) {}
 
     sample_iterator(const sample_iterator& other) noexcept = default;
 
@@ -189,13 +190,14 @@ public:
     }
 };
 
-template<class Tag, class SampleType>
-class sample_iterator<Tag, SampleType, true>
+template<typename Tag, typename SampleType, typename PointerTraits>
+class sample_iterator<Tag, SampleType, PointerTraits, true>
 {
     using sample_traits = detail::sample_traits<SampleType>;
     using sample_type = typename sample_traits::sample_type;
-    using sample_pointer = typename sample_traits::pointer;
-    using sample_reference = typename sample_traits::reference;
+    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+
+    using iter_traits = std::iterator_traits<sample_pointer>;
 
     using size_type = std::size_t;
 
@@ -204,19 +206,19 @@ public:
     using iterator_concept = std::contiguous_iterator_tag;
     using element_type = sample_type;
 #endif
-    using iterator_category = std::random_access_iterator_tag;
-    using value_type = sample_type;
-    using difference_type = std::ptrdiff_t;
-    using pointer = sample_pointer;
-    using reference = sample_reference;
+    using iterator_category = typename iter_traits::iterator_category;
+    using value_type = typename iter_traits::value_type;
+    using difference_type = typename iter_traits::difference_type;
+    using pointer = typename iter_traits::pointer;
+    using reference = typename iter_traits::reference;
 
 private:
-    pointer data_ = nullptr;
+    sample_pointer data_ = nullptr;
 
 public:
     sample_iterator() noexcept = default;
 
-    explicit sample_iterator(pointer data) noexcept : data_(data) {}
+    explicit sample_iterator(sample_pointer data) noexcept : data_(data) {}
 
     sample_iterator(const sample_iterator& other) noexcept = default;
 

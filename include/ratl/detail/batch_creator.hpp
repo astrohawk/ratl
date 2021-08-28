@@ -24,10 +24,10 @@ namespace ratl
 {
 namespace detail
 {
-template<class SampleType>
+template<typename SampleType>
 struct base_batch_creator;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct base_batch_creator<sample<SampleValueType>>
 {
     using batch_type = batch_sample_value_type_t<SampleValueType>;
@@ -79,7 +79,7 @@ private:
     }
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct base_batch_creator<network_sample<SampleValueType>>
 {
     using batch_type = batch_network_sample_value_type_t<SampleValueType>;
@@ -131,7 +131,7 @@ private:
     }
 };
 
-template<class SampleType, class = void>
+template<typename SampleType, typename = void>
 struct batch_creator : public base_batch_creator<SampleType>
 {
 };
@@ -140,7 +140,7 @@ struct batch_creator : public base_batch_creator<SampleType>
 // behaviour when performing the reinterpret_cast but this is a price we are currently willing to pay in order to get
 // the corresponding performance boost
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_type_v<SampleValueType>>::type> :
     public base_batch_creator<sample<SampleValueType>>
 {
@@ -166,7 +166,7 @@ struct batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_
     }
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 struct batch_creator<
     network_sample<SampleValueType>,
     typename std::enable_if<has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>::type> :

@@ -16,7 +16,7 @@
 
 namespace ratl
 {
-template<class InputSampleType>
+template<typename InputSampleType>
 basic_interleaved<InputSampleType> generateRandomInterleaved(std::size_t num_channels, std::size_t num_frames)
 {
     std::random_device random_device;
@@ -37,7 +37,7 @@ basic_interleaved<InputSampleType> generateRandomInterleaved(std::size_t num_cha
     return input_interleaved;
 }
 
-template<class InputSampleType, class OutputSampleType>
+template<typename InputSampleType, typename OutputSampleType>
 void benchSampleTransform(benchmark::State& state)
 {
     static constexpr std::size_t num_channels = 32;

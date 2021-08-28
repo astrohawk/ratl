@@ -20,7 +20,7 @@ namespace ratl
 {
 // transform
 
-template<class InputIterator, class OutputIterator, class Transformer>
+template<typename InputIterator, typename OutputIterator, typename Transformer>
 inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result, Transformer transformer)
 {
     return transformer(first, last, result);
@@ -28,27 +28,27 @@ inline OutputIterator transform(InputIterator first, InputIterator last, OutputI
 
 namespace detail
 {
-template<template<class, class, class> class Transformer, class InputIterator, class OutputIterator>
+template<template<typename, typename, typename> class Transformer, typename InputIterator, typename OutputIterator>
 inline OutputIterator transform_impl(
     InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
     using transformer = Transformer<InputIterator, OutputIterator, dither_generator>;
-    return transform(first, last, result, transformer(dither_gen));
+    return ratl::transform(first, last, result, transformer(dither_gen));
 }
 
-template<template<class, class, class> class Transformer, class InputIterator, class OutputIterator>
+template<template<typename, typename, typename> class Transformer, typename InputIterator, typename OutputIterator>
 inline OutputIterator transform_impl(InputIterator first, InputIterator last, OutputIterator result)
 {
     using transformer_dither_generator = batch_null_dither_generator;
     using transformer = Transformer<InputIterator, OutputIterator, transformer_dither_generator>;
     transformer_dither_generator dither_gen;
-    return transform(first, last, result, transformer(dither_gen));
+    return ratl::transform(first, last, result, transformer(dither_gen));
 }
 } // namespace detail
 
 // transform
 
-template<class InputIterator, class OutputIterator>
+template<typename InputIterator, typename OutputIterator>
 inline OutputIterator transform(
     InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
@@ -56,7 +56,7 @@ inline OutputIterator transform(
         first, last, result, dither_gen);
 }
 
-template<class InputIterator, class OutputIterator>
+template<typename InputIterator, typename OutputIterator>
 inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result)
 {
     return detail::transform_impl<detail::default_transformer, InputIterator, OutputIterator>(first, last, result);
@@ -64,7 +64,7 @@ inline OutputIterator transform(InputIterator first, InputIterator last, OutputI
 
 // reference_transform
 
-template<class InputIterator, class OutputIterator>
+template<typename InputIterator, typename OutputIterator>
 inline OutputIterator reference_transform(
     InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
@@ -72,7 +72,7 @@ inline OutputIterator reference_transform(
         first, last, result, dither_gen);
 }
 
-template<class InputIterator, class OutputIterator>
+template<typename InputIterator, typename OutputIterator>
 inline OutputIterator reference_transform(InputIterator first, InputIterator last, OutputIterator result)
 {
     return detail::transform_impl<detail::reference_transformer, InputIterator, OutputIterator>(first, last, result);
@@ -80,7 +80,7 @@ inline OutputIterator reference_transform(InputIterator first, InputIterator las
 
 // fast_transform
 
-template<class InputIterator, class OutputIterator>
+template<typename InputIterator, typename OutputIterator>
 inline OutputIterator fast_transform(
     InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
@@ -88,7 +88,7 @@ inline OutputIterator fast_transform(
         first, last, result, dither_gen);
 }
 
-template<class InputIterator, class OutputIterator>
+template<typename InputIterator, typename OutputIterator>
 inline OutputIterator fast_transform(InputIterator first, InputIterator last, OutputIterator result)
 {
     return detail::transform_impl<detail::fast_transformer, InputIterator, OutputIterator>(first, last, result);

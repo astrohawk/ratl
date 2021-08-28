@@ -22,7 +22,7 @@ namespace ratl
 {
 namespace detail
 {
-template<class OutputType, class InputType>
+template<typename OutputType, typename InputType>
 inline typename std::enable_if_t<
     sizeof(OutputType) == sizeof(InputType) && std::is_trivially_copyable<InputType>::value &&
         std::is_trivially_copyable<OutputType>::value,
@@ -47,7 +47,7 @@ bit_cast(const InputType& input) noexcept
 
 // sample_to_network_underlying_cast
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline network_sample_value_underlying_type_t<SampleValueType> sample_to_network_underlying_cast(
     SampleValueType input) noexcept
 {
@@ -56,7 +56,7 @@ inline network_sample_value_underlying_type_t<SampleValueType> sample_to_network
 
 // network_underlying_to_sample_cast
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline SampleValueType network_underlying_to_sample_cast(
     network_sample_value_underlying_type_t<SampleValueType> input) noexcept
 {
@@ -65,7 +65,7 @@ inline SampleValueType network_underlying_to_sample_cast(
 
 // network_to_network_underlying_cast
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline network_sample_value_underlying_type_t<SampleValueType> network_to_network_underlying_cast(
     network_sample_value_type_t<SampleValueType> input) noexcept
 {
@@ -74,7 +74,7 @@ inline network_sample_value_underlying_type_t<SampleValueType> network_to_networ
 
 // network_underlying_to_network_cast
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline network_sample_value_type_t<SampleValueType> network_underlying_to_network_cast(
     network_sample_value_underlying_type_t<SampleValueType> input) noexcept
 {

@@ -46,8 +46,8 @@ inline uint24_t reverse_endianness(uint24_t input) noexcept
 
 // host_to_network
 
-template<class network_sample_value_underlying_type>
-inline network_sample_value_underlying_type host_to_network(network_sample_value_underlying_type input) noexcept
+template<typename NetworkSampleValueUnderlyingType>
+inline NetworkSampleValueUnderlyingType host_to_network(NetworkSampleValueUnderlyingType input) noexcept
 {
 #if defined(RATL_CPP_LITTLE_ENDIAN)
     return reverse_endianness(input);
@@ -58,8 +58,8 @@ inline network_sample_value_underlying_type host_to_network(network_sample_value
 
 // network_to_host
 
-template<class network_sample_value_underlying_type>
-inline network_sample_value_underlying_type network_to_host(network_sample_value_underlying_type input) noexcept
+template<typename NetworkSampleValueUnderlyingType>
+inline NetworkSampleValueUnderlyingType network_to_host(NetworkSampleValueUnderlyingType input) noexcept
 {
 #if defined(RATL_CPP_LITTLE_ENDIAN)
     return reverse_endianness(input);
@@ -70,7 +70,7 @@ inline network_sample_value_underlying_type network_to_host(network_sample_value
 
 // sample_to_network_sample
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline network_sample_value_type_t<SampleValueType> sample_to_network_sample(SampleValueType input) noexcept
 {
     return network_underlying_to_network_cast<SampleValueType>(
@@ -79,7 +79,7 @@ inline network_sample_value_type_t<SampleValueType> sample_to_network_sample(Sam
 
 // network_sample_to_sample
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline SampleValueType network_sample_to_sample(network_sample_value_type_t<SampleValueType> input) noexcept
 {
     return network_underlying_to_sample_cast<SampleValueType>(

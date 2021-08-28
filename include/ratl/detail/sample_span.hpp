@@ -24,20 +24,24 @@
 
 namespace ratl
 {
-template<class SampleType, bool Contiguous, template<class, bool> class Iterator>
+template<
+    typename SampleType,
+    typename PointerTraits,
+    bool Contiguous,
+    template<typename, typename, bool>
+    class Iterator>
 class sample_span;
 
-template<class SampleType, template<class, bool> class Iterator>
-class sample_span<SampleType, false, Iterator>
+template<typename SampleType, typename PointerTraits, template<typename, typename, bool> class Iterator>
+class sample_span<SampleType, PointerTraits, false, Iterator>
 {
-public:
     using sample_traits = detail::sample_traits<SampleType>;
+
+public:
     using sample_type = typename sample_traits::sample_type;
     using const_sample_type = typename sample_traits::const_sample_type;
-    using sample_pointer = typename sample_traits::pointer;
-    using const_sample_pointer = typename sample_traits::const_pointer;
-    using sample_reference = typename sample_traits::reference;
-    using const_sample_reference = typename sample_traits::const_reference;
+    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+    using const_sample_pointer = typename PointerTraits::const_pointer;
 
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
@@ -45,11 +49,11 @@ public:
     using value_type = sample_type;
     using pointer = sample_pointer;
     using const_pointer = const_sample_pointer;
-    using reference = sample_reference;
-    using const_reference = const_sample_reference;
+    using reference = typename sample_traits::reference;
+    using const_reference = typename sample_traits::const_reference;
 
-    using iterator = Iterator<sample_type, false>;
-    using const_iterator = Iterator<const_sample_type, false>;
+    using iterator = Iterator<sample_type, PointerTraits, false>;
+    using const_iterator = Iterator<const_sample_type, PointerTraits, false>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -68,14 +72,14 @@ public:
 
     sample_span(const sample_span&) noexcept = default;
 
-    sample_span(const sample_span<SampleType, true, Iterator>& other) noexcept :
+    sample_span(const sample_span<SampleType, PointerTraits, true, Iterator>& other) noexcept :
         start_(other.start_), samples_(other.samples_), stride_(1)
     {
     }
 
     sample_span& operator=(const sample_span&) noexcept = default;
 
-    sample_span& operator=(const sample_span<SampleType, true, Iterator>& other) noexcept
+    sample_span& operator=(const sample_span<SampleType, PointerTraits, true, Iterator>& other) noexcept
     {
         sample_span(other).swap(*this);
         return *this;
@@ -88,7 +92,7 @@ public:
         return start_;
     }
 
-    inline const sample_pointer data() const noexcept
+    inline const_sample_pointer data() const noexcept
     {
         return start_;
     }
@@ -202,25 +206,23 @@ public:
     }
 };
 
-template<class SampleType, template<class, bool> class Iterator>
-inline void sample_span<SampleType, false, Iterator>::swap(sample_span& other) noexcept
+template<typename SampleType, typename PointerTraits, template<typename, typename, bool> class Iterator>
+inline void sample_span<SampleType, PointerTraits, false, Iterator>::swap(sample_span& other) noexcept
 {
     std::swap(start_, other.start_);
     std::swap(samples_, other.samples_);
     std::swap(stride_, other.stride_);
 }
 
-template<class SampleType, template<class, bool> class Iterator>
-class sample_span<SampleType, true, Iterator>
+template<typename SampleType, typename PointerTraits, template<typename, typename, bool> class Iterator>
+class sample_span<SampleType, PointerTraits, true, Iterator>
 {
 public:
     using sample_traits = detail::sample_traits<SampleType>;
     using sample_type = typename sample_traits::sample_type;
     using const_sample_type = typename sample_traits::const_sample_type;
-    using sample_pointer = typename sample_traits::pointer;
-    using const_sample_pointer = typename sample_traits::const_pointer;
-    using sample_reference = typename sample_traits::reference;
-    using const_sample_reference = typename sample_traits::const_reference;
+    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+    using const_sample_pointer = typename PointerTraits::const_pointer;
 
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
@@ -228,11 +230,11 @@ public:
     using value_type = sample_type;
     using pointer = sample_pointer;
     using const_pointer = const_sample_pointer;
-    using reference = sample_reference;
-    using const_reference = const_sample_reference;
+    using reference = typename sample_traits::reference;
+    using const_reference = typename sample_traits::const_reference;
 
-    using iterator = Iterator<sample_type, true>;
-    using const_iterator = Iterator<const_sample_type, true>;
+    using iterator = Iterator<sample_type, PointerTraits, true>;
+    using const_iterator = Iterator<const_sample_type, PointerTraits, true>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -256,7 +258,7 @@ public:
         return start_;
     }
 
-    inline const sample_pointer data() const noexcept
+    inline const_sample_pointer data() const noexcept
     {
         return start_;
     }
@@ -370,8 +372,8 @@ public:
     }
 };
 
-template<class SampleType, template<class, bool> class Iterator>
-inline void sample_span<SampleType, true, Iterator>::swap(sample_span& other) noexcept
+template<typename SampleType, typename PointerTraits, template<typename, typename, bool> class Iterator>
+inline void sample_span<SampleType, PointerTraits, true, Iterator>::swap(sample_span& other) noexcept
 {
     std::swap(start_, other.start_);
     std::swap(samples_, other.samples_);

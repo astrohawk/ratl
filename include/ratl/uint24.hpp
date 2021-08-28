@@ -65,70 +65,70 @@ inline constexpr uint24_t::operator int32_t() const noexcept
         (static_cast<uint32_t>(storage_[2]) << 16));
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator+=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) + val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator-=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) - val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator*=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) * val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator/=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) / val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator%=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) % val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator&=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) & val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator|=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) | val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator^=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) ^ val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator<<=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) << val;
     return x;
 }
 
-template<class Up>
+template<typename Up>
 inline constexpr uint24_t& operator>>=(uint24_t& x, const Up& val) noexcept
 {
     x = static_cast<int32_t>(x) >> val;

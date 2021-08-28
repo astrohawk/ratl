@@ -25,7 +25,7 @@ namespace detail
 {
 // batch_reverse_endianness_impl
 
-template<class NetworkSampleValueUnderlyingType>
+template<typename NetworkSampleValueUnderlyingType>
 struct batch_reverse_endianness_impl;
 
 template<>
@@ -162,7 +162,7 @@ struct batch_reverse_endianness_impl<uint32_t>
 
 // batch_reverse_endianness
 
-template<class NetworkSampleValueUnderlyingType, class BatchNetworkSampleValueType>
+template<typename NetworkSampleValueUnderlyingType, typename BatchNetworkSampleValueType>
 inline BatchNetworkSampleValueType batch_reverse_endianness(const BatchNetworkSampleValueType& input) noexcept
 {
     return batch_reverse_endianness_impl<NetworkSampleValueUnderlyingType>::reverse(input);
@@ -170,7 +170,7 @@ inline BatchNetworkSampleValueType batch_reverse_endianness(const BatchNetworkSa
 
 // batch_host_to_network
 
-template<class NetworkSampleValueUnderlyingType, class BatchNetworkSampleValueType>
+template<typename NetworkSampleValueUnderlyingType, typename BatchNetworkSampleValueType>
 inline BatchNetworkSampleValueType batch_host_to_network(const BatchNetworkSampleValueType& input) noexcept
 {
 #    if defined(RATL_CPP_LITTLE_ENDIAN)
@@ -182,7 +182,7 @@ inline BatchNetworkSampleValueType batch_host_to_network(const BatchNetworkSampl
 
 // batch_network_to_host
 
-template<class NetworkSampleValueUnderlyingType, class BatchNetworkSampleValueType>
+template<typename NetworkSampleValueUnderlyingType, typename BatchNetworkSampleValueType>
 inline BatchNetworkSampleValueType batch_network_to_host(const BatchNetworkSampleValueType& input) noexcept
 {
 #    if defined(RATL_CPP_LITTLE_ENDIAN)
@@ -194,7 +194,7 @@ inline BatchNetworkSampleValueType batch_network_to_host(const BatchNetworkSampl
 
 // batch_sample_to_network_sample
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline batch_network_sample_value_type_t<SampleValueType> batch_sample_to_network_sample(
     const batch_sample_value_type_t<SampleValueType>& input) noexcept
 {
@@ -204,7 +204,7 @@ inline batch_network_sample_value_type_t<SampleValueType> batch_sample_to_networ
 
 // batch_network_sample_to_sample
 
-template<class SampleValueType>
+template<typename SampleValueType>
 inline batch_sample_value_type_t<SampleValueType> batch_network_sample_to_sample(
     const batch_network_sample_value_type_t<SampleValueType>& input) noexcept
 {

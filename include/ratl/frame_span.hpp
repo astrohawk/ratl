@@ -17,28 +17,27 @@
 
 namespace ratl
 {
-template<class SampleType, bool Contiguous = false>
+template<typename SampleType, typename PointerTraits, bool Contiguous = false>
 class basic_frame_span
 {
-    using data_impl_type = sample_span<SampleType, Contiguous, detail::frame_iterator>;
-    using sample_traits = typename data_impl_type::sample_traits;
+    using data_impl_type = sample_span<SampleType, PointerTraits, Contiguous, detail::frame_iterator>;
 
 public:
-    using sample_type = typename sample_traits::sample_type;
-    using const_sample_type = typename sample_traits::const_sample_type;
+    using sample_type = typename data_impl_type::sample_type;
+    using const_sample_type = typename data_impl_type::const_sample_type;
     using sample_pointer = typename data_impl_type::sample_pointer;
     using const_sample_pointer = typename data_impl_type::const_sample_pointer;
-    using sample_reference = typename data_impl_type::sample_reference;
-    using const_sample_reference = typename data_impl_type::const_sample_reference;
+
+    using char_pointer = std::conditional_t<std::is_const<sample_type>::value, const unsigned char*, unsigned char*>;
 
     using size_type = typename data_impl_type::size_type;
     using difference_type = typename data_impl_type::difference_type;
 
     using value_type = typename data_impl_type::value_type;
-    using reference = typename data_impl_type::reference;
-    using const_reference = typename data_impl_type::const_reference;
     using pointer = typename data_impl_type::pointer;
     using const_pointer = typename data_impl_type::const_pointer;
+    using reference = typename data_impl_type::reference;
+    using const_reference = typename data_impl_type::const_reference;
 
     using iterator = typename data_impl_type::iterator;
     using const_iterator = typename data_impl_type::const_iterator;
@@ -64,20 +63,20 @@ public:
     }
 
     template<bool DummyContiguous = Contiguous, std::enable_if_t<DummyContiguous == false, bool> = true>
-    basic_frame_span(unsigned char* data, size_type channels, size_type stride) noexcept :
+    basic_frame_span(char_pointer data, size_type channels, size_type stride) noexcept :
         data_(reinterpret_cast<sample_pointer>(data), channels, stride)
     {
     }
 
     template<bool DummyContiguous = Contiguous, std::enable_if_t<DummyContiguous == true, bool> = true>
-    basic_frame_span(unsigned char* data, size_type channels) noexcept :
+    basic_frame_span(char_pointer data, size_type channels) noexcept :
         data_(reinterpret_cast<sample_pointer>(data), channels)
     {
     }
 
     template<
         class SampleArg,
-        class Allocator,
+        typename Allocator,
         std::enable_if_t<std::is_same<SampleArg, std::remove_const_t<sample_type>>::value, bool> = true>
     basic_frame_span(basic_frame<SampleArg, Allocator>& frame) noexcept : data_(frame.data(), frame.channels())
     {
@@ -85,9 +84,9 @@ public:
 
     template<
         class SampleArg,
-        class Allocator,
+        typename Allocator,
         std::enable_if_t<
-            std::is_same<typename detail::sample_traits<SampleArg>::const_sample, sample_type>::value,
+            std::is_same<typename detail::sample_traits<SampleArg>::const_sample_type, sample_type>::value,
             bool> = true>
     basic_frame_span(const basic_frame<SampleArg, Allocator>& frame) noexcept : data_(frame.data(), frame.channels())
     {
@@ -100,12 +99,7 @@ public:
         std::swap(data_, other.data_);
     }
 
-    inline sample_pointer data() noexcept
-    {
-        return data_.data();
-    }
-
-    inline const sample_pointer data() const noexcept
+    inline sample_pointer data() const noexcept
     {
         return data_.data();
     }
@@ -223,9 +217,11 @@ public:
     }
 };
 
-template<class SampleType, bool Contiguous>
-inline typename basic_frame_span<SampleType, Contiguous>::reference basic_frame_span<SampleType, Contiguous>::at(
-    size_type n)
+template<typename SampleType, typename PointerTraits, bool Contiguous>
+inline typename basic_frame_span<SampleType, PointerTraits, Contiguous>::reference basic_frame_span<
+    SampleType,
+    PointerTraits,
+    Contiguous>::at(size_type n)
 {
     if (n >= channels())
     {
@@ -234,9 +230,11 @@ inline typename basic_frame_span<SampleType, Contiguous>::reference basic_frame_
     return (*this)[n];
 }
 
-template<class SampleType, bool Contiguous>
-inline typename basic_frame_span<SampleType, Contiguous>::const_reference basic_frame_span<SampleType, Contiguous>::at(
-    size_type n) const
+template<typename SampleType, typename PointerTraits, bool Contiguous>
+inline typename basic_frame_span<SampleType, PointerTraits, Contiguous>::const_reference basic_frame_span<
+    SampleType,
+    PointerTraits,
+    Contiguous>::at(size_type n) const
 {
     if (n >= channels())
     {
@@ -245,33 +243,43 @@ inline typename basic_frame_span<SampleType, Contiguous>::const_reference basic_
     return (*this)[n];
 }
 
-template<class SampleType, bool ContiguousA, bool ContiguousB>
+template<typename SampleType, typename PointerTraitsA, bool ContiguousA, typename PointerTraitsB, bool ContiguousB>
 inline bool operator==(
-    const basic_frame_span<SampleType, ContiguousA>& a, const basic_frame_span<SampleType, ContiguousB>& b) noexcept
+    const basic_frame_span<SampleType, PointerTraitsA, ContiguousA>& a,
+    const basic_frame_span<SampleType, PointerTraitsB, ContiguousB>& b) noexcept
 {
     return (a.channels() == b.channels()) && std::equal(a.begin(), a.end(), b.begin());
 }
 
-template<class SampleType, bool ContiguousA, bool ContiguousB>
+template<typename SampleType, typename PointerTraitsA, bool ContiguousA, typename PointerTraitsB, bool ContiguousB>
 inline bool operator!=(
-    const basic_frame_span<SampleType, ContiguousA>& a, const basic_frame_span<SampleType, ContiguousB>& b) noexcept
+    const basic_frame_span<SampleType, PointerTraitsA, ContiguousA>& a,
+    const basic_frame_span<SampleType, PointerTraitsB, ContiguousB>& b) noexcept
 {
     return !(a == b);
 }
 
-template<class SampleValueType, bool Contiguous = false>
-using frame_span = basic_frame_span<sample<SampleValueType>, Contiguous>;
+template<typename SampleValueType, bool Contiguous = false>
+using frame_span =
+    basic_frame_span<sample<SampleValueType>, ratl::detail::sample_traits<sample<SampleValueType>>, Contiguous>;
 
-template<class SampleValueType, bool Contiguous = false>
-using const_frame_span =
-    basic_frame_span<typename detail::sample_traits<sample<SampleValueType>>::const_sample, Contiguous>;
+template<typename SampleValueType, bool Contiguous = false>
+using const_frame_span = basic_frame_span<
+    typename detail::sample_traits<sample<SampleValueType>>::const_sample_type,
+    ratl::detail::sample_traits<sample<SampleValueType>>,
+    Contiguous>;
 
-template<class SampleValueType, bool Contiguous = false>
-using network_frame_span = basic_frame_span<network_sample<SampleValueType>, Contiguous>;
+template<typename SampleValueType, bool Contiguous = false>
+using network_frame_span = basic_frame_span<
+    network_sample<SampleValueType>,
+    ratl::detail::sample_traits<network_sample<SampleValueType>>,
+    Contiguous>;
 
-template<class SampleValueType, bool Contiguous = false>
-using const_network_frame_span =
-    basic_frame_span<typename detail::sample_traits<network_sample<SampleValueType>>::const_sample, Contiguous>;
+template<typename SampleValueType, bool Contiguous = false>
+using const_network_frame_span = basic_frame_span<
+    typename detail::sample_traits<network_sample<SampleValueType>>::const_sample_type,
+    ratl::detail::sample_traits<network_sample<SampleValueType>>,
+    Contiguous>;
 
 } // namespace ratl
 

@@ -19,7 +19,7 @@
 
 namespace ratl
 {
-template<class SampleValueType>
+template<typename SampleValueType>
 class network_sample final
 {
     static_assert(

@@ -12,7 +12,7 @@
 // other includes
 #include <benchmark/benchmark.h>
 
-template<class Generator>
+template<typename Generator>
 void benchPrng(benchmark::State& state)
 {
     Generator gen(0x12345678);

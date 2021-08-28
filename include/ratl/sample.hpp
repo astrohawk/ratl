@@ -18,7 +18,7 @@
 
 namespace ratl
 {
-template<class SampleValueType>
+template<typename SampleValueType>
 class sample final
 {
     static_assert(
@@ -45,12 +45,12 @@ public:
 
     ~sample() = default;
 
-    template<class Up, class = typename std::enable_if<std::is_convertible<Up, value_type>::value>::type>
+    template<typename Up, std::enable_if_t<std::is_convertible<Up, value_type>::value, bool> = true>
     constexpr explicit sample(const Up& other) noexcept : sample_(other)
     {
     }
 
-    template<class Up, class = typename std::enable_if<std::is_convertible<Up, value_type>::value>::type>
+    template<typename Up, std::enable_if_t<std::is_convertible<Up, value_type>::value, bool> = true>
     constexpr sample& operator=(const Up& other) noexcept
     {
         sample_ = other;

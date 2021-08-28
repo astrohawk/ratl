@@ -28,10 +28,10 @@ namespace detail
 {
 // reference_sample_converter_impl
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 struct reference_sample_converter_impl;
 
-template<class SampleValueType, class DitherGenerator>
+template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<SampleValueType>, sample<SampleValueType>, DitherGenerator>
 {
     static inline SampleValueType convert(SampleValueType input, DitherGenerator&) noexcept
@@ -40,7 +40,7 @@ struct reference_sample_converter_impl<sample<SampleValueType>, sample<SampleVal
     }
 };
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherGenerator>
 {
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
@@ -49,7 +49,7 @@ struct reference_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherG
     }
 };
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int16_t>, sample<int32_t>, DitherGenerator>
 {
     static inline int32_t convert(int32_t input, DitherGenerator&) noexcept
@@ -61,7 +61,7 @@ struct reference_sample_converter_impl<sample<int16_t>, sample<int32_t>, DitherG
 // sample >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
 // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x007FFF80);
@@ -84,10 +84,10 @@ struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherG
     }
 };
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 constexpr int16_t reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::sample_out_max;
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherGenerator>
 {
     static inline int32_t convert(int32_t input, DitherGenerator&) noexcept
@@ -99,7 +99,7 @@ struct reference_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherG
 // sample >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
 // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFF8000);
@@ -121,10 +121,10 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherG
     }
 };
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 constexpr int16_t reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::sample_out_max;
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
 {
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFFFF80);
@@ -141,10 +141,10 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherG
     }
 };
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 constexpr int24_t reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>::sample_out_max;
 
-template<class SampleValueType, class DitherGenerator>
+template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
 {
     static constexpr float32_t scaler = float_convert_traits<SampleValueType>::divisor;
@@ -158,7 +158,7 @@ struct reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t
 // sample >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
 // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
-template<class SampleValueType, class DitherGenerator>
+template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
 {
 private:
@@ -186,17 +186,17 @@ public:
     }
 };
 
-template<class SampleValueType, class DitherGenerator>
+template<typename SampleValueType, typename DitherGenerator>
 constexpr SampleValueType
     reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::sample_out_max;
-template<class SampleValueType, class DitherGenerator>
+template<typename SampleValueType, typename DitherGenerator>
 constexpr SampleValueType
     reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::sample_out_min;
 
 // This is required as sample_converter<float32_t, sample_type> is more specific than
 // sample_converter<sample_type, sample_type>
 
-template<class DitherGenerator>
+template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<float32_t>, sample<float32_t>, DitherGenerator>
 {
     static inline float32_t convert(float32_t input, DitherGenerator&) noexcept
@@ -205,7 +205,7 @@ struct reference_sample_converter_impl<sample<float32_t>, sample<float32_t>, Dit
     }
 };
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<InputSampleType>, network_sample<OutputSampleType>, DitherGenerator>
 {
     static inline network_sample_value_type_t<OutputSampleType> convert(
@@ -222,7 +222,7 @@ struct reference_sample_converter_impl<sample<InputSampleType>, network_sample<O
     }
 };
 
-template<class SampleValueType, class DitherGenerator>
+template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<SampleValueType>, network_sample<SampleValueType>, DitherGenerator>
 {
     static inline network_sample_value_type_t<SampleValueType> convert(SampleValueType input, DitherGenerator&) noexcept
@@ -231,7 +231,7 @@ struct reference_sample_converter_impl<sample<SampleValueType>, network_sample<S
     }
 };
 
-template<class InputSampleType, class OutputSampleType, class DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 struct reference_sample_converter_impl<network_sample<InputSampleType>, sample<OutputSampleType>, DitherGenerator>
 {
     static inline OutputSampleType convert(
@@ -247,7 +247,7 @@ struct reference_sample_converter_impl<network_sample<InputSampleType>, sample<O
     }
 };
 
-template<class SampleValueType, class DitherGenerator>
+template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<network_sample<SampleValueType>, sample<SampleValueType>, DitherGenerator>
 {
     static inline SampleValueType convert(network_sample_value_type_t<SampleValueType> input, DitherGenerator&) noexcept

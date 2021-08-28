@@ -11,7 +11,6 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/operator_arrow_proxy.hpp>
-#include <ratl/detail/sample_traits.hpp>
 #include <ratl/frame_span.hpp>
 
 // other includes
@@ -21,22 +20,23 @@ namespace ratl
 {
 namespace detail
 {
-template<class SampleType>
+template<typename SampleType, typename PointerTraits>
 class interleaved_iterator
 {
     using sample_traits = detail::sample_traits<SampleType>;
     using sample_type = typename sample_traits::sample_type;
-    using sample_pointer = typename sample_traits::pointer;
-    using sample_reference = typename sample_traits::reference;
+    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+
+    using frame_type = basic_frame_span<SampleType, PointerTraits, true>;
 
     using size_type = std::size_t;
 
-    using frame_type = basic_frame_span<sample_type, true>;
+    using iter_traits = std::iterator_traits<sample_pointer>;
 
 public:
     using iterator_category = std::random_access_iterator_tag;
     using value_type = frame_type;
-    using difference_type = std::ptrdiff_t;
+    using difference_type = typename iter_traits::difference_type;
     using pointer = detail::operator_arrow_proxy<frame_type>;
     using reference = frame_type;
 

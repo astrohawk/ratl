@@ -22,7 +22,7 @@ namespace detail
 {
 // batch_sample_cast
 
-template<class OutputSampleType, class InputBatch>
+template<typename OutputSampleType, typename InputBatch>
 inline batch_sample_value_type_t<OutputSampleType> batch_sample_cast(const InputBatch& input) noexcept
 {
     return xsimd::batch_cast<typename batch_sample_value_type_t<OutputSampleType>::value_type>(input);

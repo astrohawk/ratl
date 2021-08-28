@@ -25,7 +25,7 @@ using PossibleSampleTypes = ::testing::Types<int16_t, int24_t, int32_t, float32_
 
 using PossibleIntSampleTypes = ::testing::Types<int16_t, int24_t, int32_t>;
 
-template<class InputSampleType, class OutputSampleType>
+template<typename InputSampleType, typename OutputSampleType>
 struct SampleTypeCombination
 {
     using input_sample_type = InputSampleType;
@@ -64,7 +64,7 @@ using PossibleIntInputSampleTypeCombinations = ::testing::Types<
     SampleTypeCombination<int32_t, int32_t>,
     SampleTypeCombination<int32_t, float32_t>>;
 
-template<template<class> class ContainerType, class SampleValueType, size_t Channels, size_t Frames>
+template<template<typename> class ContainerType, typename SampleValueType, size_t Channels, size_t Frames>
 class TestBase : public ::testing::Test
 {
 protected:
@@ -101,37 +101,37 @@ protected:
     container_type container_;
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class TypicalBase : public TestBase<BufferType, SampleValueType, TEST_RATL_TYPICAL_CHANNELS, TEST_RATL_TYPICAL_FRAMES>
 {
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class ZeroBase : public TestBase<BufferType, SampleValueType, 0, 0>
 {
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class ZeroFramesBase : public TestBase<BufferType, SampleValueType, TEST_RATL_TYPICAL_CHANNELS, 0>
 {
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class SingleFrameBase : public TestBase<BufferType, SampleValueType, TEST_RATL_TYPICAL_CHANNELS, 1>
 {
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class ZeroChannelsBase : public TestBase<BufferType, SampleValueType, 0, TEST_RATL_TYPICAL_FRAMES>
 {
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class SingleChannelBase : public TestBase<BufferType, SampleValueType, 1, TEST_RATL_TYPICAL_FRAMES>
 {
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class CopyBase : public TypicalBase<BufferType, SampleValueType>
 {
 protected:
@@ -141,7 +141,7 @@ protected:
     }
 };
 
-template<template<class> class BufferType, class SampleValueType>
+template<template<typename> class BufferType, typename SampleValueType>
 class MoveBase : public TypicalBase<BufferType, SampleValueType>
 {
 protected:
@@ -151,52 +151,52 @@ protected:
     }
 };
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using TypicalInterleavedBase = TypicalBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using ZeroInterleavedBase = ZeroBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using ZeroFramesInterleavedBase = ZeroFramesBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using SingleFrameInterleavedBase = SingleFrameBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using ZeroChannelsInterleavedBase = ZeroChannelsBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using SingleChannelInterleavedBase = SingleChannelBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using CopyInterleavedBase = CopyBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using MoveInterleavedBase = MoveBase<ratl::interleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using TypicalNoninterleavedBase = TypicalBase<ratl::noninterleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using ZeroNoninterleavedBase = ZeroBase<ratl::noninterleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using ZeroFramesNoninterleavedBase = ZeroFramesBase<ratl::noninterleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using SingleFrameNoninterleavedBase = SingleFrameBase<ratl::noninterleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using ZeroChannelsNoninterleavedBase = ZeroChannelsBase<ratl::noninterleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using SingleChannelNoninterleavedBase = SingleChannelBase<ratl::noninterleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using CopyNoninterleavedBase = CopyBase<ratl::noninterleaved, SampleValueType>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using MoveNoninterleavedBase = MoveBase<ratl::noninterleaved, SampleValueType>;
 
 } // namespace test

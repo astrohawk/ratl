@@ -22,10 +22,10 @@ namespace ratl
 namespace detail
 {
 #if defined(RATL_CPP_VERSION_HAS_CPP17)
-template<class... Ts>
+template<typename... Ts>
 using void_t = std::void_t<Ts...>;
 #else
-template<class...>
+template<typename...>
 struct void_impl
 {
     using type = void;
@@ -35,13 +35,13 @@ struct void_impl
  * std::void_t reimplementation for C++14.
  * Supports CWG 1558
  */
-template<class... Ts>
+template<typename... Ts>
 using void_t = typename detail::void_impl<Ts...>::type;
 #endif
 
 // is_complete
 
-template<typename Tp, class = void>
+template<typename Tp, typename = void>
 struct is_complete : std::false_type
 {
 };
@@ -53,7 +53,7 @@ struct is_complete<Tp, decltype(void(sizeof(Tp)))> : std::true_type
 
 // is_complete_v
 
-template<class Tp>
+template<typename Tp>
 static constexpr bool is_complete_v = is_complete<Tp>::value;
 
 } // namespace detail

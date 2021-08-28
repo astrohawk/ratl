@@ -22,7 +22,7 @@
 #define CHANNELS 16
 #define FRAMES 512
 
-template<class Tp>
+template<typename Tp>
 static std::string bytes_string(const Tp& bytes)
 {
     const auto* array = reinterpret_cast<const uint8_t*>(&bytes);
@@ -37,7 +37,7 @@ static std::string bytes_string(const Tp& bytes)
     return std::move(stream).str();
 }
 
-template<class SampleType>
+template<typename SampleType>
 auto generate_empty_interleaved(size_t channels, size_t frames)
 {
     using sample_traits = ratl::detail::sample_traits<sample>;
@@ -47,21 +47,21 @@ auto generate_empty_interleaved(size_t channels, size_t frames)
     return interleaved(channels, frames);
 }
 
-template<class SampleValueType, class = typename std::enable_if<!std::is_floating_point<sample_type>::value>::type>
+template<typename SampleValueType, std::enable_if_t<!std::is_floating_point<sample_type>::value, bool> = true>
 std::uniform_int_distribution<int32_t> generate_distribution()
 {
     using sample_limits = ratl::sample_limits<sample_type>;
     return std::uniform_int_distribution<int32_t>(sample_limits::min, sample_limits::max);
 }
 
-template<class SampleValueType, class = typename std::enable_if<std::is_floating_point<sample_type>::value>::type>
+template<typename SampleValueType, std::enable_if_t<std::is_floating_point<sample_type>::value, bool> = true>
 std::uniform_real_distribution<float32_t> generate_distribution()
 {
     using sample_limits = ratl::sample_limits<sample_type>;
     return std::uniform_real_distribution<float32_t>(sample_limits::min, sample_limits::max);
 }
 
-template<class SampleType>
+template<typename SampleType>
 auto generate_random_interleaved(size_t channels, size_t frames)
 {
     using sample_traits = ratl::detail::sample_traits<sample>;
@@ -435,21 +435,21 @@ int main()
 
 #elif 0
 
-template<class F, class... T, typename = decltype(std::declval<F>()(std::declval<T>()...))>
+template<typename F, typename... T, typename = decltype(std::declval<F>()(std::declval<T>()...))>
 std::true_type supports_test(const F&, const T&...);
 std::false_type supports_test(...);
 
-template<class>
+template<typename>
 struct supports;
-template<class F, class... T>
+template<typename F, typename... T>
 struct supports<F(T...)> : decltype(supports_test(std::declval<F>(), std::declval<T>()...))
 {
 };
 
-template<class Tp, class Up>
+template<typename Tp, typename Up>
 struct supports_equal_to_impl
 {
-    template<class TpTest, class UpTest>
+    template<typename TpTest, typename UpTest>
     static auto equal_to_test(const TpTest* t, const UpTest* u) -> decltype(*t == *u, char(0))
     {
     }
@@ -459,15 +459,15 @@ struct supports_equal_to_impl
     static const bool value = (sizeof(equal_to_test((Tp*)0, (Up*)0)) == 1);
 };
 
-template<class Tp, class Up>
+template<typename Tp, typename Up>
 struct supports_equal_to : public std::integral_constant<bool, supports_equal_to_impl<Tp, Up>::value>
 {
 };
 
-template<class Tp, class Up>
+template<typename Tp, typename Up>
 struct supports_less_than_impl
 {
-    template<class TpTest, class UpTest>
+    template<typename TpTest, typename UpTest>
     static auto less_than_test(const TpTest* t, const UpTest* u) -> decltype(*t <= *u, char(0))
     {
     }
@@ -477,7 +477,7 @@ struct supports_less_than_impl
     static const bool value = (sizeof(less_than_test((Tp*)0, (Up*)0)) == 1);
 };
 
-template<class Tp, class Up>
+template<typename Tp, typename Up>
 struct supports_less_than : public std::integral_constant<bool, supports_less_than_impl<Tp, Up>::value>
 {
 };
@@ -783,7 +783,7 @@ int main()
 
 #elif 0
 
-template<class Tp>
+template<typename Tp>
 void print_convert(const Tp& sample)
 {
     auto initial_int = ratl::sample<Tp>(sample);
@@ -802,7 +802,7 @@ void print_convert(const Tp& sample)
     std::cout << std::endl;
 }
 
-template<class Tp>
+template<typename Tp>
 void print_tofloat(const Tp& sample)
 {
     std::cout << std::setprecision(100) << (sample * ratl::detail::float_convert_traits<Tp>::multiplier) << std::endl;
@@ -851,7 +851,7 @@ int main()
 
 #elif 1
 
-template<class InputSampleType, class OutputSampleType>
+template<typename InputSampleType, typename OutputSampleType>
 static void verify_samples(const ratl::sample<InputSampleType>& in, const ratl::sample<OutputSampleType>& out)
 {
     auto in_raw = static_cast<int32_t>(in.get());
@@ -869,7 +869,7 @@ static void verify_samples(const ratl::sample<InputSampleType>& in, const ratl::
     //    out_narrow << " (" << out_raw << ", " << bytes_string(out) << ")" << std::endl;
 }
 
-template<class SampleValueType>
+template<typename SampleValueType>
 static void verify_samples(const ratl::sample<sample_type>& in, const ratl::sample<sample_type>& out)
 {
     //    assert(in.get() == out.get());
@@ -882,19 +882,19 @@ static void verify_samples(const ratl::sample<sample_type>& in, const ratl::samp
     //    ")" << std::endl;
 }
 
-template<class InputSampleType, class OutputSampleType>
+template<typename InputSampleType, typename OutputSampleType>
 static void verify_samples(const ratl::sample<InputSampleType>& in, const ratl::network_sample<OutputSampleType>& out)
 {
     return verify_samples(in, ratl::convert<ratl::sample<OutputSampleType>>(out));
 }
 
-template<class InputSampleType, class OutputSampleType>
+template<typename InputSampleType, typename OutputSampleType>
 static void verify_samples(const ratl::network_sample<InputSampleType>& in, const ratl::sample<OutputSampleType>& out)
 {
     return verify_samples(ratl::convert<ratl::sample<InputSampleType>>(in), out);
 }
 
-template<class SampleIn, class SampleOut, class Duration>
+template<typename SampleIn, typename SampleOut, typename Duration>
 Duration get_average_transform_time(size_t channels, size_t frames)
 {
     const auto input_interleaved = generate_random_interleaved<SampleIn>(channels, frames);

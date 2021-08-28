@@ -26,37 +26,39 @@
 
 namespace ratl
 {
-template<class SampleType, class Allocator = ratl::allocator<SampleType>>
+template<typename SampleType, typename Allocator = ratl::allocator<SampleType>>
 class basic_interleaved
 {
+public:
     using allocator_type = Allocator;
+
+private:
     using alloc_traits = std::allocator_traits<allocator_type>;
+
     using sample_traits = detail::sample_traits<SampleType>;
 
 public:
     using sample_type = typename sample_traits::sample_type;
     using const_sample_type = typename sample_traits::const_sample_type;
-    using sample_pointer = typename sample_traits::pointer;
-    using const_sample_pointer = typename sample_traits::const_pointer;
-    using sample_reference = typename sample_traits::reference;
-    using const_sample_reference = typename sample_traits::const_reference;
+    using sample_pointer = typename alloc_traits::pointer;
+    using const_sample_pointer = typename alloc_traits::const_pointer;
 
-    using channel_type = basic_channel_span<sample_type, false>;
-    using const_channel_type = basic_channel_span<const_sample_type, false>;
-    using frame_type = basic_frame_span<sample_type, true>;
-    using const_frame_type = basic_frame_span<const_sample_type, true>;
+    using channel_type = basic_channel_span<sample_type, alloc_traits, false>;
+    using const_channel_type = basic_channel_span<const_sample_type, alloc_traits, false>;
+    using frame_type = basic_frame_span<sample_type, alloc_traits, true>;
+    using const_frame_type = basic_frame_span<const_sample_type, alloc_traits, true>;
 
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
 
     using value_type = frame_type;
-    using pointer = detail::operator_arrow_proxy<value_type>;
-    using const_pointer = const detail::operator_arrow_proxy<value_type>;
+    using pointer = detail::operator_arrow_proxy<frame_type>;
+    using const_pointer = const detail::operator_arrow_proxy<frame_type>;
     using reference = frame_type;
     using const_reference = const_frame_type;
 
-    using iterator = detail::interleaved_iterator<sample_type>;
-    using const_iterator = detail::interleaved_iterator<const_sample_type>;
+    using iterator = detail::interleaved_iterator<sample_type, alloc_traits>;
+    using const_iterator = detail::interleaved_iterator<const_sample_type, alloc_traits>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -106,11 +108,11 @@ private:
 
 public:
     static_assert(
-        std::is_same<sample_type, typename allocator_type::value_type>::value,
-        "allocator::value_type must be same type as sample");
+        std::is_same<std::remove_cv_t<sample_type>, sample_type>::value,
+        "sample_type must be non-const and non-volatile");
     static_assert(
-        std::is_same<sample_pointer, typename alloc_traits::pointer>::value,
-        "allocator::pointer must be same type as sample*");
+        std::is_same<typename allocator_type::value_type, sample_type>::value,
+        "allocator::value_type must be same type as sample_type");
 
     basic_interleaved() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
 
@@ -316,13 +318,13 @@ private:
 
     void allocate()
     {
+        data_.start_ = alloc_traits::allocate(alloc_, samples());
         // we don't need to default construct the samples as sample types are trivially default constructable
-        data_.start_ = alloc_.allocate(samples());
     }
 
     void deallocate()
     {
-        alloc_.deallocate(data(), samples());
+        alloc_traits::deallocate(alloc_, data_.start_, samples());
     }
 
     void copy_assign_alloc(const basic_interleaved& other)
@@ -365,7 +367,7 @@ private:
     void swap_alloc(basic_interleaved&, std::false_type) noexcept {}
 };
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 basic_interleaved<SampleType, Allocator>::basic_interleaved(size_type channels, size_type frames) :
     data_(channels, frames)
 {
@@ -376,7 +378,7 @@ basic_interleaved<SampleType, Allocator>::basic_interleaved(size_type channels, 
     }
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 basic_interleaved<SampleType, Allocator>::basic_interleaved(
     size_type channels, size_type frames, const allocator_type& alloc) :
     alloc_(alloc), data_(channels, frames)
@@ -388,7 +390,7 @@ basic_interleaved<SampleType, Allocator>::basic_interleaved(
     }
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 basic_interleaved<SampleType, Allocator>::basic_interleaved(const basic_interleaved& other) :
     alloc_(alloc_traits::select_on_container_copy_construction(other.alloc_)), data_(other.channels(), other.frames())
 {
@@ -399,7 +401,7 @@ basic_interleaved<SampleType, Allocator>::basic_interleaved(const basic_interlea
     }
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 basic_interleaved<SampleType, Allocator>::basic_interleaved(
     const basic_interleaved& other, const allocator_type& alloc) :
     alloc_(alloc), data_(other.channels(), other.frames())
@@ -411,7 +413,7 @@ basic_interleaved<SampleType, Allocator>::basic_interleaved(
     }
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 basic_interleaved<SampleType, Allocator>::basic_interleaved(
     basic_interleaved&& other, const allocator_type& alloc, std::false_type) :
     alloc_(alloc)
@@ -427,7 +429,7 @@ basic_interleaved<SampleType, Allocator>::basic_interleaved(
     }
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 basic_interleaved<SampleType, Allocator>& basic_interleaved<SampleType, Allocator>::operator=(
     const basic_interleaved& other)
 {
@@ -439,7 +441,7 @@ basic_interleaved<SampleType, Allocator>& basic_interleaved<SampleType, Allocato
     return *this;
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 basic_interleaved<SampleType, Allocator>& basic_interleaved<SampleType, Allocator>::operator=(
     basic_interleaved&& other) noexcept(alloc_traits::propagate_on_container_move_assignment::value)
 {
@@ -447,7 +449,7 @@ basic_interleaved<SampleType, Allocator>& basic_interleaved<SampleType, Allocato
     return *this;
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 void basic_interleaved<SampleType, Allocator>::move_assign(basic_interleaved& other, std::true_type) noexcept
 {
     if (data() != nullptr)
@@ -458,7 +460,7 @@ void basic_interleaved<SampleType, Allocator>::move_assign(basic_interleaved& ot
     data_.move(other.data_);
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 void basic_interleaved<SampleType, Allocator>::move_assign(basic_interleaved& other, std::false_type)
 {
     if (alloc_ != other.alloc_)
@@ -480,14 +482,14 @@ void basic_interleaved<SampleType, Allocator>::move_assign(basic_interleaved& ot
     }
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 void basic_interleaved<SampleType, Allocator>::swap(basic_interleaved& other)
 {
     swap_alloc(other, typename alloc_traits::propagate_on_container_swap());
     data_.swap(other.data_);
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 inline typename basic_interleaved<SampleType, Allocator>::reference basic_interleaved<SampleType, Allocator>::at(
     size_type n)
 {
@@ -498,7 +500,7 @@ inline typename basic_interleaved<SampleType, Allocator>::reference basic_interl
     return (*this)[n];
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 inline typename basic_interleaved<SampleType, Allocator>::const_reference basic_interleaved<SampleType, Allocator>::at(
     size_type n) const
 {
@@ -509,7 +511,7 @@ inline typename basic_interleaved<SampleType, Allocator>::const_reference basic_
     return (*this)[n];
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 inline bool operator==(
     const basic_interleaved<SampleType, Allocator>& a, const basic_interleaved<SampleType, Allocator>& b) noexcept
 {
@@ -517,17 +519,17 @@ inline bool operator==(
            std::equal(a.data(), a.data() + a.samples(), b.data());
 }
 
-template<class SampleType, class Allocator>
+template<typename SampleType, typename Allocator>
 inline bool operator!=(
     const basic_interleaved<SampleType, Allocator>& a, const basic_interleaved<SampleType, Allocator>& b) noexcept
 {
     return !(a == b);
 }
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using interleaved = basic_interleaved<sample<SampleValueType>>;
 
-template<class SampleValueType>
+template<typename SampleValueType>
 using network_interleaved = basic_interleaved<network_sample<SampleValueType>>;
 
 } // namespace ratl
