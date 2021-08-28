@@ -32,21 +32,28 @@ class basic_interleaved
 public:
     using allocator_type = Allocator;
 
+    static_assert(
+        std::is_same<std::remove_cv_t<SampleType>, SampleType>::value,
+        "sample_type must be non-const and non-volatile");
+    static_assert(
+        std::is_same<typename allocator_type::value_type, SampleType>::value,
+        "allocator::value_type must be same type as sample_type");
+
 private:
     using alloc_traits = std::allocator_traits<allocator_type>;
-
-    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_traits = detail::sample_traits_from_traits_t<alloc_traits>;
+    using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
 public:
     using sample_type = typename sample_traits::sample_type;
     using const_sample_type = typename sample_traits::const_sample_type;
-    using sample_pointer = typename alloc_traits::pointer;
-    using const_sample_pointer = typename alloc_traits::const_pointer;
+    using sample_pointer = typename sample_traits::pointer;
+    using const_sample_pointer = typename sample_traits::const_pointer;
 
-    using channel_type = basic_channel_span<sample_type, alloc_traits, false>;
-    using const_channel_type = basic_channel_span<const_sample_type, alloc_traits, false>;
-    using frame_type = basic_frame_span<sample_type, alloc_traits, true>;
-    using const_frame_type = basic_frame_span<const_sample_type, alloc_traits, true>;
+    using channel_type = basic_channel_span<sample_traits, false>;
+    using const_channel_type = basic_channel_span<const_sample_traits, false>;
+    using frame_type = basic_frame_span<sample_traits, true>;
+    using const_frame_type = basic_frame_span<const_sample_traits, true>;
 
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
@@ -57,8 +64,8 @@ public:
     using reference = frame_type;
     using const_reference = const_frame_type;
 
-    using iterator = detail::interleaved_iterator<sample_type, alloc_traits>;
-    using const_iterator = detail::interleaved_iterator<const_sample_type, alloc_traits>;
+    using iterator = detail::interleaved_iterator<sample_traits>;
+    using const_iterator = detail::interleaved_iterator<const_sample_traits>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -107,13 +114,6 @@ private:
     data_impl data_;
 
 public:
-    static_assert(
-        std::is_same<std::remove_cv_t<sample_type>, sample_type>::value,
-        "sample_type must be non-const and non-volatile");
-    static_assert(
-        std::is_same<typename allocator_type::value_type, sample_type>::value,
-        "allocator::value_type must be same type as sample_type");
-
     basic_interleaved() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
 
     explicit basic_interleaved(const allocator_type& alloc) noexcept : alloc_(alloc) {}
@@ -511,17 +511,17 @@ inline typename basic_interleaved<SampleType, Allocator>::const_reference basic_
     return (*this)[n];
 }
 
-template<typename SampleType, typename Allocator>
+template<typename SampleType, typename AllocatorA, typename AllocatorB>
 inline bool operator==(
-    const basic_interleaved<SampleType, Allocator>& a, const basic_interleaved<SampleType, Allocator>& b) noexcept
+    const basic_interleaved<SampleType, AllocatorA>& a, const basic_interleaved<SampleType, AllocatorB>& b) noexcept
 {
     return (a.channels() == b.channels()) && (a.frames() == b.frames()) &&
            std::equal(a.data(), a.data() + a.samples(), b.data());
 }
 
-template<typename SampleType, typename Allocator>
+template<typename SampleType, typename AllocatorA, typename AllocatorB>
 inline bool operator!=(
-    const basic_interleaved<SampleType, Allocator>& a, const basic_interleaved<SampleType, Allocator>& b) noexcept
+    const basic_interleaved<SampleType, AllocatorA>& a, const basic_interleaved<SampleType, AllocatorB>& b) noexcept
 {
     return !(a == b);
 }

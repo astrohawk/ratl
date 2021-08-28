@@ -20,15 +20,15 @@ namespace ratl
 {
 namespace detail
 {
-template<typename Tag, typename SampleType, typename PointerTraits, bool Contiguous>
+template<typename Tag, typename SampleTraits, bool Contiguous>
 class sample_iterator;
 
-template<typename Tag, typename SampleType, typename PointerTraits>
-class sample_iterator<Tag, SampleType, PointerTraits, false>
+template<typename Tag, typename SampleTraits>
+class sample_iterator<Tag, SampleTraits, false>
 {
-    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_traits = SampleTraits;
     using sample_type = typename sample_traits::sample_type;
-    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+    using sample_pointer = typename sample_traits::pointer;
 
     using iter_traits = std::iterator_traits<sample_pointer>;
 
@@ -190,12 +190,12 @@ public:
     }
 };
 
-template<typename Tag, typename SampleType, typename PointerTraits>
-class sample_iterator<Tag, SampleType, PointerTraits, true>
+template<typename Tag, typename SampleTraits>
+class sample_iterator<Tag, SampleTraits, true>
 {
-    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_traits = SampleTraits;
     using sample_type = typename sample_traits::sample_type;
-    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+    using sample_pointer = typename sample_traits::pointer;
 
     using iter_traits = std::iterator_traits<sample_pointer>;
 

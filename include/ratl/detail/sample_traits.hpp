@@ -50,7 +50,7 @@ static constexpr bool is_sample_v = is_sample<SampleType>::value;
 
 // sample_traits
 
-template<typename SampleType>
+template<typename SampleType, typename PointerType = SampleType*, typename ConstPointerType = const SampleType*>
 struct sample_traits
 {
     static_assert(is_sample_v<SampleType>, "sample is not a valid sample type");
@@ -67,14 +67,23 @@ struct sample_traits
      * pointer, const_pointer, reference and const_reference
      * A (const) pointer/reference to the sample.
      */
-    using pointer = sample_type*;
-    using const_pointer = const_sample_type*;
+    using pointer = PointerType;
+    using const_pointer = ConstPointerType;
     using reference = sample_type&;
     using const_reference = const_sample_type&;
-
-    template<typename OtherSampleType>
-    using rebind = sample_traits<OtherSampleType>;
 };
+
+template<typename AllocatorTraits>
+using sample_traits_from_traits_t = sample_traits<
+    typename AllocatorTraits::value_type,
+    typename AllocatorTraits::pointer,
+    typename AllocatorTraits::const_pointer>;
+
+template<typename SampleTraits>
+using const_sample_traits_t = sample_traits<
+    typename SampleTraits::const_sample_type,
+    typename SampleTraits::const_pointer,
+    typename SampleTraits::const_pointer>;
 
 // sample_pointer_select
 

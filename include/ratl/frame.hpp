@@ -28,10 +28,19 @@ class basic_frame
 public:
     using allocator_type = Allocator;
 
+    static_assert(
+        std::is_same<std::remove_cv_t<SampleType>, SampleType>::value,
+        "sample_type must be non-const and non-volatile");
+    static_assert(
+        std::is_same<typename allocator_type::value_type, SampleType>::value,
+        "allocator::value_type must be same type as sample_type");
+
 private:
     using alloc_traits = std::allocator_traits<allocator_type>;
+    using sample_traits = detail::sample_traits_from_traits_t<alloc_traits>;
+    using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
-    using data_impl_type = sample_span<SampleType, alloc_traits, true, detail::frame_iterator>;
+    using data_impl_type = sample_span<sample_traits, true, detail::frame_iterator>;
 
 public:
     using sample_type = typename data_impl_type::sample_type;
@@ -58,13 +67,6 @@ private:
     data_impl_type data_;
 
 public:
-    static_assert(
-        std::is_same<std::remove_cv_t<sample_type>, sample_type>::value,
-        "sample_type must be non-const and non-volatile");
-    static_assert(
-        std::is_same<typename allocator_type::value_type, sample_type>::value,
-        "allocator::value_type must be same type as sample_type");
-
     basic_frame() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
 
     explicit basic_frame(const allocator_type& alloc) noexcept : alloc_(alloc) {}
@@ -424,6 +426,20 @@ inline typename basic_frame<SampleType, Allocator>::const_reference basic_frame<
         throw std::out_of_range("frame");
     }
     return (*this)[n];
+}
+
+template<typename SampleType, typename AllocatorA, typename AllocatorB>
+inline bool operator==(
+    const basic_frame<SampleType, AllocatorA>& a, const basic_frame<SampleType, AllocatorB>& b) noexcept
+{
+    return (a.channels() == b.channels()) && std::equal(a.data(), a.data() + a.channels(), b.data());
+}
+
+template<typename SampleType, typename AllocatorA, typename AllocatorB>
+inline bool operator!=(
+    const basic_frame<SampleType, AllocatorA>& a, const basic_frame<SampleType, AllocatorB>& b) noexcept
+{
+    return !(a == b);
 }
 
 template<typename SampleValueType>

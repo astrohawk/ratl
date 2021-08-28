@@ -18,127 +18,93 @@ namespace test
 TEST(RandomAccess, TestTag)
 {
     ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::interleaved_iterator<sample<int16_t>, ratl::detail::sample_traits<sample<int16_t>>>>::
-            iterator_category,
+        std::iterator_traits<detail::interleaved_iterator<detail::sample_traits<sample<int16_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::interleaved_iterator<sample<int24_t>, ratl::detail::sample_traits<sample<int24_t>>>>::
-            iterator_category,
+        std::iterator_traits<detail::interleaved_iterator<detail::sample_traits<sample<int24_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::interleaved_iterator<sample<int32_t>, ratl::detail::sample_traits<sample<int32_t>>>>::
-            iterator_category,
+        std::iterator_traits<detail::interleaved_iterator<detail::sample_traits<sample<int32_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::interleaved_iterator<sample<float32_t>, ratl::detail::sample_traits<sample<float32_t>>>>::
-            iterator_category,
+        std::iterator_traits<detail::interleaved_iterator<detail::sample_traits<sample<float32_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
 
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::noninterleaved_iterator<sample<int16_t>, ratl::detail::sample_traits<sample<int16_t>>>>::
-            iterator_category,
+            detail::noninterleaved_iterator<detail::sample_traits<sample<int16_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::noninterleaved_iterator<sample<int24_t>, ratl::detail::sample_traits<sample<int24_t>>>>::
-            iterator_category,
+            detail::noninterleaved_iterator<detail::sample_traits<sample<int24_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::noninterleaved_iterator<sample<int32_t>, ratl::detail::sample_traits<sample<int32_t>>>>::
-            iterator_category,
+            detail::noninterleaved_iterator<detail::sample_traits<sample<int32_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::noninterleaved_iterator<sample<float32_t>, ratl::detail::sample_traits<sample<float32_t>>>>::
-            iterator_category,
+            detail::noninterleaved_iterator<detail::sample_traits<sample<float32_t>>>>::iterator_category,
         std::random_access_iterator_tag>();
 
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int16_t>, ratl::detail::sample_traits<sample<int16_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<int16_t>>, false>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int24_t>, ratl::detail::sample_traits<sample<int24_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<int24_t>>, false>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int32_t>, ratl::detail::sample_traits<sample<int32_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<int32_t>>, false>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<float32_t>, ratl::detail::sample_traits<sample<float32_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<float32_t>>, false>>::iterator_category,
+        std::random_access_iterator_tag>();
+    ::testing::StaticAssertTypeEq<
+        std::iterator_traits<detail::channel_iterator<detail::sample_traits<sample<int16_t>>, true>>::iterator_category,
+        std::random_access_iterator_tag>();
+    ::testing::StaticAssertTypeEq<
+        std::iterator_traits<detail::channel_iterator<detail::sample_traits<sample<int24_t>>, true>>::iterator_category,
+        std::random_access_iterator_tag>();
+    ::testing::StaticAssertTypeEq<
+        std::iterator_traits<detail::channel_iterator<detail::sample_traits<sample<int32_t>>, true>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int16_t>, ratl::detail::sample_traits<sample<int16_t>>, true>>::
-            iterator_category,
-        std::random_access_iterator_tag>();
-    ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::channel_iterator<sample<int24_t>, ratl::detail::sample_traits<sample<int24_t>>, true>>::
-            iterator_category,
-        std::random_access_iterator_tag>();
-    ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::channel_iterator<sample<int32_t>, ratl::detail::sample_traits<sample<int32_t>>, true>>::
-            iterator_category,
-        std::random_access_iterator_tag>();
-    ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::channel_iterator<sample<float32_t>, ratl::detail::sample_traits<sample<float32_t>>, true>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<float32_t>>, true>>::iterator_category,
         std::random_access_iterator_tag>();
 
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int16_t>, ratl::detail::sample_traits<sample<int16_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<int16_t>>, false>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int24_t>, ratl::detail::sample_traits<sample<int24_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<int24_t>>, false>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int32_t>, ratl::detail::sample_traits<sample<int32_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<int32_t>>, false>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<float32_t>, ratl::detail::sample_traits<sample<float32_t>>, false>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<float32_t>>, false>>::iterator_category,
+        std::random_access_iterator_tag>();
+    ::testing::StaticAssertTypeEq<
+        std::iterator_traits<detail::channel_iterator<detail::sample_traits<sample<int16_t>>, true>>::iterator_category,
+        std::random_access_iterator_tag>();
+    ::testing::StaticAssertTypeEq<
+        std::iterator_traits<detail::channel_iterator<detail::sample_traits<sample<int24_t>>, true>>::iterator_category,
+        std::random_access_iterator_tag>();
+    ::testing::StaticAssertTypeEq<
+        std::iterator_traits<detail::channel_iterator<detail::sample_traits<sample<int32_t>>, true>>::iterator_category,
         std::random_access_iterator_tag>();
     ::testing::StaticAssertTypeEq<
         std::iterator_traits<
-            detail::channel_iterator<sample<int16_t>, ratl::detail::sample_traits<sample<int16_t>>, true>>::
-            iterator_category,
-        std::random_access_iterator_tag>();
-    ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::channel_iterator<sample<int24_t>, ratl::detail::sample_traits<sample<int24_t>>, true>>::
-            iterator_category,
-        std::random_access_iterator_tag>();
-    ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::channel_iterator<sample<int32_t>, ratl::detail::sample_traits<sample<int32_t>>, true>>::
-            iterator_category,
-        std::random_access_iterator_tag>();
-    ::testing::StaticAssertTypeEq<
-        std::iterator_traits<
-            detail::channel_iterator<sample<float32_t>, ratl::detail::sample_traits<sample<float32_t>>, true>>::
-            iterator_category,
+            detail::channel_iterator<detail::sample_traits<sample<float32_t>>, true>>::iterator_category,
         std::random_access_iterator_tag>();
 }
 

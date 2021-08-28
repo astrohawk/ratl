@@ -28,10 +28,19 @@ class basic_channel
 public:
     using allocator_type = Allocator;
 
+    static_assert(
+        std::is_same<std::remove_cv_t<SampleType>, SampleType>::value,
+        "sample_type must be non-const and non-volatile");
+    static_assert(
+        std::is_same<typename allocator_type::value_type, SampleType>::value,
+        "allocator::value_type must be same type as sample_type");
+
 private:
     using alloc_traits = std::allocator_traits<allocator_type>;
+    using sample_traits = detail::sample_traits_from_traits_t<alloc_traits>;
+    using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
-    using data_impl_type = sample_span<SampleType, alloc_traits, true, detail::channel_iterator>;
+    using data_impl_type = sample_span<sample_traits, true, detail::channel_iterator>;
 
 public:
     using sample_type = typename data_impl_type::sample_type;
@@ -58,13 +67,6 @@ private:
     data_impl_type data_;
 
 public:
-    static_assert(
-        std::is_same<std::remove_cv_t<sample_type>, sample_type>::value,
-        "sample_type must be non-const and non-volatile");
-    static_assert(
-        std::is_same<typename allocator_type::value_type, sample_type>::value,
-        "allocator::value_type must be same type as sample_type");
-
     basic_channel() noexcept(std::is_nothrow_default_constructible<allocator_type>::value) = default;
 
     explicit basic_channel(const allocator_type& alloc) noexcept : alloc_(alloc) {}
@@ -428,6 +430,20 @@ inline typename basic_channel<SampleType, Allocator>::const_reference basic_chan
         throw std::out_of_range("channel");
     }
     return (*this)[n];
+}
+
+template<typename SampleType, typename AllocatorA, typename AllocatorB>
+inline bool operator==(
+    const basic_channel<SampleType, AllocatorA>& a, const basic_channel<SampleType, AllocatorB>& b) noexcept
+{
+    return (a.samples() == b.samples()) && std::equal(a.data(), a.data() + a.samples(), b.data());
+}
+
+template<typename SampleType, typename AllocatorA, typename AllocatorB>
+inline bool operator!=(
+    const basic_channel<SampleType, AllocatorA>& a, const basic_channel<SampleType, AllocatorB>& b) noexcept
+{
+    return !(a == b);
 }
 
 template<typename SampleValueType>

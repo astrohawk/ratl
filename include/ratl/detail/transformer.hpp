@@ -132,22 +132,20 @@ class basic_transformer;
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    interleaved_iterator<InputSampleType, InputTraits>,
-    interleaved_iterator<OutputSampleType, OutputTraits>,
+    interleaved_iterator<InputSampleTraits>,
+    interleaved_iterator<OutputSampleTraits>,
     DitherGenerator>
 {
-    using input_iterator = interleaved_iterator<InputSampleType, InputTraits>;
-    using output_iterator = interleaved_iterator<OutputSampleType, OutputTraits>;
+    using input_iterator = interleaved_iterator<InputSampleTraits>;
+    using output_iterator = interleaved_iterator<OutputSampleTraits>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -201,22 +199,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    noninterleaved_iterator<InputSampleType, InputTraits>,
-    noninterleaved_iterator<OutputSampleType, OutputTraits>,
+    noninterleaved_iterator<InputSampleTraits>,
+    noninterleaved_iterator<OutputSampleTraits>,
     DitherGenerator>
 {
-    using input_iterator = noninterleaved_iterator<InputSampleType, InputTraits>;
-    using output_iterator = noninterleaved_iterator<OutputSampleType, OutputTraits>;
+    using input_iterator = noninterleaved_iterator<InputSampleTraits>;
+    using output_iterator = noninterleaved_iterator<OutputSampleTraits>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -270,22 +266,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    frame_iterator<InputSampleType, InputTraits, false>,
-    frame_iterator<OutputSampleType, OutputTraits, false>,
+    frame_iterator<InputSampleTraits, false>,
+    frame_iterator<OutputSampleTraits, false>,
     DitherGenerator>
 {
-    using input_iterator = frame_iterator<InputSampleType, InputTraits, false>;
-    using output_iterator = frame_iterator<OutputSampleType, OutputTraits, false>;
+    using input_iterator = frame_iterator<InputSampleTraits, false>;
+    using output_iterator = frame_iterator<OutputSampleTraits, false>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -326,22 +320,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    frame_iterator<InputSampleType, InputTraits, false>,
-    frame_iterator<OutputSampleType, OutputTraits, true>,
+    frame_iterator<InputSampleTraits, false>,
+    frame_iterator<OutputSampleTraits, true>,
     DitherGenerator>
 {
-    using input_iterator = frame_iterator<InputSampleType, InputTraits, false>;
-    using output_iterator = frame_iterator<OutputSampleType, OutputTraits, true>;
+    using input_iterator = frame_iterator<InputSampleTraits, false>;
+    using output_iterator = frame_iterator<OutputSampleTraits, true>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -368,22 +360,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    frame_iterator<InputSampleType, InputTraits, true>,
-    frame_iterator<OutputSampleType, OutputTraits, false>,
+    frame_iterator<InputSampleTraits, true>,
+    frame_iterator<OutputSampleTraits, false>,
     DitherGenerator>
 {
-    using input_iterator = frame_iterator<InputSampleType, InputTraits, true>;
-    using output_iterator = frame_iterator<OutputSampleType, OutputTraits, false>;
+    using input_iterator = frame_iterator<InputSampleTraits, true>;
+    using output_iterator = frame_iterator<OutputSampleTraits, false>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -410,22 +400,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    frame_iterator<InputSampleType, InputTraits, true>,
-    frame_iterator<OutputSampleType, OutputTraits, true>,
+    frame_iterator<InputSampleTraits, true>,
+    frame_iterator<OutputSampleTraits, true>,
     DitherGenerator>
 {
-    using input_iterator = frame_iterator<InputSampleType, InputTraits, true>;
-    using output_iterator = frame_iterator<OutputSampleType, OutputTraits, true>;
+    using input_iterator = frame_iterator<InputSampleTraits, true>;
+    using output_iterator = frame_iterator<OutputSampleTraits, true>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -447,22 +435,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    channel_iterator<InputSampleType, InputTraits, false>,
-    channel_iterator<OutputSampleType, OutputTraits, false>,
+    channel_iterator<InputSampleTraits, false>,
+    channel_iterator<OutputSampleTraits, false>,
     DitherGenerator>
 {
-    using input_iterator = channel_iterator<InputSampleType, InputTraits, false>;
-    using output_iterator = channel_iterator<OutputSampleType, OutputTraits, false>;
+    using input_iterator = channel_iterator<InputSampleTraits, false>;
+    using output_iterator = channel_iterator<OutputSampleTraits, false>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -503,22 +489,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    channel_iterator<InputSampleType, InputTraits, false>,
-    channel_iterator<OutputSampleType, OutputTraits, true>,
+    channel_iterator<InputSampleTraits, false>,
+    channel_iterator<OutputSampleTraits, true>,
     DitherGenerator>
 {
-    using input_iterator = channel_iterator<InputSampleType, InputTraits, false>;
-    using output_iterator = channel_iterator<OutputSampleType, OutputTraits, true>;
+    using input_iterator = channel_iterator<InputSampleTraits, false>;
+    using output_iterator = channel_iterator<OutputSampleTraits, true>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -545,22 +529,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    channel_iterator<InputSampleType, InputTraits, true>,
-    channel_iterator<OutputSampleType, OutputTraits, false>,
+    channel_iterator<InputSampleTraits, true>,
+    channel_iterator<OutputSampleTraits, false>,
     DitherGenerator>
 {
-    using input_iterator = channel_iterator<InputSampleType, InputTraits, true>;
-    using output_iterator = channel_iterator<OutputSampleType, OutputTraits, false>;
+    using input_iterator = channel_iterator<InputSampleTraits, true>;
+    using output_iterator = channel_iterator<OutputSampleTraits, false>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;
@@ -587,22 +569,20 @@ private:
 template<
     template<typename, typename, typename>
     class SampleConverter,
-    typename InputSampleType,
-    class InputTraits,
-    typename OutputSampleType,
-    class OutputTraits,
+    typename InputSampleTraits,
+    typename OutputSampleTraits,
     typename DitherGenerator>
 class basic_transformer<
     SampleConverter,
-    channel_iterator<InputSampleType, InputTraits, true>,
-    channel_iterator<OutputSampleType, OutputTraits, true>,
+    channel_iterator<InputSampleTraits, true>,
+    channel_iterator<OutputSampleTraits, true>,
     DitherGenerator>
 {
-    using input_iterator = channel_iterator<InputSampleType, InputTraits, true>;
-    using output_iterator = channel_iterator<OutputSampleType, OutputTraits, true>;
+    using input_iterator = channel_iterator<InputSampleTraits, true>;
+    using output_iterator = channel_iterator<OutputSampleTraits, true>;
 
-    using base_input_sample_type = std::remove_cv_t<InputSampleType>;
-    using base_output_sample_type = std::remove_cv_t<OutputSampleType>;
+    using base_input_sample_type = std::remove_cv_t<typename InputSampleTraits::sample_type>;
+    using base_output_sample_type = std::remove_cv_t<typename OutputSampleTraits::sample_type>;
 
     using transformer_impl =
         basic_transformer_impl<SampleConverter, base_input_sample_type, base_output_sample_type, DitherGenerator>;

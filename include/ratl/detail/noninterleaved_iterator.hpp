@@ -21,14 +21,14 @@ namespace ratl
 {
 namespace detail
 {
-template<typename SampleType, typename PointerTraits>
+template<typename SampleTraits>
 class noninterleaved_iterator
 {
-    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_traits = SampleTraits;
     using sample_type = typename sample_traits::sample_type;
-    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
+    using sample_pointer = typename sample_traits::pointer;
 
-    using channel_type = basic_channel_span<SampleType, PointerTraits, true>;
+    using channel_type = basic_channel_span<sample_traits, true>;
 
     using size_type = std::size_t;
 

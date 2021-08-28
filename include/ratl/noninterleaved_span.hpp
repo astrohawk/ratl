@@ -26,21 +26,22 @@
 
 namespace ratl
 {
-template<typename SampleType, typename PointerTraits>
+template<typename SampleTraits>
 class basic_noninterleaved_span
 {
-    using sample_traits = detail::sample_traits<SampleType>;
+    using sample_traits = SampleTraits;
+    using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
 public:
     using sample_type = typename sample_traits::sample_type;
     using const_sample_type = typename sample_traits::const_sample_type;
-    using sample_pointer = detail::sample_pointer_select_t<sample_type, PointerTraits>;
-    using const_sample_pointer = typename PointerTraits::const_pointer;
+    using sample_pointer = typename sample_traits::pointer;
+    using const_sample_pointer = typename sample_traits::const_pointer;
 
-    using channel_type = basic_channel_span<sample_type, PointerTraits, true>;
-    using const_channel_type = basic_channel_span<const_sample_type, PointerTraits, true>;
-    using frame_type = basic_frame_span<sample_type, PointerTraits, false>;
-    using const_frame_type = basic_frame_span<const_sample_type, PointerTraits, false>;
+    using channel_type = basic_channel_span<sample_traits, true>;
+    using const_channel_type = basic_channel_span<const_sample_traits, true>;
+    using frame_type = basic_frame_span<sample_traits, false>;
+    using const_frame_type = basic_frame_span<const_sample_traits, false>;
 
     using char_pointer = std::conditional_t<std::is_const<sample_type>::value, const unsigned char*, unsigned char*>;
 
@@ -53,8 +54,8 @@ public:
     using reference = channel_type;
     using const_reference = const_channel_type;
 
-    using iterator = detail::noninterleaved_iterator<sample_type, PointerTraits>;
-    using const_iterator = detail::noninterleaved_iterator<const_sample_type, PointerTraits>;
+    using iterator = detail::noninterleaved_iterator<sample_traits>;
+    using const_iterator = detail::noninterleaved_iterator<const_sample_traits>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -248,18 +249,17 @@ public:
     }
 };
 
-template<typename SampleType, typename PointerTraits>
-inline void basic_noninterleaved_span<SampleType, PointerTraits>::swap(basic_noninterleaved_span& other) noexcept
+template<typename SampleTraits>
+inline void basic_noninterleaved_span<SampleTraits>::swap(basic_noninterleaved_span& other) noexcept
 {
     std::swap(start_, other.start_);
     std::swap(channels_, other.channels_);
     std::swap(frames_, other.frames_);
 }
 
-template<typename SampleType, typename PointerTraits>
-inline typename basic_noninterleaved_span<SampleType, PointerTraits>::reference basic_noninterleaved_span<
-    SampleType,
-    PointerTraits>::at(size_type n)
+template<typename SampleTraits>
+inline typename basic_noninterleaved_span<SampleTraits>::reference basic_noninterleaved_span<SampleTraits>::at(
+    size_type n)
 {
     if (n >= channels())
     {
@@ -268,10 +268,9 @@ inline typename basic_noninterleaved_span<SampleType, PointerTraits>::reference 
     return (*this)[n];
 }
 
-template<typename SampleType, typename PointerTraits>
-inline typename basic_noninterleaved_span<SampleType, PointerTraits>::const_reference basic_noninterleaved_span<
-    SampleType,
-    PointerTraits>::at(size_type n) const
+template<typename SampleTraits>
+inline typename basic_noninterleaved_span<SampleTraits>::const_reference basic_noninterleaved_span<SampleTraits>::at(
+    size_type n) const
 {
     if (n >= channels())
     {
@@ -280,41 +279,44 @@ inline typename basic_noninterleaved_span<SampleType, PointerTraits>::const_refe
     return (*this)[n];
 }
 
-template<typename SampleType, typename PointerTraitsA, typename PointerTraitsB>
+template<
+    typename SampleTraitsA,
+    typename SampleTraitsB,
+    std::enable_if_t<
+        std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
+        bool> = true>
 inline bool operator==(
-    const basic_noninterleaved_span<SampleType, PointerTraitsA>& a,
-    const basic_noninterleaved_span<SampleType, PointerTraitsB>& b) noexcept
+    const basic_noninterleaved_span<SampleTraitsA>& a, const basic_noninterleaved_span<SampleTraitsB>& b) noexcept
 {
     return (a.channels() == b.channels()) && (a.frames() == b.frames()) &&
            std::equal(a.data(), a.data() + a.samples(), b.data());
 }
 
-template<typename SampleType, typename PointerTraitsA, typename PointerTraitsB>
+template<
+    typename SampleTraitsA,
+    typename SampleTraitsB,
+    std::enable_if_t<
+        std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
+        bool> = true>
 inline bool operator!=(
-    const basic_noninterleaved_span<SampleType, PointerTraitsA>& a,
-    const basic_noninterleaved_span<SampleType, PointerTraitsB>& b) noexcept
+    const basic_noninterleaved_span<SampleTraitsA>& a, const basic_noninterleaved_span<SampleTraitsB>& b) noexcept
 {
     return !(a == b);
 }
 
 template<typename SampleValueType>
-using noninterleaved_span =
-    basic_noninterleaved_span<sample<SampleValueType>, ratl::detail::sample_traits<sample<SampleValueType>>>;
+using noninterleaved_span = basic_noninterleaved_span<detail::sample_traits<sample<SampleValueType>>>;
 
 template<typename SampleValueType>
-using const_noninterleaved_span = basic_noninterleaved_span<
-    typename detail::sample_traits<sample<SampleValueType>>::const_sample_type,
-    ratl::detail::sample_traits<sample<SampleValueType>>>;
+using const_noninterleaved_span =
+    basic_noninterleaved_span<detail::const_sample_traits_t<detail::sample_traits<sample<SampleValueType>>>>;
 
 template<typename SampleValueType>
-using network_noninterleaved_span = basic_noninterleaved_span<
-    network_sample<SampleValueType>,
-    ratl::detail::sample_traits<network_sample<SampleValueType>>>;
+using network_noninterleaved_span = basic_noninterleaved_span<detail::sample_traits<network_sample<SampleValueType>>>;
 
 template<typename SampleValueType>
-using const_network_noninterleaved_span = basic_noninterleaved_span<
-    typename detail::sample_traits<network_sample<SampleValueType>>::const_sample_type,
-    ratl::detail::sample_traits<network_sample<SampleValueType>>>;
+using const_network_noninterleaved_span =
+    basic_noninterleaved_span<detail::const_sample_traits_t<detail::sample_traits<network_sample<SampleValueType>>>>;
 
 } // namespace ratl
 
