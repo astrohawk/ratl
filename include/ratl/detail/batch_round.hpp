@@ -41,7 +41,7 @@ inline xsimd::batch<std::int32_t, 4> batch_round_float32_to_int32(const xsimd::b
 
     const uint32x4_t mask = vcltq_f32(input, zero_val_dup);
     const float32x4_t round = vbslq_f32(mask, minus_point5_val_dup, point5_val_dup);
-    return vcvtq_s32_f32(vaddq_f32(x, round));
+    return vcvtq_s32_f32(vaddq_f32(input, round));
 }
 #    endif
 
