@@ -27,7 +27,7 @@ inline xsimd::batch<std::int32_t, 4> batch_round_float32_to_int32(const xsimd::b
 }
 #    endif
 
-#    if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_32_NEON_VERSION
+#    if XSIMD_ARM_INSTR_SET >= XSIMD_ARM8_64_NEON_VERSION
 inline xsimd::batch<std::int32_t, 4> batch_round_float32_to_int32(const xsimd::batch<float, 4>& input)
 {
     return vcvtnq_s32_f32(input);
