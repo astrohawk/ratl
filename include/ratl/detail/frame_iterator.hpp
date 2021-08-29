@@ -19,8 +19,8 @@ struct frame_iterator_tag
 {
 };
 
-template<typename SampleTraits, bool Contiguous = false>
-using frame_iterator = sample_iterator<frame_iterator_tag, SampleTraits, Contiguous>;
+template<typename SampleType, typename SampleTraits, typename Contiguous = std::false_type>
+using frame_iterator = sample_iterator<frame_iterator_tag, SampleType, SampleTraits, Contiguous>;
 
 } // namespace detail
 } // namespace ratl

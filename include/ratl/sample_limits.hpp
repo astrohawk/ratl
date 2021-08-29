@@ -33,10 +33,12 @@ struct sample_limits<int16_t>
     static constexpr int16_t max = std::numeric_limits<int16_t>::max();
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 constexpr int sample_limits<int16_t>::digits;
 constexpr bool sample_limits<int16_t>::is_integer;
 constexpr typename sample_limits<int16_t>::value_type sample_limits<int16_t>::min;
 constexpr typename sample_limits<int16_t>::value_type sample_limits<int16_t>::max;
+#endif
 
 template<>
 struct sample_limits<int24_t>
@@ -50,10 +52,12 @@ struct sample_limits<int24_t>
     static constexpr value_type max = RATL_INT24_MAX;
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 constexpr int sample_limits<int24_t>::digits;
 constexpr bool sample_limits<int24_t>::is_integer;
 constexpr typename sample_limits<int24_t>::value_type sample_limits<int24_t>::min;
 constexpr typename sample_limits<int24_t>::value_type sample_limits<int24_t>::max;
+#endif
 
 template<>
 struct sample_limits<int32_t>
@@ -67,10 +71,12 @@ struct sample_limits<int32_t>
     static constexpr int32_t max = std::numeric_limits<int32_t>::max();
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 constexpr int sample_limits<int32_t>::digits;
 constexpr bool sample_limits<int32_t>::is_integer;
 constexpr typename sample_limits<int32_t>::value_type sample_limits<int32_t>::min;
 constexpr typename sample_limits<int32_t>::value_type sample_limits<int32_t>::max;
+#endif
 
 template<>
 struct sample_limits<float32_t>
@@ -84,10 +90,12 @@ struct sample_limits<float32_t>
     static constexpr value_type max = 1.f;
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 constexpr int sample_limits<float32_t>::digits;
 constexpr bool sample_limits<float32_t>::is_integer;
 constexpr typename sample_limits<float32_t>::value_type sample_limits<float32_t>::min;
 constexpr typename sample_limits<float32_t>::value_type sample_limits<float32_t>::max;
+#endif
 
 } // namespace ratl
 

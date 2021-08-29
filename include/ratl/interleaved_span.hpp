@@ -26,9 +26,13 @@
 
 namespace ratl
 {
-template<typename SampleTraits>
+template<typename SampleType, typename SampleTraits>
 class basic_interleaved_span
 {
+    static_assert(
+        std::is_same<typename SampleTraits::sample_type, SampleType>::value,
+        "sample_type in SampleTraits must be the same type as SampleType");
+
     using sample_traits = SampleTraits;
     using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
@@ -38,10 +42,10 @@ public:
     using sample_pointer = typename sample_traits::pointer;
     using const_sample_pointer = typename sample_traits::const_pointer;
 
-    using channel_type = basic_channel_span<sample_traits, false>;
-    using const_channel_type = basic_channel_span<const_sample_traits, false>;
-    using frame_type = basic_frame_span<sample_traits, true>;
-    using const_frame_type = basic_frame_span<const_sample_traits, true>;
+    using channel_type = basic_channel_span<sample_type, sample_traits, std::false_type>;
+    using const_channel_type = basic_channel_span<const_sample_type, const_sample_traits, std::false_type>;
+    using frame_type = basic_frame_span<sample_type, sample_traits, std::true_type>;
+    using const_frame_type = basic_frame_span<const_sample_type, const_sample_traits, std::true_type>;
 
     using char_pointer = std::conditional_t<std::is_const<sample_type>::value, const unsigned char*, unsigned char*>;
 
@@ -54,8 +58,8 @@ public:
     using reference = frame_type;
     using const_reference = const_frame_type;
 
-    using iterator = detail::interleaved_iterator<sample_traits>;
-    using const_iterator = detail::interleaved_iterator<const_sample_traits>;
+    using iterator = detail::interleaved_iterator<sample_type, sample_traits>;
+    using const_iterator = detail::interleaved_iterator<const_sample_type, const_sample_traits>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -249,16 +253,18 @@ public:
     }
 };
 
-template<typename SampleTraits>
-inline void basic_interleaved_span<SampleTraits>::swap(basic_interleaved_span& other) noexcept
+template<typename SampleType, typename SampleTraits>
+inline void basic_interleaved_span<SampleType, SampleTraits>::swap(basic_interleaved_span& other) noexcept
 {
     std::swap(start_, other.start_);
     std::swap(channels_, other.channels_);
     std::swap(frames_, other.frames_);
 }
 
-template<typename SampleTraits>
-inline typename basic_interleaved_span<SampleTraits>::reference basic_interleaved_span<SampleTraits>::at(size_type n)
+template<typename SampleType, typename SampleTraits>
+inline typename basic_interleaved_span<SampleType, SampleTraits>::reference basic_interleaved_span<
+    SampleType,
+    SampleTraits>::at(size_type n)
 {
     if (n >= frames())
     {
@@ -267,9 +273,10 @@ inline typename basic_interleaved_span<SampleTraits>::reference basic_interleave
     return (*this)[n];
 }
 
-template<typename SampleTraits>
-inline typename basic_interleaved_span<SampleTraits>::const_reference basic_interleaved_span<SampleTraits>::at(
-    size_type n) const
+template<typename SampleType, typename SampleTraits>
+inline typename basic_interleaved_span<SampleType, SampleTraits>::const_reference basic_interleaved_span<
+    SampleType,
+    SampleTraits>::at(size_type n) const
 {
     if (n >= frames())
     {
@@ -279,43 +286,53 @@ inline typename basic_interleaved_span<SampleTraits>::const_reference basic_inte
 }
 
 template<
+    typename SampleTypeA,
     typename SampleTraitsA,
+    typename SampleTypeB,
     typename SampleTraitsB,
     std::enable_if_t<
         std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
         bool> = true>
 inline bool operator==(
-    const basic_interleaved_span<SampleTraitsA>& a, const basic_interleaved_span<SampleTraitsB>& b) noexcept
+    const basic_interleaved_span<SampleTypeA, SampleTraitsA>& a,
+    const basic_interleaved_span<SampleTypeB, SampleTraitsB>& b) noexcept
 {
     return (a.channels() == b.channels()) && (a.frames() == b.frames()) &&
            std::equal(a.data(), a.data() + a.samples(), b.data());
 }
 
 template<
+    typename SampleTypeA,
     typename SampleTraitsA,
+    typename SampleTypeB,
     typename SampleTraitsB,
     std::enable_if_t<
         std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
         bool> = true>
 inline bool operator!=(
-    const basic_interleaved_span<SampleTraitsA>& a, const basic_interleaved_span<SampleTraitsB>& b) noexcept
+    const basic_interleaved_span<SampleTypeA, SampleTraitsA>& a,
+    const basic_interleaved_span<SampleTypeB, SampleTraitsB>& b) noexcept
 {
     return !(a == b);
 }
 
 template<typename SampleValueType>
-using interleaved_span = basic_interleaved_span<detail::sample_traits<sample<SampleValueType>>>;
+using interleaved_span =
+    basic_interleaved_span<sample<SampleValueType>, detail::sample_traits<sample<SampleValueType>>>;
 
 template<typename SampleValueType>
-using const_interleaved_span =
-    basic_interleaved_span<detail::const_sample_traits_t<detail::sample_traits<sample<SampleValueType>>>>;
+using const_interleaved_span = basic_interleaved_span<
+    typename detail::sample_traits<sample<SampleValueType>>::const_sample_type,
+    detail::const_sample_traits_t<detail::sample_traits<sample<SampleValueType>>>>;
 
 template<typename SampleValueType>
-using network_interleaved_span = basic_interleaved_span<detail::sample_traits<network_sample<SampleValueType>>>;
+using network_interleaved_span =
+    basic_interleaved_span<network_sample<SampleValueType>, detail::sample_traits<network_sample<SampleValueType>>>;
 
 template<typename SampleValueType>
-using const_network_interleaved_span =
-    basic_interleaved_span<detail::const_sample_traits_t<detail::sample_traits<network_sample<SampleValueType>>>>;
+using const_network_interleaved_span = basic_interleaved_span<
+    typename detail::sample_traits<network_sample<SampleValueType>>::const_sample_type,
+    detail::const_sample_traits_t<detail::sample_traits<network_sample<SampleValueType>>>>;
 
 } // namespace ratl
 

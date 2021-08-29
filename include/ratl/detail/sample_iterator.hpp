@@ -20,12 +20,16 @@ namespace ratl
 {
 namespace detail
 {
-template<typename Tag, typename SampleTraits, bool Contiguous>
+template<typename Tag, typename SampleType, typename SampleTraits, typename Contiguous>
 class sample_iterator;
 
-template<typename Tag, typename SampleTraits>
-class sample_iterator<Tag, SampleTraits, false>
+template<typename Tag, typename SampleType, typename SampleTraits>
+class sample_iterator<Tag, SampleType, SampleTraits, std::false_type>
 {
+    static_assert(
+        std::is_same<typename SampleTraits::sample_type, SampleType>::value,
+        "sample_type in SampleTraits must be the same type as SampleType");
+
     using sample_traits = SampleTraits;
     using sample_type = typename sample_traits::sample_type;
     using sample_pointer = typename sample_traits::pointer;
@@ -190,9 +194,13 @@ public:
     }
 };
 
-template<typename Tag, typename SampleTraits>
-class sample_iterator<Tag, SampleTraits, true>
+template<typename Tag, typename SampleType, typename SampleTraits>
+class sample_iterator<Tag, SampleType, SampleTraits, std::true_type>
 {
+    static_assert(
+        std::is_same<typename SampleTraits::sample_type, SampleType>::value,
+        "sample_type in SampleTraits must be the same type as SampleType");
+
     using sample_traits = SampleTraits;
     using sample_type = typename sample_traits::sample_type;
     using sample_pointer = typename sample_traits::pointer;

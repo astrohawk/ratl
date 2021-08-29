@@ -79,6 +79,7 @@ struct base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, D
     }
 };
 
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename DitherGenerator>
 constexpr std::size_t
     base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::total_shift;
@@ -88,6 +89,7 @@ constexpr std::size_t
 template<typename DitherGenerator>
 constexpr std::size_t
     base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::post_dither_shift;
+#    endif
 
 template<typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherGenerator>
@@ -114,6 +116,7 @@ struct base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, D
     }
 };
 
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename DitherGenerator>
 constexpr std::size_t
     base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::total_shift;
@@ -123,6 +126,7 @@ constexpr std::size_t
 template<typename DitherGenerator>
 constexpr std::size_t
     base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::post_dither_shift;
+#    endif
 
 template<typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
@@ -146,9 +150,11 @@ struct base_batch_fast_sample_converter_impl<sample<SampleValueType>, sample<flo
     }
 };
 
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType, typename DitherGenerator>
 constexpr float32_t
     base_batch_fast_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>::scaler;
+#    endif
 
 template<typename SampleValueType, typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
@@ -171,12 +177,14 @@ public:
     }
 };
 
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType, typename DitherGenerator>
 constexpr float32_t
     base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::positive_scaler;
 template<typename SampleValueType, typename DitherGenerator>
 constexpr float32_t
     base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::negative_scaler;
+#    endif
 
 template<typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<float32_t>, sample<float32_t>, DitherGenerator>

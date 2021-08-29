@@ -17,10 +17,10 @@
 
 namespace ratl
 {
-template<typename SampleTraits, bool Contiguous = false>
+template<typename SampleType, typename SampleTraits, typename Contiguous = std::false_type>
 class basic_frame_span
 {
-    using data_impl_type = sample_span<SampleTraits, Contiguous, detail::frame_iterator>;
+    using data_impl_type = sample_span<SampleType, SampleTraits, Contiguous, detail::frame_iterator>;
 
 public:
     using sample_type = typename data_impl_type::sample_type;
@@ -52,23 +52,31 @@ public:
 
     basic_frame_span(const basic_frame_span&) noexcept = default;
 
-    template<bool DummyContiguous = Contiguous, std::enable_if_t<DummyContiguous == false, bool> = true>
+    template<
+        typename DummyContiguous = Contiguous,
+        std::enable_if_t<std::is_same<DummyContiguous, std::false_type>::value, bool> = true>
     basic_frame_span(sample_pointer data, size_type channels, size_type stride) noexcept : data_(data, channels, stride)
     {
     }
 
-    template<bool DummyContiguous = Contiguous, std::enable_if_t<DummyContiguous == true, bool> = true>
+    template<
+        typename DummyContiguous = Contiguous,
+        std::enable_if_t<std::is_same<DummyContiguous, std::true_type>::value, bool> = true>
     basic_frame_span(sample_pointer data, size_type channels) noexcept : data_(data, channels)
     {
     }
 
-    template<bool DummyContiguous = Contiguous, std::enable_if_t<DummyContiguous == false, bool> = true>
+    template<
+        typename DummyContiguous = Contiguous,
+        std::enable_if_t<std::is_same<DummyContiguous, std::false_type>::value, bool> = true>
     basic_frame_span(char_pointer data, size_type channels, size_type stride) noexcept :
         data_(reinterpret_cast<sample_pointer>(data), channels, stride)
     {
     }
 
-    template<bool DummyContiguous = Contiguous, std::enable_if_t<DummyContiguous == true, bool> = true>
+    template<
+        typename DummyContiguous = Contiguous,
+        std::enable_if_t<std::is_same<DummyContiguous, std::true_type>::value, bool> = true>
     basic_frame_span(char_pointer data, size_type channels) noexcept :
         data_(reinterpret_cast<sample_pointer>(data), channels)
     {
@@ -217,9 +225,11 @@ public:
     }
 };
 
-template<typename SampleTraits, bool Contiguous>
-inline typename basic_frame_span<SampleTraits, Contiguous>::reference basic_frame_span<SampleTraits, Contiguous>::at(
-    size_type n)
+template<typename SampleType, typename SampleTraits, typename Contiguous>
+inline typename basic_frame_span<SampleType, SampleTraits, Contiguous>::reference basic_frame_span<
+    SampleType,
+    SampleTraits,
+    Contiguous>::at(size_type n)
 {
     if (n >= channels())
     {
@@ -228,9 +238,11 @@ inline typename basic_frame_span<SampleTraits, Contiguous>::reference basic_fram
     return (*this)[n];
 }
 
-template<typename SampleTraits, bool Contiguous>
-inline typename basic_frame_span<SampleTraits, Contiguous>::const_reference basic_frame_span<SampleTraits, Contiguous>::
-    at(size_type n) const
+template<typename SampleType, typename SampleTraits, typename Contiguous>
+inline typename basic_frame_span<SampleType, SampleTraits, Contiguous>::const_reference basic_frame_span<
+    SampleType,
+    SampleTraits,
+    Contiguous>::at(size_type n) const
 {
     if (n >= channels())
     {
@@ -240,48 +252,55 @@ inline typename basic_frame_span<SampleTraits, Contiguous>::const_reference basi
 }
 
 template<
+    typename SampleTypeA,
     typename SampleTraitsA,
-    bool ContiguousA,
+    typename ContiguousA,
+    typename SampleTypeB,
     typename SampleTraitsB,
-    bool ContiguousB,
+    typename ContiguousB,
     std::enable_if_t<
         std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
         bool> = true>
 inline bool operator==(
-    const basic_frame_span<SampleTraitsA, ContiguousA>& a,
-    const basic_frame_span<SampleTraitsB, ContiguousB>& b) noexcept
+    const basic_frame_span<SampleTypeA, SampleTraitsA, ContiguousA>& a,
+    const basic_frame_span<SampleTypeB, SampleTraitsB, ContiguousB>& b) noexcept
 {
     return (a.channels() == b.channels()) && std::equal(a.begin(), a.end(), b.begin());
 }
 
 template<
+    typename SampleTypeA,
     typename SampleTraitsA,
-    bool ContiguousA,
+    typename ContiguousA,
+    typename SampleTypeB,
     typename SampleTraitsB,
-    bool ContiguousB,
+    typename ContiguousB,
     std::enable_if_t<
         std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
         bool> = true>
 inline bool operator!=(
-    const basic_frame_span<SampleTraitsA, ContiguousA>& a,
-    const basic_frame_span<SampleTraitsB, ContiguousB>& b) noexcept
+    const basic_frame_span<SampleTypeA, SampleTraitsA, ContiguousA>& a,
+    const basic_frame_span<SampleTypeB, SampleTraitsB, ContiguousB>& b) noexcept
 {
     return !(a == b);
 }
 
 template<typename SampleValueType>
-using frame_span = basic_frame_span<detail::sample_traits<sample<SampleValueType>>>;
+using frame_span = basic_frame_span<sample<SampleValueType>, detail::sample_traits<sample<SampleValueType>>>;
 
 template<typename SampleValueType>
-using const_frame_span =
-    basic_frame_span<detail::const_sample_traits_t<detail::sample_traits<sample<SampleValueType>>>>;
+using const_frame_span = basic_frame_span<
+    typename detail::sample_traits<sample<SampleValueType>>::const_sample_type,
+    detail::const_sample_traits_t<detail::sample_traits<sample<SampleValueType>>>>;
 
 template<typename SampleValueType>
-using network_frame_span = basic_frame_span<detail::sample_traits<network_sample<SampleValueType>>>;
+using network_frame_span =
+    basic_frame_span<network_sample<SampleValueType>, detail::sample_traits<network_sample<SampleValueType>>>;
 
 template<typename SampleValueType>
-using const_network_frame_span =
-    basic_frame_span<detail::const_sample_traits_t<detail::sample_traits<network_sample<SampleValueType>>>>;
+using const_network_frame_span = basic_frame_span<
+    typename detail::sample_traits<network_sample<SampleValueType>>::const_sample_type,
+    detail::const_sample_traits_t<detail::sample_traits<network_sample<SampleValueType>>>>;
 
 } // namespace ratl
 

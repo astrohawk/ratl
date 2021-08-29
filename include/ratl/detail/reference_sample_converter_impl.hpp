@@ -84,8 +84,10 @@ struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherG
     }
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename DitherGenerator>
 constexpr int16_t reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>::sample_out_max;
+#endif
 
 template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherGenerator>
@@ -121,8 +123,10 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherG
     }
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename DitherGenerator>
 constexpr int16_t reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>::sample_out_max;
+#endif
 
 template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
@@ -141,8 +145,10 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherG
     }
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename DitherGenerator>
 constexpr int24_t reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>::sample_out_max;
+#endif
 
 template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
@@ -186,12 +192,14 @@ public:
     }
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType, typename DitherGenerator>
 constexpr SampleValueType
     reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::sample_out_max;
 template<typename SampleValueType, typename DitherGenerator>
 constexpr SampleValueType
     reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::sample_out_min;
+#endif
 
 // This is required as sample_converter<float32_t, sample_type> is more specific than
 // sample_converter<sample_type, sample_type>

@@ -21,14 +21,18 @@ namespace ratl
 {
 namespace detail
 {
-template<typename SampleTraits>
+template<typename SampleType, typename SampleTraits>
 class noninterleaved_iterator
 {
+    static_assert(
+        std::is_same<typename SampleTraits::sample_type, SampleType>::value,
+        "sample_type in SampleTraits must be the same type as SampleType");
+
     using sample_traits = SampleTraits;
     using sample_type = typename sample_traits::sample_type;
     using sample_pointer = typename sample_traits::pointer;
 
-    using channel_type = basic_channel_span<sample_traits, true>;
+    using channel_type = basic_channel_span<sample_type, sample_traits, std::true_type>;
 
     using size_type = std::size_t;
 

@@ -74,9 +74,11 @@ private:
     batch_type state_;
 };
 
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 constexpr uint32_t batch_linear_congruential_generator::multiplier;
 constexpr uint32_t batch_linear_congruential_generator::increment;
 constexpr uint32_t batch_linear_congruential_generator::jump_mask;
+#    endif
 
 } // namespace detail
 } // namespace ratl

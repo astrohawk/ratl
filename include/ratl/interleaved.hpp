@@ -50,10 +50,10 @@ public:
     using sample_pointer = typename sample_traits::pointer;
     using const_sample_pointer = typename sample_traits::const_pointer;
 
-    using channel_type = basic_channel_span<sample_traits, false>;
-    using const_channel_type = basic_channel_span<const_sample_traits, false>;
-    using frame_type = basic_frame_span<sample_traits, true>;
-    using const_frame_type = basic_frame_span<const_sample_traits, true>;
+    using channel_type = basic_channel_span<sample_type, sample_traits, std::false_type>;
+    using const_channel_type = basic_channel_span<const_sample_type, const_sample_traits, std::false_type>;
+    using frame_type = basic_frame_span<sample_type, sample_traits, std::true_type>;
+    using const_frame_type = basic_frame_span<const_sample_type, const_sample_traits, std::true_type>;
 
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
@@ -64,8 +64,8 @@ public:
     using reference = frame_type;
     using const_reference = const_frame_type;
 
-    using iterator = detail::interleaved_iterator<sample_traits>;
-    using const_iterator = detail::interleaved_iterator<const_sample_traits>;
+    using iterator = detail::interleaved_iterator<sample_type, sample_traits>;
+    using const_iterator = detail::interleaved_iterator<const_sample_type, const_sample_traits>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 

@@ -64,10 +64,12 @@ private:
     detail::batch_linear_congruential_generator rng_{default_seed};
 };
 
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 constexpr uint32_t batch_triangular_dither_generator::default_seed;
 constexpr std::size_t batch_triangular_dither_generator::int16_shift;
 constexpr std::size_t batch_triangular_dither_generator::float32_shift;
 constexpr float32_t batch_triangular_dither_generator::float32_scaler;
+#    endif
 
 class batch_shaped_dither_generator : public shaped_dither_generator
 {
@@ -101,10 +103,12 @@ private:
     detail::batch_sample_value_type_t<int32_t> previous_{};
 };
 
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 constexpr uint32_t batch_shaped_dither_generator::default_seed;
 constexpr std::size_t batch_shaped_dither_generator::initial_shift;
 constexpr std::size_t batch_shaped_dither_generator::int16_shift;
 constexpr float32_t batch_shaped_dither_generator::float32_scaler;
+#    endif
 
 #else
 

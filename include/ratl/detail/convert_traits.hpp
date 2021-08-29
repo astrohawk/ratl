@@ -24,10 +24,12 @@ struct float_convert_traits
     static constexpr float32_t divisor = 1.f / multiplier;
 };
 
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType>
 constexpr float32_t float_convert_traits<SampleValueType>::multiplier;
 template<typename SampleValueType>
 constexpr float32_t float_convert_traits<SampleValueType>::divisor;
+#endif
 
 } // namespace detail
 } // namespace ratl

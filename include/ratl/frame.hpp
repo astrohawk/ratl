@@ -40,7 +40,7 @@ private:
     using sample_traits = detail::sample_traits_from_traits_t<alloc_traits>;
     using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
-    using data_impl_type = sample_span<sample_traits, true, detail::frame_iterator>;
+    using data_impl_type = sample_span<SampleType, sample_traits, std::true_type, detail::frame_iterator>;
 
 public:
     using sample_type = typename data_impl_type::sample_type;

@@ -24,12 +24,21 @@
 
 namespace ratl
 {
-template<typename SampleTraits, bool Contiguous, template<typename, bool> class Iterator>
+template<
+    typename SampleType,
+    typename SampleTraits,
+    typename Contiguous,
+    template<typename, typename, typename>
+    class Iterator>
 class sample_span;
 
-template<typename SampleTraits, template<typename, bool> class Iterator>
-class sample_span<SampleTraits, false, Iterator>
+template<typename SampleType, typename SampleTraits, template<typename, typename, typename> class Iterator>
+class sample_span<SampleType, SampleTraits, std::false_type, Iterator>
 {
+    static_assert(
+        std::is_same<typename SampleTraits::sample_type, SampleType>::value,
+        "sample_type in SampleTraits must be the same type as SampleType");
+
     using sample_traits = SampleTraits;
     using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
@@ -48,8 +57,8 @@ public:
     using reference = typename sample_traits::reference;
     using const_reference = typename sample_traits::const_reference;
 
-    using iterator = Iterator<sample_traits, false>;
-    using const_iterator = Iterator<const_sample_traits, false>;
+    using iterator = Iterator<sample_type, sample_traits, std::false_type>;
+    using const_iterator = Iterator<const_sample_type, const_sample_traits, std::false_type>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -68,14 +77,14 @@ public:
 
     sample_span(const sample_span&) noexcept = default;
 
-    sample_span(const sample_span<SampleTraits, true, Iterator>& other) noexcept :
+    sample_span(const sample_span<SampleType, SampleTraits, std::true_type, Iterator>& other) noexcept :
         start_(other.start_), samples_(other.samples_), stride_(1)
     {
     }
 
     sample_span& operator=(const sample_span&) noexcept = default;
 
-    sample_span& operator=(const sample_span<SampleTraits, true, Iterator>& other) noexcept
+    sample_span& operator=(const sample_span<SampleType, SampleTraits, std::true_type, Iterator>& other) noexcept
     {
         sample_span(other).swap(*this);
         return *this;
@@ -202,17 +211,21 @@ public:
     }
 };
 
-template<typename SampleTraits, template<typename, bool> class Iterator>
-inline void sample_span<SampleTraits, false, Iterator>::swap(sample_span& other) noexcept
+template<typename SampleType, typename SampleTraits, template<typename, typename, typename> class Iterator>
+inline void sample_span<SampleType, SampleTraits, std::false_type, Iterator>::swap(sample_span& other) noexcept
 {
     std::swap(start_, other.start_);
     std::swap(samples_, other.samples_);
     std::swap(stride_, other.stride_);
 }
 
-template<typename SampleTraits, template<typename, bool> class Iterator>
-class sample_span<SampleTraits, true, Iterator>
+template<typename SampleType, typename SampleTraits, template<typename, typename, typename> class Iterator>
+class sample_span<SampleType, SampleTraits, std::true_type, Iterator>
 {
+    static_assert(
+        std::is_same<typename SampleTraits::sample_type, SampleType>::value,
+        "sample_type in SampleTraits must be the same type as SampleType");
+
     using sample_traits = SampleTraits;
     using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
@@ -231,8 +244,8 @@ public:
     using reference = typename sample_traits::reference;
     using const_reference = typename sample_traits::const_reference;
 
-    using iterator = Iterator<sample_traits, true>;
-    using const_iterator = Iterator<const_sample_traits, true>;
+    using iterator = Iterator<sample_type, sample_traits, std::true_type>;
+    using const_iterator = Iterator<const_sample_type, const_sample_traits, std::true_type>;
     using reverse_iterator = std::reverse_iterator<iterator>;
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -370,8 +383,8 @@ public:
     }
 };
 
-template<typename SampleTraits, template<typename, bool> class Iterator>
-inline void sample_span<SampleTraits, true, Iterator>::swap(sample_span& other) noexcept
+template<typename SampleType, typename SampleTraits, template<typename, typename, typename> class Iterator>
+inline void sample_span<SampleType, SampleTraits, std::true_type, Iterator>::swap(sample_span& other) noexcept
 {
     std::swap(start_, other.start_);
     std::swap(samples_, other.samples_);

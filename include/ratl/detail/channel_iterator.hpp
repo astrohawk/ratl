@@ -19,8 +19,8 @@ struct channel_iterator_tag
 {
 };
 
-template<typename SampleTraits, bool Contiguous = false>
-using channel_iterator = sample_iterator<channel_iterator_tag, SampleTraits, Contiguous>;
+template<typename SampleType, typename SampleTraits, typename Contiguous = std::false_type>
+using channel_iterator = sample_iterator<channel_iterator_tag, SampleType, SampleTraits, Contiguous>;
 
 } // namespace detail
 } // namespace ratl
