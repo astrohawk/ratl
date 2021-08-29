@@ -17,7 +17,7 @@ function(ratl_add_test test_target)
     target_link_libraries(${test_target}
             ratl
             GTest::Main)
-    if (UNIX AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "(Clang|AppleClang)")
         target_compile_options(${test_target}
                 PRIVATE $<$<CONFIG:DEBUG>:-fsanitize=address> $<$<CONFIG:DEBUG>:-fsanitize=undefined>)
         target_link_options(${test_target}
