@@ -16,15 +16,23 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(CMAKE_CXX_EXTENSIONS OFF)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+    message(STATUS "C++ standard set to C++${CMAKE_CXX_STANDARD}")
+
     if (MSVC)
-        add_compile_options(/W4 /WX)
-    elseif (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
-        add_compile_options(-march=native)
-        add_compile_options(-Wall -Wextra -Wpedantic -Wcast-qual -Wnon-virtual-dtor -Werror)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
+        if(NOT CMAKE_CXX_FLAGS MATCHES "/arch")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
+        endif()
+    elseif (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang|AppleClang)")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wcast-qual -Wnon-virtual-dtor -Werror")
+        if(NOT CMAKE_CXX_FLAGS MATCHES "-march")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+            if(NOT CMAKE_CXX_FLAGS MATCHES "-mtune")
+                set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mtune=native")
+            endif()
+        endif()
     endif ()
 endif ()
-
-message(STATUS "C++ standard set to C++${CMAKE_CXX_STANDARD}")
 
 add_subdirectory(third_party)
 
@@ -63,7 +71,6 @@ set(RATL_HEADERS
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_value_traits.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/type_traits.hpp
-        ${RATL_INCLUDE_DIR}/ratl/detail/types.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/xsimd.hpp
         ${RATL_INCLUDE_DIR}/ratl/allocator.hpp
         ${RATL_INCLUDE_DIR}/ratl/channel.hpp
