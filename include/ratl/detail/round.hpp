@@ -65,7 +65,7 @@ inline int32_t round_float32_to_int32_fast(float32_t input) noexcept
 #elif defined(RATL_ROUND_USE_NEON_INTRINSICS) && defined(RATL_CPP_ARCH_AARCH64)
     return vgetq_lane_s32(vcvtnq_s32_f32(vdupq_n_f32(input)), 0);
 #else
-    return static_cast<int32_t>(round_float32_to_int32_magic(input));
+    return round_float32_to_int32_magic(input);
 #endif
 }
 } // namespace detail

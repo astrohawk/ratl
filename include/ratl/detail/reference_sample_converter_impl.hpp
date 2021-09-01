@@ -9,6 +9,7 @@
 #define _ratl_detail_reference_sample_converter_impl_
 
 // ratl includes
+#include <ratl/detail/cast.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/convert_traits.hpp>
 #include <ratl/detail/endianness.hpp>
@@ -45,7 +46,7 @@ struct reference_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherG
 {
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return static_cast<int24_t>(input << 8);
+        return narrowing_cast<int24_t>(input << 8);
     }
 };
 
@@ -78,7 +79,7 @@ struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherG
         {
             return sample_out_max;
         }
-        return static_cast<int16_t>(
+        return narrowing_cast<int16_t>(
             (((input + (rounding + (input >> 31))) << pre_dither_shift) + dither_gen.generate_int16()) >>
             post_dither_shift);
     }
@@ -117,7 +118,7 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherG
         {
             return sample_out_max;
         }
-        return static_cast<int16_t>(
+        return narrowing_cast<int16_t>(
             (((input + (rounding + (input >> 31))) >> pre_dither_shift) + dither_gen.generate_int16()) >>
             post_dither_shift);
     }
@@ -141,7 +142,7 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherG
         {
             return sample_out_max;
         }
-        return static_cast<int24_t>((input + (rounding + (input >> 31))) >> 8);
+        return narrowing_cast<int24_t>((input + (rounding + (input >> 31))) >> 8);
     }
 };
 
@@ -178,7 +179,7 @@ private:
         float_convert_traits<SampleValueType>::multiplier - DitherGenerator::float32_max;
 
 public:
-    static inline int32_t convert(float32_t input, DitherGenerator& dither_gen) noexcept
+    static inline SampleValueType convert(float32_t input, DitherGenerator& dither_gen) noexcept
     {
         if (RATL_UNLIKELY(input >= sample_in_max))
         {
@@ -188,7 +189,8 @@ public:
         {
             return sample_out_min;
         }
-        return round_float32_to_int32((input * scaler) + dither_gen.generate_float32());
+        return narrowing_cast<SampleValueType>(
+            round_float32_to_int32((input * scaler) + dither_gen.generate_float32()));
     }
 };
 

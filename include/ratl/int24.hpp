@@ -13,6 +13,7 @@
 
 // other includes
 #include <cstdint>
+#include <cstring>
 #include <type_traits>
 
 // defines
@@ -37,10 +38,7 @@ public:
 
     ~int24_t() = default;
 
-    inline constexpr int24_t(const int32_t& other) noexcept :
-        storage_{static_cast<uint8_t>(other), static_cast<uint8_t>(other >> 8), static_cast<uint8_t>(other >> 16)}
-    {
-    }
+    inline constexpr int24_t(const int32_t& other) noexcept;
 
     inline constexpr int24_t& operator=(const int32_t& other) noexcept;
 
@@ -50,11 +48,40 @@ public:
     uint8_t storage_[3];
 };
 
+inline constexpr int24_t::int24_t(const int32_t& other) noexcept : storage_{}
+{
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+    if (std::is_constant_evaluated())
+#endif
+    {
+        storage_[0] = static_cast<uint8_t>(other);
+        storage_[1] = static_cast<uint8_t>(other >> 8);
+        storage_[2] = static_cast<uint8_t>(other >> 16);
+    }
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+    else
+    {
+        std::memcpy(&storage_, &other, 3);
+    }
+#endif
+}
+
 inline constexpr int24_t& int24_t::operator=(const int32_t& other) noexcept
 {
-    storage_[0] = static_cast<uint8_t>(other);
-    storage_[1] = static_cast<uint8_t>(other >> 8);
-    storage_[2] = static_cast<uint8_t>(other >> 16);
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+    if (std::is_constant_evaluated())
+#endif
+    {
+        storage_[0] = static_cast<uint8_t>(other);
+        storage_[1] = static_cast<uint8_t>(other >> 8);
+        storage_[2] = static_cast<uint8_t>(other >> 16);
+    }
+#if defined(RATL_CPP_VERSION_HAS_CPP20)
+    else
+    {
+        std::memcpy(&storage_, &other, 3);
+    }
+#endif
     return *this;
 }
 

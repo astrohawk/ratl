@@ -28,8 +28,9 @@ template<typename SampleType>
 struct base_batch_creator;
 
 template<typename SampleValueType>
-struct base_batch_creator<sample<SampleValueType>>
+class base_batch_creator<sample<SampleValueType>>
 {
+public:
     using batch_type = batch_sample_value_type_t<SampleValueType>;
 
     template<typename Iterator>
@@ -45,26 +46,15 @@ struct base_batch_creator<sample<SampleValueType>>
     }
 
 private:
-    static typename batch_type::value_type convert_input(SampleValueType input)
-    {
-        return static_cast<typename batch_type::value_type>(input);
-    }
-
-    static SampleValueType convert_output(typename batch_type::value_type input)
-    {
-        return static_cast<SampleValueType>(input);
-    }
-
     template<typename Iterator, std::size_t... I>
     static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
     {
         return batch_type(convert_input(input[I].get())...);
     }
 
-    template<std::size_t I, typename Iterator>
-    static inline void store_element(const batch_type& input, Iterator output) noexcept
+    static inline typename batch_type::value_type convert_input(SampleValueType input)
     {
-        output[I].get() = convert_output(input[I]);
+        return input;
     }
 
     template<typename Iterator, std::size_t... I>
@@ -77,11 +67,23 @@ private:
         (void)fake;
 #    endif
     }
+
+    template<std::size_t I, typename Iterator>
+    static inline void store_element(const batch_type& input, Iterator output) noexcept
+    {
+        output[I].get() = convert_output(input[I]);
+    }
+
+    static inline SampleValueType convert_output(typename batch_type::value_type input)
+    {
+        return narrowing_cast<SampleValueType>(input);
+    }
 };
 
 template<typename SampleValueType>
-struct base_batch_creator<network_sample<SampleValueType>>
+class base_batch_creator<network_sample<SampleValueType>>
 {
+public:
     using batch_type = batch_network_sample_value_type_t<SampleValueType>;
 
     template<typename Iterator>
@@ -97,26 +99,15 @@ struct base_batch_creator<network_sample<SampleValueType>>
     }
 
 private:
-    static typename batch_type::value_type convert_input(network_sample_value_underlying_type_t<SampleValueType> input)
-    {
-        return static_cast<typename batch_type::value_type>(input);
-    }
-
-    static network_sample_value_underlying_type_t<SampleValueType> convert_output(typename batch_type::value_type input)
-    {
-        return static_cast<network_sample_value_underlying_type_t<SampleValueType>>(input);
-    }
-
     template<typename Iterator, std::size_t... I>
     static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
     {
-        return batch_type(convert_input(network_to_network_underlying_cast<SampleValueType>(input[I].get()))...);
+        return batch_type(convert_input(input[I].get())...);
     }
 
-    template<std::size_t I, typename Iterator>
-    static inline void store_element(const batch_type& input, Iterator output) noexcept
+    static inline typename batch_type::value_type convert_input(network_sample_value_type_t<SampleValueType> input)
     {
-        output[I].get() = network_underlying_to_network_cast<SampleValueType>(convert_output(input[I]));
+        return network_to_network_underlying_cast<SampleValueType>(input);
     }
 
     template<typename Iterator, std::size_t... I>
@@ -129,6 +120,18 @@ private:
         (void)fake;
 #    endif
     }
+
+    template<std::size_t I, typename Iterator>
+    static inline void store_element(const batch_type& input, Iterator output) noexcept
+    {
+        output[I].get() = convert_output(input[I]);
+    }
+
+    static inline network_sample_value_type_t<SampleValueType> convert_output(typename batch_type::value_type input)
+    {
+        return network_underlying_to_network_cast<SampleValueType>(
+            narrowing_cast<network_sample_value_underlying_type_t<SampleValueType>>(input));
+    }
 };
 
 template<typename SampleType, typename = void>
@@ -137,14 +140,16 @@ struct batch_creator : public base_batch_creator<SampleType>
 };
 
 // The load and store overloads for the specific sample types technically rely on undefined
-// behaviour when performing the reinterpret_cast but this is a price we are currently willing to pay in order to get
+// behaviour when performing the reinterpret_cast but this is a risk we are currently willing to take in order to get
 // the corresponding performance boost
 
 template<typename SampleValueType>
-struct batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_type_v<SampleValueType>>::type> :
+class batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_type_v<SampleValueType>>::type> :
     public base_batch_creator<sample<SampleValueType>>
 {
     using base = typename batch_creator::base_batch_creator;
+
+public:
     using batch_type = typename base::batch_type;
 
     using base::load;
@@ -167,12 +172,14 @@ struct batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_
 };
 
 template<typename SampleValueType>
-struct batch_creator<
+class batch_creator<
     network_sample<SampleValueType>,
     typename std::enable_if<has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>::type> :
     public base_batch_creator<network_sample<SampleValueType>>
 {
     using base = typename batch_creator::base_batch_creator;
+
+public:
     using batch_type = typename base::batch_type;
 
     using base::load;

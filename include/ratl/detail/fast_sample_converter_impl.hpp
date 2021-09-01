@@ -9,6 +9,7 @@
 #define _ratl_detail_fast_sample_converter_impl_
 
 // ratl includes
+#include <ratl/detail/cast.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/convert_traits.hpp>
 #include <ratl/detail/endianness.hpp>
@@ -45,7 +46,7 @@ struct fast_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherGenera
 {
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return static_cast<int24_t>(input << 8);
+        return narrowing_cast<int24_t>(input << 8);
     }
 };
 
@@ -68,7 +69,8 @@ struct fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenera
 
     static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return static_cast<int16_t>(((input << pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
+        return narrowing_cast<int16_t>(
+            ((input << pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
 
@@ -90,7 +92,8 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenera
 
     static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return static_cast<int16_t>(((input >> pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
+        return narrowing_cast<int16_t>(
+            ((input >> pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
 
@@ -99,7 +102,7 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenera
 {
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return static_cast<int24_t>(input >> 8);
+        return narrowing_cast<int24_t>(input >> 8);
     }
 };
 
@@ -124,10 +127,10 @@ private:
         -static_cast<float32_t>(sample_limits<SampleValueType>::min) - DitherGenerator::float32_max;
 
 public:
-    static inline int32_t convert(float32_t input, DitherGenerator& dither_gen) noexcept
+    static inline SampleValueType convert(float32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return round_float32_to_int32_fast(
-            (input * (input < 0 ? negative_scaler : positive_scaler)) + dither_gen.generate_float32());
+        return narrowing_cast<SampleValueType>(round_float32_to_int32_fast(
+            (input * (input < 0 ? negative_scaler : positive_scaler)) + dither_gen.generate_float32()));
     }
 };
 
