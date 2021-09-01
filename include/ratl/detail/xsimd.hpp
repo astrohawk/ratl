@@ -10,7 +10,13 @@
 
 // other includes
 #if defined(RATL_HAS_XSIMD)
+#    if defined(RATL_CPP_COMPILER_MSVC)
+#        pragma warning(push, 0)
+#    endif
 #    include <xsimd/xsimd.hpp>
+#    if defined(RATL_CPP_COMPILER_MSVC)
+#        pragma warning(pop)
+#    endif
 #endif
 
 #endif // _ratl_detail_xsimd_
