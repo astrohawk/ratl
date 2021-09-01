@@ -25,7 +25,7 @@ namespace ratl
 namespace detail
 {
 template<typename SampleType>
-struct base_batch_creator;
+class base_batch_creator;
 
 template<typename SampleValueType>
 class base_batch_creator<sample<SampleValueType>>
