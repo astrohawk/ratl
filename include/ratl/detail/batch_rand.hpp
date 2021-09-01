@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    static uint32_t make_state(linear_congruential_generator& gen, std::size_t)
+    static inline uint32_t make_state(linear_congruential_generator& gen, std::size_t)
     {
         auto state = gen();
         gen.jump();
@@ -62,7 +62,7 @@ private:
     }
 
     template<std::size_t... I>
-    static batch_type make_batch_state(uint32_t seed, std::index_sequence<I...>)
+    static inline batch_type make_batch_state(uint32_t seed, std::index_sequence<I...>)
     {
         linear_congruential_generator gen(seed);
         return batch_type(make_state(gen, I)...);

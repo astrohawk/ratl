@@ -18,22 +18,22 @@ class operator_arrow_proxy
 public:
     explicit operator_arrow_proxy(const Tp& value) : value_(value) {}
 
-    Tp* operator->() noexcept
+    inline Tp* operator->() noexcept
     {
         return &value_;
     }
 
-    const Tp* operator->() const noexcept
+    inline const Tp* operator->() const noexcept
     {
         return &value_;
     }
 
-    operator const Tp*() noexcept
+    inline operator const Tp*() noexcept
     {
         return &value_;
     }
 
-    operator Tp*() const noexcept
+    inline operator Tp*() const noexcept
     {
         return &value_;
     }

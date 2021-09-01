@@ -34,7 +34,7 @@ struct fast_sample_converter_impl;
 template<typename SampleValueType, typename DitherGenerator>
 struct fast_sample_converter_impl<sample<SampleValueType>, sample<SampleValueType>, DitherGenerator>
 {
-    static const SampleValueType& convert(const SampleValueType& input, DitherGenerator&) noexcept
+    static inline const SampleValueType& convert(const SampleValueType& input, DitherGenerator&) noexcept
     {
         return input;
     }
@@ -43,7 +43,7 @@ struct fast_sample_converter_impl<sample<SampleValueType>, sample<SampleValueTyp
 template<typename DitherGenerator>
 struct fast_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherGenerator>
 {
-    static int24_t convert(int32_t input, DitherGenerator&) noexcept
+    static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
         return static_cast<int24_t>(input << 8);
     }
@@ -52,7 +52,7 @@ struct fast_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherGenera
 template<typename DitherGenerator>
 struct fast_sample_converter_impl<sample<int16_t>, sample<int32_t>, DitherGenerator>
 {
-    static int32_t convert(int32_t input, DitherGenerator&) noexcept
+    static inline int32_t convert(int32_t input, DitherGenerator&) noexcept
     {
         return input << 16;
     }
@@ -66,16 +66,16 @@ struct fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenera
         DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
     static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
 
-    static int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
+    static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return static_cast<int24_t>(((input << pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
+        return static_cast<int16_t>(((input << pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
 
 template<typename DitherGenerator>
 struct fast_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherGenerator>
 {
-    static int32_t convert(int32_t input, DitherGenerator&) noexcept
+    static inline int32_t convert(int32_t input, DitherGenerator&) noexcept
     {
         return input << 8;
     }
@@ -88,7 +88,7 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenera
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
     static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 
-    static int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
+    static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
         return static_cast<int16_t>(((input >> pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
@@ -97,7 +97,7 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenera
 template<typename DitherGenerator>
 struct fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
 {
-    static int24_t convert(int32_t input, DitherGenerator&) noexcept
+    static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
         return static_cast<int24_t>(input >> 8);
     }
