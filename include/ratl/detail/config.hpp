@@ -27,16 +27,16 @@
 #endif
 
 // compiler
-// RATL_CPP_COMPILER_MSVC
 // RATL_CPP_COMPILER_CLANG
 // RATL_CPP_COMPILER_GCC
+// RATL_CPP_COMPILER_MSVC
 
-#if defined(_MSC_VER)
-#    define RATL_CPP_COMPILER_MSVC
-#elif defined(__clang__)
+#if defined(__clang__)
 #    define RATL_CPP_COMPILER_CLANG
 #elif defined(__GNUC__)
 #    define RATL_CPP_COMPILER_GCC
+#elif defined(_MSC_VER)
+#    define RATL_CPP_COMPILER_MSVC
 #else
 #    error Unknown compiler
 #endif
@@ -47,19 +47,7 @@
 // RATL_CPP_ARCH_ARM
 // RATL_CPP_ARCH_AARCH64
 
-#if defined(RATL_CPP_COMPILER_MSVC)
-#    if defined(_M_X64)
-#        define RATL_CPP_ARCH_X86_64
-#    elif defined(_M_IX86)
-#        define RATL_CPP_ARCH_X86
-#    elif defined(_M_ARM64)
-#        define RATL_CPP_ARCH_AARCH64
-#    elif defined(_M_ARM)
-#        define RATL_CPP_ARCH_ARM
-#    else
-#        error Unknown architecture
-#    endif
-#elif defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
+#if defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
 #    if defined(__x86_64__)
 #        define RATL_CPP_ARCH_X86_64
 #    elif defined(__i386)
@@ -67,6 +55,18 @@
 #    elif defined(__aarch64__)
 #        define RATL_CPP_ARCH_AARCH64
 #    elif defined(__arm__)
+#        define RATL_CPP_ARCH_ARM
+#    else
+#        error Unknown architecture
+#    endif
+#elif defined(RATL_CPP_COMPILER_MSVC)
+#    if defined(_M_X64)
+#        define RATL_CPP_ARCH_X86_64
+#    elif defined(_M_IX86)
+#        define RATL_CPP_ARCH_X86
+#    elif defined(_M_ARM64)
+#        define RATL_CPP_ARCH_AARCH64
+#    elif defined(_M_ARM)
 #        define RATL_CPP_ARCH_ARM
 #    else
 #        error Unknown architecture
@@ -79,8 +79,18 @@
 // RATL_CPP_VERSION_HAS_CPP17
 // RATL_CPP_VERSION_HAS_CPP20
 
-#if defined(RATL_CPP_COMPILER_MSVC)
-#    if not defined(_MSVC_LANG)
+#if defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
+#    if __cplusplus >= 202002L
+#        define RATL_CPP_VERSION_HAS_CPP20
+#    endif
+#    if __cplusplus >= 201703L
+#        define RATL_CPP_VERSION_HAS_CPP17
+#    endif
+#    if __cplusplus >= 201402L
+#        define RATL_CPP_VERSION_HAS_CPP14
+#    endif
+#elif defined(RATL_CPP_COMPILER_MSVC)
+#    if !defined(_MSVC_LANG)
 #        error Unsupported version of msvc; requires Visual Studio 2015 or above
 #    endif
 #    if _MSVC_LANG >= 202004L
@@ -92,16 +102,6 @@
 #    if _MSVC_LANG >= 201402L
 #        define RATL_CPP_VERSION_HAS_CPP14
 #    endif
-#elif defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
-#    if __cplusplus >= 202002L
-#        define RATL_CPP_VERSION_HAS_CPP20
-#    endif
-#    if __cplusplus >= 201703L
-#        define RATL_CPP_VERSION_HAS_CPP17
-#    endif
-#    if __cplusplus >= 201402L
-#        define RATL_CPP_VERSION_HAS_CPP14
-#    endif
 #endif
 #if !defined(RATL_CPP_VERSION_HAS_CPP14)
 #    error Unsupported C++ version; requires C++14 or greater
@@ -111,13 +111,7 @@
 // RATL_CPP_LITTLE_ENDIAN
 // RATL_CPP_BIG_ENDIAN
 
-#if defined(RATL_CPP_COMPILER_MSVC)
-#    if defined(RATL_CPP_ARCH_X86) || defined(RATL_CPP_ARCH_X86_64)
-#        define RATL_CPP_LITTLE_ENDIAN
-#    else
-#        error Unknown endianness
-#    endif
-#elif defined(RATL_CPP_COMPILER_CLANG)
+#if defined(RATL_CPP_COMPILER_CLANG)
 #    if defined(__LITTLE_ENDIAN__)
 #        define RATL_CPP_LITTLE_ENDIAN
 #    elif defined(__BIG_ENDIAN__)
@@ -130,6 +124,12 @@
 #        define RATL_CPP_LITTLE_ENDIAN
 #    elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #        define RATL_CPP_BIG_ENDIAN
+#    else
+#        error Unknown endianness
+#    endif
+#elif defined(RATL_CPP_COMPILER_MSVC)
+#    if defined(RATL_CPP_ARCH_X86) || defined(RATL_CPP_ARCH_X86_64)
+#        define RATL_CPP_LITTLE_ENDIAN
 #    else
 #        error Unknown endianness
 #    endif
