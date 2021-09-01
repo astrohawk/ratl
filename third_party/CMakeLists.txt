@@ -5,10 +5,6 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-set(BUILD_TESTS OFF CACHE BOOL "Disable third party tests")
-set(BUILD_BENCHMARKS OFF CACHE BOOL "Disable third party benchmarks")
-set(BUILD_EXAMPLES OFF CACHE BOOL "Disable third party examples")
-
 option(RATL_BENCHMARK_SOURCE "Build benchmark from source located in this dir" OFF)
 if (RATL_BENCHMARK_SOURCE)
     set(BENCHMARK_ENABLE_TESTING OFF)

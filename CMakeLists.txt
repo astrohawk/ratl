@@ -5,7 +5,7 @@
 # LICENSE file in the root directory of this source tree.
 #
 
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.15)
 
 project(ratl
         LANGUAGES CXX)
@@ -18,19 +18,27 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 
     message(STATUS "C++ standard set to C++${CMAKE_CXX_STANDARD}")
 
-    if (MSVC)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX")
-        if(NOT CMAKE_CXX_FLAGS MATCHES "/arch")
+    if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC" OR CMAKE_CXX_COMPILER_FRONTEND_VARIANT MATCHES "MSVC")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX /wd4996")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /bigobj")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        if (NOT CMAKE_CXX_FLAGS MATCHES "/arch")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
         endif()
+        if (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+        endif ()
     elseif (CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang|AppleClang)")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wcast-qual -Wnon-virtual-dtor -Werror")
-        if(NOT CMAKE_CXX_FLAGS MATCHES "-march")
+        if (NOT CMAKE_CXX_FLAGS MATCHES "-march")
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
-            if(NOT CMAKE_CXX_FLAGS MATCHES "-mtune")
+            if (NOT CMAKE_CXX_FLAGS MATCHES "-mtune")
                 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mtune=native")
-            endif()
-        endif()
+            endif ()
+        endif ()
+        if (WIN32)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-enum-value")
+        endif ()
     endif ()
 endif ()
 
@@ -103,7 +111,7 @@ if (TARGET xsimd)
 endif ()
 
 option(RATL_BUILD_TESTING "Build tests" OFF)
-if (RATL_BUILD_TESTING AND BUILD_TESTING)
+if (RATL_BUILD_TESTING)
     enable_testing()
     add_subdirectory(test)
 endif ()
