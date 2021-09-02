@@ -126,7 +126,7 @@ struct narrowing_cast_impl<uint24_t>
         std::memcpy(&temp, &input, sizeof(uint24_t));
         return temp;
 #else
-        return static_cast<int24_t>(input);
+        return static_cast<uint24_t>(input);
 #endif
     }
 };

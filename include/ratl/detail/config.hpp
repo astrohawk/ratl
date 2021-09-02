@@ -147,8 +147,10 @@
 #    define RATL_UNLIKELY(x) x
 #endif
 
-#if !defined(RATL_CPP_VERSION_HAS_CPP20)
-#    define RATL_USE_INT24_MEMCPY_NARROWING_CAST
+#if defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_MSVC)
+#    if !defined(RATL_CPP_VERSION_HAS_CPP20)
+#        define RATL_USE_INT24_MEMCPY_NARROWING_CAST
+#    endif
 #endif
 
 #endif // _ratl_detail_config_
