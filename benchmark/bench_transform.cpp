@@ -16,15 +16,15 @@
 
 namespace ratl
 {
-template<typename InputSampleType>
-basic_interleaved<InputSampleType> generateRandomInterleaved(std::size_t num_channels, std::size_t num_frames)
+template<typename InputType>
+InputType generateRandomInput(std::size_t num_channels, std::size_t num_frames)
 {
     std::random_device random_device;
     std::default_random_engine random_engine(random_device());
-    std::uniform_real_distribution<float32_t> uniform_dist(-0.8, 0.8);
+    std::uniform_real_distribution<float32_t> uniform_dist(-0.8f, 0.8f);
 
-    interleaved<float32_t> float_interleaved(num_channels, num_frames);
-    for (auto frame : float_interleaved)
+    interleaved<float32_t> float_container(num_channels, num_frames);
+    for (auto frame : float_container)
     {
         for (auto& input : frame)
         {
@@ -32,19 +32,25 @@ basic_interleaved<InputSampleType> generateRandomInterleaved(std::size_t num_cha
         }
     }
 
-    basic_interleaved<InputSampleType> input_interleaved(num_channels, num_frames);
-    transform(float_interleaved.begin(), float_interleaved.end(), input_interleaved.begin());
-    return input_interleaved;
+    InputType input(num_channels, num_frames);
+    for (std::size_t i = 0; i < num_channels; ++i)
+    {
+        transform(float_container.channel(i).begin(), float_container.channel(i).end(), input.channel(i).begin());
+    }
+    return input;
 }
 
 template<typename InputSampleType, typename OutputSampleType>
-void benchSampleTransform(benchmark::State& state)
+void benchTransform(benchmark::State& state)
 {
+    using input_type = basic_interleaved<InputSampleType>;
+    using output_type = basic_noninterleaved<OutputSampleType>;
+
     static constexpr std::size_t num_channels = 32;
     static constexpr std::size_t num_frames = 480;
 
-    auto input = generateRandomInterleaved<InputSampleType>(num_channels, num_frames);
-    auto output = basic_noninterleaved<OutputSampleType>(num_channels, num_frames);
+    auto input = generateRandomInput<input_type>(num_channels, num_frames);
+    auto output = output_type(num_channels, num_frames);
     dither_generator dither_gen;
     for (auto _ : state)
     {
@@ -55,54 +61,54 @@ void benchSampleTransform(benchmark::State& state)
     }
 }
 
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, network_sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, network_sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, network_sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int16_t>, network_sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, network_sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, network_sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, network_sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int24_t>, network_sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, network_sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, network_sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, network_sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<int32_t>, network_sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, network_sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, network_sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, network_sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, sample<float32_t>, network_sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int16_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int16_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int16_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int16_t>, sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int24_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int24_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int24_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int24_t>, sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int32_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int32_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int32_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<int32_t>, sample<float32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<float32_t>, sample<int16_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<float32_t>, sample<int24_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<float32_t>, sample<int32_t>);
-BENCHMARK_TEMPLATE(benchSampleTransform, network_sample<float32_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, network_sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, network_sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, network_sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int16_t>, network_sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, network_sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, network_sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, network_sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int24_t>, network_sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, network_sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, network_sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, network_sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<int32_t>, network_sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, network_sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, network_sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, network_sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, sample<float32_t>, network_sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int16_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int16_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int16_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int16_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int24_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int24_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int24_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int24_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int32_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int32_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int32_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<int32_t>, sample<float32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<float32_t>, sample<int16_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<float32_t>, sample<int24_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<float32_t>, sample<int32_t>);
+BENCHMARK_TEMPLATE(benchTransform, network_sample<float32_t>, sample<float32_t>);
 
 } // namespace ratl
 

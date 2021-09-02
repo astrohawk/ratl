@@ -26,7 +26,6 @@ static_assert(std::is_standard_layout<uint24_t>::value, "uint24_t is not a stand
 TEST(ReturnTypes, Plus)
 {
     ::testing::StaticAssertTypeEq<decltype(ratl::uint24_t(1) + 1), decltype(uint16_t(1) + 1)>();
-    ::testing::StaticAssertTypeEq<decltype(ratl::uint24_t(1) + 0x7fffffff), decltype(uint16_t(1) + 0x7fffffff)>();
     ::testing::StaticAssertTypeEq<decltype(ratl::uint24_t(1) + 0x80000000), decltype(uint16_t(1) + 0x80000000)>();
 }
 

@@ -83,20 +83,20 @@ public:
     }
 
     template<
-        class SampleArg,
+        class Sample,
         typename Allocator,
-        std::enable_if_t<std::is_same<SampleArg, std::remove_const_t<sample_type>>::value, bool> = true>
-    basic_frame_span(basic_frame<SampleArg, Allocator>& frame) noexcept : data_(frame.data(), frame.channels())
+        std::enable_if_t<std::is_same<Sample, std::remove_const_t<sample_type>>::value, bool> = true>
+    basic_frame_span(basic_frame<Sample, Allocator>& frame) noexcept : data_(frame.data(), frame.channels())
     {
     }
 
     template<
-        class SampleArg,
+        class Sample,
         typename Allocator,
         std::enable_if_t<
-            std::is_same<typename detail::sample_traits<SampleArg>::const_sample_type, sample_type>::value,
+            std::is_same<typename detail::sample_traits<Sample>::const_sample_type, sample_type>::value,
             bool> = true>
-    basic_frame_span(const basic_frame<SampleArg, Allocator>& frame) noexcept : data_(frame.data(), frame.channels())
+    basic_frame_span(const basic_frame<Sample, Allocator>& frame) noexcept : data_(frame.data(), frame.channels())
     {
     }
 

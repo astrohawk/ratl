@@ -9,8 +9,13 @@
 #include <ratl/ratl.hpp>
 
 // other includes
+#include <cmath>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#if !defined(M_PI)
+#define M_PI 3.14159265358979323846
+#endif
 
 namespace py = pybind11;
 

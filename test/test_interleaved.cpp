@@ -21,7 +21,7 @@ protected:
     ratl::interleaved<SampleValueType> container_;
 };
 
-TYPED_TEST_SUITE(DefaultConstructor, PossibleSampleTypes, );
+TYPED_TEST_SUITE(DefaultConstructor, PossibleSampleValueTypes, );
 
 TYPED_TEST(DefaultConstructor, DataNull)
 {
@@ -80,7 +80,7 @@ class ZeroConstructor : public ZeroInterleavedBase<SampleValueType>
 {
 };
 
-TYPED_TEST_SUITE(ZeroConstructor, PossibleSampleTypes, );
+TYPED_TEST_SUITE(ZeroConstructor, PossibleSampleValueTypes, );
 
 TYPED_TEST(ZeroConstructor, DataNull)
 {
@@ -139,7 +139,7 @@ class ZeroChannelsConstructor : public ZeroChannelsInterleavedBase<SampleValueTy
 {
 };
 
-TYPED_TEST_SUITE(ZeroChannelsConstructor, PossibleSampleTypes, );
+TYPED_TEST_SUITE(ZeroChannelsConstructor, PossibleSampleValueTypes, );
 
 TYPED_TEST(ZeroChannelsConstructor, DataNull)
 {
@@ -203,7 +203,7 @@ class ZeroFramesConstructor : public ZeroFramesInterleavedBase<SampleValueType>
 {
 };
 
-TYPED_TEST_SUITE(ZeroFramesConstructor, PossibleSampleTypes, );
+TYPED_TEST_SUITE(ZeroFramesConstructor, PossibleSampleValueTypes, );
 
 TYPED_TEST(ZeroFramesConstructor, DataNull)
 {
@@ -262,7 +262,7 @@ class TypedTypical : public TypicalInterleavedBase<SampleValueType>
 {
 };
 
-TYPED_TEST_SUITE(TypedTypical, PossibleSampleTypes, );
+TYPED_TEST_SUITE(TypedTypical, PossibleSampleValueTypes, );
 
 TYPED_TEST(TypedTypical, DataNotNull)
 {
@@ -374,7 +374,8 @@ TYPED_TEST(TypedTypical, IteratorMinusEquals)
 
 TYPED_TEST(TypedTypical, IteratorDistance)
 {
-    EXPECT_EQ(std::distance(this->container_.begin(), this->container_.end()), this->frames());
+    EXPECT_EQ(
+        static_cast<std::size_t>(std::distance(this->container_.begin(), this->container_.end())), this->frames());
 }
 
 TYPED_TEST(TypedTypical, IteratorIncrement)
@@ -487,20 +488,20 @@ template<typename SampleValueType>
 class Equality : public ::testing::Test
 {
 protected:
-    using sample_type = SampleValueType;
+    using sample_value_type = SampleValueType;
 
-    static ratl::interleaved<sample_type> generate_default()
+    static ratl::interleaved<sample_value_type> generate_default()
     {
-        return ratl::interleaved<sample_type>();
+        return ratl::interleaved<sample_value_type>();
     }
 
-    static ratl::interleaved<sample_type> generate_typical()
+    static ratl::interleaved<sample_value_type> generate_typical()
     {
-        return ratl::interleaved<sample_type>(TEST_RATL_TYPICAL_CHANNELS, TEST_RATL_TYPICAL_FRAMES);
+        return ratl::interleaved<sample_value_type>(TEST_RATL_TYPICAL_CHANNELS, TEST_RATL_TYPICAL_FRAMES);
     }
 };
 
-TYPED_TEST_SUITE(Equality, PossibleSampleTypes, );
+TYPED_TEST_SUITE(Equality, PossibleSampleValueTypes, );
 
 TYPED_TEST(Equality, DefaultEqual)
 {
@@ -514,20 +515,21 @@ TYPED_TEST(Equality, TypicalEqual)
 
 TYPED_TEST(Equality, DefaultZeroConstructorEqual)
 {
-    EXPECT_EQ(this->generate_default(), (ratl::interleaved<typename TestFixture::sample_type>(0, 0)));
+    EXPECT_EQ(this->generate_default(), (ratl::interleaved<typename TestFixture::sample_value_type>(0, 0)));
 }
 
 TYPED_TEST(Equality, DefaultZeroChannelsConstructorNotEqual)
 {
     EXPECT_NE(
-        this->generate_default(), (ratl::interleaved<typename TestFixture::sample_type>(0, TEST_RATL_TYPICAL_FRAMES)));
+        this->generate_default(),
+        (ratl::interleaved<typename TestFixture::sample_value_type>(0, TEST_RATL_TYPICAL_FRAMES)));
 }
 
 TYPED_TEST(Equality, DefaultZeroFramesConstructorNotEqual)
 {
     EXPECT_NE(
         this->generate_default(),
-        (ratl::interleaved<typename TestFixture::sample_type>(TEST_RATL_TYPICAL_CHANNELS, 0)));
+        (ratl::interleaved<typename TestFixture::sample_value_type>(TEST_RATL_TYPICAL_CHANNELS, 0)));
 }
 
 TYPED_TEST(Equality, DefaultTypicalNotEqual)
@@ -538,15 +540,15 @@ TYPED_TEST(Equality, DefaultTypicalNotEqual)
 TYPED_TEST(Equality, TypicalAllWriteNotEqual)
 {
     auto typical = this->generate_typical();
-    std::fill_n(typical.data(), typical.samples(), 1);
+    std::fill_n(typical.data(), typical.samples(), static_cast<typename TestFixture::sample_value_type>(1));
     EXPECT_NE(typical, this->generate_typical());
 }
 
 TYPED_TEST(Equality, TypicalAllWriteBackEqual)
 {
     auto typical = this->generate_typical();
-    std::fill_n(typical.data(), typical.samples(), 1);
-    std::fill_n(typical.data(), typical.samples(), 0);
+    std::fill_n(typical.data(), typical.samples(), static_cast<typename TestFixture::sample_value_type>(1));
+    std::fill_n(typical.data(), typical.samples(), static_cast<typename TestFixture::sample_value_type>(0));
     EXPECT_EQ(typical, this->generate_typical());
 }
 
@@ -554,7 +556,7 @@ TYPED_TEST(Equality, TypicalOneWriteNotEqual)
 {
     auto typical = this->generate_typical();
     size_t middle_sample = (TEST_RATL_TYPICAL_CHANNELS * TEST_RATL_TYPICAL_FRAMES) / 2;
-    typical.data()[middle_sample] = 1;
+    typical.data()[middle_sample] = static_cast<typename TestFixture::sample_value_type>(1);
     EXPECT_NE(typical, this->generate_typical());
 }
 
@@ -562,8 +564,8 @@ TYPED_TEST(Equality, TypicalOneWriteBackEqual)
 {
     auto typical = this->generate_typical();
     size_t middle_sample = (TEST_RATL_TYPICAL_CHANNELS * TEST_RATL_TYPICAL_FRAMES) / 2;
-    typical.data()[middle_sample] = 1;
-    typical.data()[middle_sample] = 0;
+    typical.data()[middle_sample] = static_cast<typename TestFixture::sample_value_type>(1);
+    typical.data()[middle_sample] = static_cast<typename TestFixture::sample_value_type>(0);
     EXPECT_EQ(typical, this->generate_typical());
 }
 
@@ -577,7 +579,7 @@ protected:
     using interleaved_type = typename super_type::container_type;
 };
 
-TYPED_TEST_SUITE(CopyConstructor, PossibleSampleTypes, );
+TYPED_TEST_SUITE(CopyConstructor, PossibleSampleValueTypes, );
 
 TYPED_TEST(CopyConstructor, CopyConstructor)
 {
@@ -596,7 +598,7 @@ protected:
     using interleaved_type = typename super_type::container_type;
 };
 
-TYPED_TEST_SUITE(CopyAssignmentOperator, PossibleSampleTypes, );
+TYPED_TEST_SUITE(CopyAssignmentOperator, PossibleSampleValueTypes, );
 
 TYPED_TEST(CopyAssignmentOperator, CopyAssignmentOperator)
 {
@@ -616,7 +618,7 @@ protected:
     using interleaved_type = typename super_type::container_type;
 };
 
-TYPED_TEST_SUITE(MoveConstructor, PossibleSampleTypes, );
+TYPED_TEST_SUITE(MoveConstructor, PossibleSampleValueTypes, );
 
 TYPED_TEST(MoveConstructor, MoveConstructor)
 {
@@ -635,7 +637,7 @@ protected:
     using interleaved_type = typename super_type::container_type;
 };
 
-TYPED_TEST_SUITE(MoveAssignmentOperator, PossibleSampleTypes, );
+TYPED_TEST_SUITE(MoveAssignmentOperator, PossibleSampleValueTypes, );
 
 TYPED_TEST(MoveAssignmentOperator, MoveAssignmentOperator)
 {
@@ -660,7 +662,7 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(Swap, PossibleSampleTypes, );
+TYPED_TEST_SUITE(Swap, PossibleSampleValueTypes, );
 
 TYPED_TEST(Swap, SwapFree)
 {
@@ -778,7 +780,7 @@ protected:
     using interleaved_type = ratl::basic_interleaved<sample_type, allocator>;
 };
 
-TYPED_TEST_SUITE(Allocate, PossibleSampleTypes, );
+TYPED_TEST_SUITE(Allocate, PossibleSampleValueTypes, );
 
 TYPED_TEST(Allocate, TypicalAllocate)
 {
@@ -828,23 +830,27 @@ TYPED_TEST(Allocate, Swap)
 template<typename SampleValueType>
 class RawReadWrite : public TypicalInterleavedBase<SampleValueType>
 {
+protected:
+    using sample_value_type = SampleValueType;
 };
 
-TYPED_TEST_SUITE(RawReadWrite, PossibleSampleTypes, );
+TYPED_TEST_SUITE(RawReadWrite, PossibleSampleValueTypes, );
 
 TYPED_TEST(RawReadWrite, Write)
 {
-    auto iter = std::fill_n(this->container_.data(), this->container_.samples(), 1);
+    auto iter = std::fill_n(
+        this->container_.data(), this->container_.samples(), static_cast<typename TestFixture::sample_value_type>(1));
     EXPECT_EQ(iter, this->container_.data() + this->container_.samples());
 }
 
 TYPED_TEST(RawReadWrite, Read)
 {
-    std::fill_n(this->container_.data(), this->container_.samples(), 1);
+    std::fill_n(
+        this->container_.data(), this->container_.samples(), static_cast<typename TestFixture::sample_value_type>(1));
 
     for (size_t i = 0; i < this->container_.samples(); ++i)
     {
-        EXPECT_EQ(this->container_.data()[i].get(), 1);
+        EXPECT_EQ(this->container_.data()[i].get(), static_cast<typename TestFixture::sample_value_type>(1));
     }
 }
 

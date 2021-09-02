@@ -26,7 +26,6 @@ static_assert(std::is_standard_layout<int24_t>::value, "int24_t is not a standar
 TEST(ReturnTypes, Plus)
 {
     ::testing::StaticAssertTypeEq<decltype(ratl::int24_t(1) + 1), decltype(int16_t(1) + 1)>();
-    ::testing::StaticAssertTypeEq<decltype(ratl::int24_t(1) + 0x7fffffff), decltype(int16_t(1) + 0x7fffffff)>();
     ::testing::StaticAssertTypeEq<decltype(ratl::int24_t(1) + 0x80000000), decltype(int16_t(1) + 0x80000000)>();
 }
 

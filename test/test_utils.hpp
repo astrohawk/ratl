@@ -21,48 +21,48 @@ namespace ratl
 {
 namespace test
 {
-using PossibleSampleTypes = ::testing::Types<int16_t, int24_t, int32_t, float32_t>;
+using PossibleSampleValueTypes = ::testing::Types<int16_t, int24_t, int32_t, float32_t>;
 
-using PossibleIntSampleTypes = ::testing::Types<int16_t, int24_t, int32_t>;
+using PossibleIntSampleValueTypes = ::testing::Types<int16_t, int24_t, int32_t>;
 
-template<typename InputSampleType, typename OutputSampleType>
-struct SampleTypeCombination
+template<typename InputSampleValueType, typename OutputSampleValueType>
+struct SampleValueTypeCombination
 {
-    using input_sample_type = InputSampleType;
-    using output_sample_type = OutputSampleType;
+    using input_sample_value_type = InputSampleValueType;
+    using output_sample_value_type = OutputSampleValueType;
 };
 
-using PossibleSampleTypeCombinations = ::testing::Types<
-    SampleTypeCombination<int16_t, int16_t>,
-    SampleTypeCombination<int16_t, int24_t>,
-    SampleTypeCombination<int16_t, int32_t>,
-    SampleTypeCombination<int16_t, float32_t>,
-    SampleTypeCombination<int24_t, int16_t>,
-    SampleTypeCombination<int24_t, int24_t>,
-    SampleTypeCombination<int24_t, int32_t>,
-    SampleTypeCombination<int24_t, float32_t>,
-    SampleTypeCombination<int32_t, int16_t>,
-    SampleTypeCombination<int32_t, int24_t>,
-    SampleTypeCombination<int32_t, int32_t>,
-    SampleTypeCombination<int32_t, float32_t>,
-    SampleTypeCombination<float32_t, int16_t>,
-    SampleTypeCombination<float32_t, int24_t>,
-    SampleTypeCombination<float32_t, int32_t>,
-    SampleTypeCombination<float32_t, float32_t>>;
+using PossibleSampleValueTypeCombinations = ::testing::Types<
+    SampleValueTypeCombination<int16_t, int16_t>,
+    SampleValueTypeCombination<int16_t, int24_t>,
+    SampleValueTypeCombination<int16_t, int32_t>,
+    SampleValueTypeCombination<int16_t, float32_t>,
+    SampleValueTypeCombination<int24_t, int16_t>,
+    SampleValueTypeCombination<int24_t, int24_t>,
+    SampleValueTypeCombination<int24_t, int32_t>,
+    SampleValueTypeCombination<int24_t, float32_t>,
+    SampleValueTypeCombination<int32_t, int16_t>,
+    SampleValueTypeCombination<int32_t, int24_t>,
+    SampleValueTypeCombination<int32_t, int32_t>,
+    SampleValueTypeCombination<int32_t, float32_t>,
+    SampleValueTypeCombination<float32_t, int16_t>,
+    SampleValueTypeCombination<float32_t, int24_t>,
+    SampleValueTypeCombination<float32_t, int32_t>,
+    SampleValueTypeCombination<float32_t, float32_t>>;
 
-using PossibleIntInputSampleTypeCombinations = ::testing::Types<
-    SampleTypeCombination<int16_t, int16_t>,
-    SampleTypeCombination<int16_t, int24_t>,
-    SampleTypeCombination<int16_t, int32_t>,
-    SampleTypeCombination<int16_t, float32_t>,
-    SampleTypeCombination<int24_t, int16_t>,
-    SampleTypeCombination<int24_t, int24_t>,
-    SampleTypeCombination<int24_t, int32_t>,
-    SampleTypeCombination<int24_t, float32_t>,
-    SampleTypeCombination<int32_t, int16_t>,
-    SampleTypeCombination<int32_t, int24_t>,
-    SampleTypeCombination<int32_t, int32_t>,
-    SampleTypeCombination<int32_t, float32_t>>;
+using PossibleIntInputSampleValueTypeCombinations = ::testing::Types<
+    /*SampleValueTypeCombination<int16_t, int16_t>,
+    SampleValueTypeCombination<int16_t, int24_t>,
+    SampleValueTypeCombination<int16_t, int32_t>,
+    SampleValueTypeCombination<int16_t, float32_t>,*/
+    SampleValueTypeCombination<int24_t, int16_t>/*,
+    SampleValueTypeCombination<int24_t, int24_t>,
+    SampleValueTypeCombination<int24_t, int32_t>,
+    SampleValueTypeCombination<int24_t, float32_t>,
+    SampleValueTypeCombination<int32_t, int16_t>,
+    SampleValueTypeCombination<int32_t, int24_t>,
+    SampleValueTypeCombination<int32_t, int32_t>,
+    SampleValueTypeCombination<int32_t, float32_t>*/>;
 
 template<template<typename> class ContainerType, typename SampleValueType, size_t Channels, size_t Frames>
 class TestBase : public ::testing::Test

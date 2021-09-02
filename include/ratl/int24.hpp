@@ -15,11 +15,12 @@
 #include <cstdint>
 #include <cstring>
 #include <type_traits>
+#include <limits>
 
 // defines
 #define RATL_INT24_DIGITS 23
-#define RATL_INT24_MIN -8388608
-#define RATL_INT24_MAX 8388607
+#define RATL_INT24_MIN static_cast<int24_t>(-8388608)
+#define RATL_INT24_MAX static_cast<int24_t>(8388607)
 
 namespace ratl
 {
@@ -29,18 +30,22 @@ public:
     int24_t() noexcept = default;
 
     constexpr int24_t(const int24_t&) noexcept = default;
-
-    constexpr int24_t(int24_t&&) noexcept = default;
-
     constexpr int24_t& operator=(const int24_t&) noexcept = default;
 
-    constexpr int24_t& operator=(int24_t&&) noexcept = default;
+    static constexpr auto i = std::numeric_limits<int>::max();
+
+    template<
+        typename Tp,
+        std::enable_if_t<std::is_convertible<Tp, std::int32_t>::value && sizeof(Tp) >= sizeof(std::int32_t), bool> =
+            true>
+    inline explicit constexpr int24_t(const Tp& other) noexcept;
+    template<
+        typename Tp,
+        std::enable_if_t<std::is_convertible<Tp, std::int32_t>::value && sizeof(Tp) >= sizeof(std::int32_t), bool> =
+            true>
+    inline constexpr int24_t& operator=(const Tp& other) noexcept;
 
     ~int24_t() = default;
-
-    inline constexpr int24_t(const int32_t& other) noexcept;
-
-    inline constexpr int24_t& operator=(const int32_t& other) noexcept;
 
     inline constexpr operator int32_t() const noexcept;
 
@@ -48,7 +53,10 @@ public:
     uint8_t storage_[3];
 };
 
-inline constexpr int24_t::int24_t(const int32_t& other) noexcept : storage_{}
+template<
+    typename Tp,
+    std::enable_if_t<std::is_convertible<Tp, std::int32_t>::value && sizeof(Tp) >= sizeof(std::int32_t), bool>>
+inline constexpr int24_t::int24_t(const Tp& other) noexcept : storage_{}
 {
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
     if (std::is_constant_evaluated())
@@ -66,7 +74,10 @@ inline constexpr int24_t::int24_t(const int32_t& other) noexcept : storage_{}
 #endif
 }
 
-inline constexpr int24_t& int24_t::operator=(const int32_t& other) noexcept
+template<
+    typename Tp,
+    std::enable_if_t<std::is_convertible<Tp, std::int32_t>::value && sizeof(Tp) >= sizeof(std::int32_t), bool>>
+inline constexpr int24_t& int24_t::operator=(const Tp& other) noexcept
 {
 #if defined(RATL_CPP_VERSION_HAS_CPP20)
     if (std::is_constant_evaluated())

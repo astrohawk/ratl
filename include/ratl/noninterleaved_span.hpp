@@ -87,21 +87,21 @@ public:
     }
 
     template<
-        typename SampleArg,
+        typename Sample,
         typename Allocator,
-        std::enable_if_t<std::is_same<SampleArg, std::remove_const_t<sample_type>>::value, bool> = true>
-    basic_noninterleaved_span(basic_interleaved<SampleArg, Allocator>& noninterleaved) noexcept :
+        std::enable_if_t<std::is_same<Sample, std::remove_const_t<sample_type>>::value, bool> = true>
+    basic_noninterleaved_span(basic_interleaved<Sample, Allocator>& noninterleaved) noexcept :
         start_(noninterleaved.data()), channels_(noninterleaved.channels()), frames_(noninterleaved.frames())
     {
     }
 
     template<
-        typename SampleArg,
+        typename Sample,
         typename Allocator,
         std::enable_if_t<
-            std::is_same<typename detail::sample_traits<SampleArg>::const_sample_type, sample_type>::value,
+            std::is_same<typename detail::sample_traits<Sample>::const_sample_type, sample_type>::value,
             bool> = true>
-    basic_noninterleaved_span(const basic_interleaved<SampleArg, Allocator>& noninterleaved) noexcept :
+    basic_noninterleaved_span(const basic_interleaved<Sample, Allocator>& noninterleaved) noexcept :
         start_(noninterleaved.data()), channels_(noninterleaved.channels()), frames_(noninterleaved.frames())
     {
     }

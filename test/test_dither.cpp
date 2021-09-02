@@ -19,9 +19,11 @@ template<typename Generator>
 class DitherGeneratorTest : public testing::Test
 {
 protected:
-    using DitherGenerator = Generator;
+    using generator = Generator;
+
     static constexpr std::size_t num_tests = 10000000;
-    DitherGenerator generator_;
+
+    generator generator_;
 };
 
 using DitherGenerators = testing::Types<
@@ -32,11 +34,9 @@ TYPED_TEST_SUITE(DitherGeneratorTest, DitherGenerators, );
 
 TYPED_TEST(DitherGeneratorTest, Int16Limits)
 {
-    static constexpr int32_t limit_max = (TestFixture::DitherGenerator::int16_bits == 0)
-                                             ? 0
-                                             : (0xffffffff >> (32 - TestFixture::DitherGenerator::int16_bits));
-    static constexpr int32_t limit_min =
-        (TestFixture::DitherGenerator::int16_bits == 0) ? 0 : (0xffffffff << TestFixture::DitherGenerator::int16_bits);
+    static constexpr auto int16_bits = TestFixture::generator::int16_bits;
+    static constexpr auto limit_max = static_cast<int32_t>((int16_bits == 0) ? 0 : ~(0xffffffff << int16_bits));
+    static constexpr auto limit_min = static_cast<int32_t>((int16_bits == 0) ? 0 : (0xffffffff << int16_bits));
     int32_t max = 0;
     int32_t min = 0;
     for (std::size_t i = 0; i < this->num_tests; ++i)
@@ -53,7 +53,7 @@ TYPED_TEST(DitherGeneratorTest, Int16Limits)
 
 TYPED_TEST(DitherGeneratorTest, Float32Limits)
 {
-    static constexpr float32_t limit_max = TestFixture::DitherGenerator::float32_max;
+    static constexpr float32_t limit_max = TestFixture::generator::float32_max;
     static constexpr float32_t limit_min = -limit_max;
     float32_t max = 0;
     float32_t min = 0;
