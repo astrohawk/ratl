@@ -41,8 +41,7 @@ inline uint32_t reverse_endianness(uint32_t input) noexcept
 
 inline uint24_t reverse_endianness(uint24_t input) noexcept
 {
-    return narrowing_cast<uint24_t>(
-        reverse_endianness(static_cast<uint32_t>(input) << 8));
+    return narrowing_cast<uint24_t>(reverse_endianness(static_cast<uint32_t>(input) << 8));
 }
 
 // host_to_network

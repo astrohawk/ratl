@@ -14,8 +14,8 @@
 // other includes
 #include <cstdint>
 #include <cstring>
-#include <type_traits>
 #include <limits>
+#include <type_traits>
 
 // defines
 #define RATL_INT24_DIGITS 23
