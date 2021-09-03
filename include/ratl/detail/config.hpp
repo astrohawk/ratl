@@ -33,6 +33,9 @@
 
 #if defined(__clang__)
 #    define RATL_CPP_COMPILER_CLANG
+#if defined(_MSC_VER)
+#    define RATL_CPP_COMPILER_BACKEND_MSVC
+#endif
 #elif defined(__GNUC__)
 #    define RATL_CPP_COMPILER_GCC
 #elif defined(_MSC_VER)
@@ -147,10 +150,10 @@
 #    define RATL_UNLIKELY(x) x
 #endif
 
-#if defined(RATL_CPP_COMPILER_MSVC)
+#if defined(RATL_CPP_COMPILER_MSVC) || defined(RATL_CPP_COMPILER_BACKEND_MSVC)
 #    if defined(RATL_CPP_VERSION_HAS_CPP20)
 #        define RATL_USE_INT24_MEMCPY_CONVERT
-#    elif defined(RATL_CPP_VERSION_HAS_CPP20)
+#    else
 #        define RATL_USE_INT24_MEMCPY_NARROWING_CAST
 #    endif
 #endif
