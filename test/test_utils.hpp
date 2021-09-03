@@ -51,18 +51,18 @@ using PossibleSampleValueTypeCombinations = ::testing::Types<
     SampleValueTypeCombination<float32_t, float32_t>>;
 
 using PossibleIntInputSampleValueTypeCombinations = ::testing::Types<
-    /*SampleValueTypeCombination<int16_t, int16_t>,
+    SampleValueTypeCombination<int16_t, int16_t>,
     SampleValueTypeCombination<int16_t, int24_t>,
     SampleValueTypeCombination<int16_t, int32_t>,
-    SampleValueTypeCombination<int16_t, float32_t>,*/
-    SampleValueTypeCombination<int24_t, int16_t>/*,
+    SampleValueTypeCombination<int16_t, float32_t>,
+    SampleValueTypeCombination<int24_t, int16_t>,
     SampleValueTypeCombination<int24_t, int24_t>,
     SampleValueTypeCombination<int24_t, int32_t>,
     SampleValueTypeCombination<int24_t, float32_t>,
     SampleValueTypeCombination<int32_t, int16_t>,
     SampleValueTypeCombination<int32_t, int24_t>,
     SampleValueTypeCombination<int32_t, int32_t>,
-    SampleValueTypeCombination<int32_t, float32_t>*/>;
+    SampleValueTypeCombination<int32_t, float32_t>>;
 
 template<template<typename> class ContainerType, typename SampleValueType, size_t Channels, size_t Frames>
 class TestBase : public ::testing::Test
