@@ -58,7 +58,7 @@ template<
     std::enable_if_t<std::is_convertible<Tp, std::int32_t>::value && sizeof(Tp) >= sizeof(std::int32_t), bool>>
 inline constexpr int24_t::int24_t(const Tp& other) noexcept : storage_{}
 {
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
+#if defined(RATL_USE_INT24_MEMCPY_CONVERT)
     if (std::is_constant_evaluated())
 #endif
     {
@@ -66,7 +66,7 @@ inline constexpr int24_t::int24_t(const Tp& other) noexcept : storage_{}
         storage_[1] = static_cast<uint8_t>(other >> 8);
         storage_[2] = static_cast<uint8_t>(other >> 16);
     }
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
+#if defined(RATL_USE_INT24_MEMCPY_CONVERT)
     else
     {
         std::memcpy(&storage_, &other, 3);
@@ -79,7 +79,7 @@ template<
     std::enable_if_t<std::is_convertible<Tp, std::int32_t>::value && sizeof(Tp) >= sizeof(std::int32_t), bool>>
 inline constexpr int24_t& int24_t::operator=(const Tp& other) noexcept
 {
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
+#if defined(RATL_USE_INT24_MEMCPY_CONVERT)
     if (std::is_constant_evaluated())
 #endif
     {
@@ -87,7 +87,7 @@ inline constexpr int24_t& int24_t::operator=(const Tp& other) noexcept
         storage_[1] = static_cast<uint8_t>(other >> 8);
         storage_[2] = static_cast<uint8_t>(other >> 16);
     }
-#if defined(RATL_CPP_VERSION_HAS_CPP20)
+#if defined(RATL_USE_INT24_MEMCPY_CONVERT)
     else
     {
         std::memcpy(&storage_, &other, 3);
