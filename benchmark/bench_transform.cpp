@@ -54,10 +54,7 @@ void benchTransform(benchmark::State& state)
     dither_generator dither_gen;
     for (auto _ : state)
     {
-        for (std::size_t i = 0; i < num_channels; ++i)
-        {
-            transform(input.channel(i).begin(), input.channel(i).end(), output.channel(i).begin(), dither_gen);
-        }
+        reference_transform(input.cbegin(), input.cend(), output.begin(), dither_gen);
     }
 }
 

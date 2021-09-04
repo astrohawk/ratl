@@ -177,17 +177,17 @@ public:
         {
             // Input and output don't have same number of channels, so must transform frame by frame
 
-            frame_transformer frame_transformer(dither_gen_);
+            auto transformer = frame_transformer(dither_gen_);
             auto min_channels = std::min(first.channels(), result.channels());
             return detail::apply_op(
                 first,
                 last,
                 result,
-                [&frame_transformer, min_channels](input_frame input, output_frame output)
+                [&transformer, min_channels](input_frame input, output_frame output)
                 {
                     auto input_begin = input.cbegin();
                     auto input_end = std::next(input_begin, min_channels);
-                    frame_transformer(input_begin, input_end, output.begin());
+                    transformer(input_begin, input_end, output.begin());
                 });
         }
     }
@@ -237,7 +237,7 @@ public:
     {
         if (first.frames() == result.frames())
         {
-            // Input and output have same number of channels, so blit samples
+            // Input and output have same number of frames, so blit samples
 
             return output_iterator(
                 transformer_impl(dither_gen_).transform(first.base(), last.base(), result.base()), result.frames());
@@ -246,19 +246,117 @@ public:
         {
             // Input and output don't have same number of frames, so must transform channel by channel
 
-            channel_transformer channel_transformer(dither_gen_);
+            auto transformer = channel_transformer(dither_gen_);
             auto min_frames = std::min(first.frames(), result.frames());
             return detail::apply_op(
                 first,
                 last,
                 result,
-                [&channel_transformer, min_frames](input_channel input, output_channel output)
+                [&transformer, min_frames](input_channel input, output_channel output)
                 {
                     auto input_begin = input.cbegin();
                     auto input_end = std::next(input_begin, min_frames);
-                    channel_transformer(input_begin, input_end, output.begin());
+                    transformer(input_begin, input_end, output.begin());
                 });
         }
+    }
+
+private:
+    std::reference_wrapper<DitherGenerator> dither_gen_;
+};
+
+// transformer for interleaved_iterator to noninterleaved_iterator
+
+template<
+    template<typename, typename, typename>
+    class SampleConverter,
+    typename InputSampleType,
+    typename InputSampleTraits,
+    typename OutputSampleType,
+    typename OutputSampleTraits,
+    typename DitherGenerator>
+class basic_transformer<
+    SampleConverter,
+    interleaved_iterator<InputSampleType, InputSampleTraits>,
+    noninterleaved_iterator<OutputSampleType, OutputSampleTraits>,
+    DitherGenerator>
+{
+    using input_iterator = interleaved_iterator<InputSampleType, InputSampleTraits>;
+    using output_iterator = noninterleaved_iterator<OutputSampleType, OutputSampleTraits>;
+
+    using input_channel = basic_channel_span<InputSampleType, InputSampleTraits>;
+    using output_channel = typename output_iterator::value_type;
+
+    using input_channel_iterator = typename input_channel::const_iterator;
+    using output_channel_iterator = typename output_channel::iterator;
+
+    using channel_transformer =
+        basic_transformer<SampleConverter, input_channel_iterator, output_channel_iterator, DitherGenerator>;
+
+public:
+    explicit basic_transformer(DitherGenerator& dither_gen) : dither_gen_(dither_gen) {}
+
+    inline output_iterator operator()(input_iterator first, input_iterator last, output_iterator result) const noexcept
+    {
+        auto transformer = channel_transformer(dither_gen_);
+        auto channels = first.channels();
+        auto frames = std::min(static_cast<std::size_t>(std::distance(first, last)), result.frames());
+        auto end_channel_base = first.base() + channels;
+        for (auto channel_base = first.base(); channel_base < end_channel_base; ++channel_base, (void)++result)
+        {
+            auto input = input_channel(channel_base, frames, channels);
+            transformer(input.begin(), input.end(), result->begin());
+        }
+        return result;
+    }
+
+private:
+    std::reference_wrapper<DitherGenerator> dither_gen_;
+};
+
+// transformer for noninterleaved_iterator to interleaved_iterator
+
+template<
+    template<typename, typename, typename>
+    class SampleConverter,
+    typename InputSampleType,
+    typename InputSampleTraits,
+    typename OutputSampleType,
+    typename OutputSampleTraits,
+    typename DitherGenerator>
+class basic_transformer<
+    SampleConverter,
+    noninterleaved_iterator<InputSampleType, InputSampleTraits>,
+    interleaved_iterator<OutputSampleType, OutputSampleTraits>,
+    DitherGenerator>
+{
+    using input_iterator = noninterleaved_iterator<InputSampleType, InputSampleTraits>;
+    using output_iterator = interleaved_iterator<OutputSampleType, OutputSampleTraits>;
+
+    using input_frame = basic_frame_span<InputSampleType, InputSampleTraits>;
+    using output_frame = typename output_iterator::value_type;
+
+    using input_frame_iterator = typename input_frame::const_iterator;
+    using output_frame_iterator = typename output_frame::iterator;
+
+    using frame_transformer =
+        basic_transformer<SampleConverter, input_frame_iterator, output_frame_iterator, DitherGenerator>;
+
+public:
+    explicit basic_transformer(DitherGenerator& dither_gen) : dither_gen_(dither_gen) {}
+
+    inline output_iterator operator()(input_iterator first, input_iterator last, output_iterator result) const noexcept
+    {
+        auto transformer = frame_transformer(dither_gen_);
+        auto channels = std::min(static_cast<std::size_t>(std::distance(first, last)), result.channels());
+        auto frames = first.frames();
+        auto end_frame_base = first.base() + frames;
+        for (auto frame_base = first.base(); frame_base < end_frame_base; ++frame_base, (void)++result)
+        {
+            auto input = input_frame(frame_base, channels, frames);
+            transformer(input.begin(), input.end(), result->begin());
+        }
+        return result;
     }
 
 private:
