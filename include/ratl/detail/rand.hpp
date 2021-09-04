@@ -21,7 +21,7 @@ namespace detail
 class linear_congruential_generator
 {
 public:
-    explicit constexpr linear_congruential_generator(uint32_t seed) noexcept : state_(seed) {}
+    explicit constexpr linear_congruential_generator(std::uint32_t seed) noexcept : state_(seed) {}
 
     ~linear_congruential_generator() = default;
 
@@ -33,7 +33,7 @@ public:
 
     linear_congruential_generator& operator=(linear_congruential_generator&&) noexcept = default;
 
-    inline constexpr uint32_t operator()() noexcept
+    inline constexpr std::uint32_t operator()() noexcept
     {
         state_ = (multiplier * state_) + increment;
         return state_;
@@ -45,10 +45,10 @@ public:
     }
 
 private:
-    static constexpr uint32_t multiplier = 0x0bb38435;
-    static constexpr uint32_t increment = 0x3619636b;
-    static constexpr uint32_t jump_mask = 0x8739cbf1;
-    uint32_t state_;
+    static constexpr std::uint32_t multiplier = 0x0bb38435;
+    static constexpr std::uint32_t increment = 0x3619636b;
+    static constexpr std::uint32_t jump_mask = 0x8739cbf1;
+    std::uint32_t state_;
 };
 
 } // namespace detail

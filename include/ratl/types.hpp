@@ -18,7 +18,9 @@
 namespace ratl
 {
 using int16_t = std::int16_t;
+using uint16_t = std::uint16_t;
 using int32_t = std::int32_t;
+using uint32_t = std::uint32_t;
 using float32_t = float;
 } // namespace ratl
 

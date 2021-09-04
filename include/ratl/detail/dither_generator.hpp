@@ -57,7 +57,7 @@ public:
     }
 
 private:
-    static constexpr uint32_t default_seed = 0x1942da21;
+    static constexpr std::uint32_t default_seed = 0x1942da21;
     static constexpr std::size_t int16_shift = (32 - int16_bits);
     static constexpr std::size_t float32_shift = 1;
     static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
@@ -91,7 +91,7 @@ private:
         return high_pass;
     }
 
-    static constexpr uint32_t default_seed = 0xac9ad704;
+    static constexpr std::uint32_t default_seed = 0xac9ad704;
     static constexpr std::size_t initial_shift = 2;
     static constexpr std::size_t int16_shift = 32 - int16_bits - (initial_shift - 1);
     static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;

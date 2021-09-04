@@ -27,7 +27,7 @@ class batch_linear_congruential_generator
     using batch_type = xsimd::batch<std::uint32_t, batch_size>;
 
 public:
-    explicit batch_linear_congruential_generator(uint32_t seed) noexcept :
+    explicit batch_linear_congruential_generator(std::uint32_t seed) noexcept :
         state_(make_batch_state(seed, std::make_index_sequence<batch_size>()))
     {
     }
@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    static inline uint32_t make_state(linear_congruential_generator& gen, std::size_t)
+    static inline std::uint32_t make_state(linear_congruential_generator& gen, std::size_t)
     {
         auto state = gen();
         gen.jump();
@@ -62,7 +62,7 @@ private:
     }
 
     template<std::size_t... I>
-    static inline batch_type make_batch_state(uint32_t seed, std::index_sequence<I...>)
+    static inline batch_type make_batch_state(std::uint32_t seed, std::index_sequence<I...>)
     {
         linear_congruential_generator gen(seed);
         return batch_type(make_state(gen, I)...);
@@ -73,15 +73,15 @@ private:
     // across the different translation units, therefore we are forced to do it this way. Once we drop support for C++14
     // we can change these to be static constexpr member variables which are implicitly inline and therefore won't
     // result in multiple definitions.
-    inline static constexpr uint32_t multiplier() noexcept
+    static constexpr std::uint32_t multiplier() noexcept
     {
         return 0x0bb38435;
     }
-    inline static constexpr uint32_t increment() noexcept
+    static constexpr std::uint32_t increment() noexcept
     {
         return 0x3619636b;
     }
-    inline static constexpr uint32_t jump_mask() noexcept
+    static constexpr std::uint32_t jump_mask() noexcept
     {
         return 0x8739cbf1;
     }

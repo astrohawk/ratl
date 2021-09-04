@@ -61,20 +61,20 @@ private:
     // across the different translation units, therefore we are forced to do it this way. Once we drop support for C++14
     // we can change these to be static constexpr member variables which are implicitly inline and therefore won't
     // result in multiple definitions.
-    inline static constexpr std::size_t int16_shift() noexcept
+    static constexpr std::size_t int16_shift() noexcept
     {
         return 32 - int16_bits;
     }
-    inline static constexpr std::size_t float32_shift() noexcept
+    static constexpr std::size_t float32_shift() noexcept
     {
         return 1;
     }
-    inline static constexpr float32_t float32_scaler() noexcept
+    static constexpr float32_t float32_scaler() noexcept
     {
         return detail::float_convert_traits<int32_t>::divisor;
     }
 
-    static constexpr uint32_t default_seed = 0xfad46483;
+    static constexpr std::uint32_t default_seed = 0xfad46483;
 
     detail::batch_linear_congruential_generator rng_{default_seed};
 };
@@ -107,20 +107,20 @@ private:
     // across the different translation units, therefore we are forced to do it this way. Once we drop support for C++14
     // we can change these to be static constexpr member variables which are implicitly inline and therefore won't
     // result in multiple definitions.
-    inline static constexpr std::size_t initial_shift() noexcept
+    static constexpr std::size_t initial_shift() noexcept
     {
         return 2;
     }
-    inline static constexpr std::size_t int16_shift() noexcept
+    static constexpr std::size_t int16_shift() noexcept
     {
         return 32 - int16_bits - (initial_shift() - 1);
     }
-    inline static constexpr float32_t float32_scaler() noexcept
+    static constexpr float32_t float32_scaler() noexcept
     {
         return detail::float_convert_traits<int32_t>::divisor;
     }
 
-    static constexpr uint32_t default_seed = 0x8914c30c;
+    static constexpr std::uint32_t default_seed = 0x8914c30c;
 
     detail::batch_linear_congruential_generator rng_{default_seed};
     detail::batch_sample_value_type_t<int32_t> previous_{};
