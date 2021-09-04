@@ -20,7 +20,7 @@ namespace detail
 template<typename SampleValueType>
 struct float_convert_traits
 {
-    static constexpr float32_t multiplier = -static_cast<float32_t>(sample_limits<SampleValueType>::min);
+    static constexpr float32_t multiplier = -static_cast<float32_t>(sample_limits<SampleValueType>::min());
     static constexpr float32_t divisor = 1.f / multiplier;
 };
 

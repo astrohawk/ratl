@@ -44,71 +44,87 @@ class batch_triangular_dither_generator : public triangular_dither_generator
 public:
     inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift) +
-               (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift);
+        return (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift()) +
+               (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift());
     }
 
     inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
     {
-        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift) +
-                       (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift);
-        return xsimd::to_float(current) * float32_scaler;
+        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift()) +
+                       (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift());
+        return xsimd::to_float(current) * float32_scaler();
     }
 
 private:
+    // We cannot use static constexpr members here as they are ODR-used and C++14 requires a definition for ODR-used
+    // static constexpr members. Unfortunately any definition here in the header would result in multiple definitions
+    // across the different translation units, therefore we are forced to do it this way. Once we drop support for C++14
+    // we can change these to be static constexpr member variables which are implicitly inline and therefore won't
+    // result in multiple definitions.
+    inline static constexpr std::size_t int16_shift() noexcept
+    {
+        return 32 - int16_bits;
+    }
+    inline static constexpr std::size_t float32_shift() noexcept
+    {
+        return 1;
+    }
+    inline static constexpr float32_t float32_scaler() noexcept
+    {
+        return detail::float_convert_traits<int32_t>::divisor;
+    }
+
     static constexpr uint32_t default_seed = 0xfad46483;
-    static constexpr std::size_t int16_shift = (32 - int16_bits);
-    static constexpr std::size_t float32_shift = 1;
-    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
 
     detail::batch_linear_congruential_generator rng_{default_seed};
 };
-
-#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
-constexpr uint32_t batch_triangular_dither_generator::default_seed;
-constexpr std::size_t batch_triangular_dither_generator::int16_shift;
-constexpr std::size_t batch_triangular_dither_generator::float32_shift;
-constexpr float32_t batch_triangular_dither_generator::float32_scaler;
-#    endif
 
 class batch_shaped_dither_generator : public shaped_dither_generator
 {
 public:
     inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return generate_high_pass() >> int16_shift;
+        return generate_high_pass() >> int16_shift();
     }
 
     inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
     {
-        return xsimd::to_float(generate_high_pass()) * float32_scaler;
+        return xsimd::to_float(generate_high_pass()) * float32_scaler();
     }
 
 private:
     inline detail::batch_sample_value_type_t<int32_t> generate_high_pass() noexcept
     {
-        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift) +
-                       (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift);
+        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift()) +
+                       (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift());
         auto high_pass = current - previous_;
         previous_ = current;
         return high_pass;
     }
 
+    // We cannot use static constexpr members here as they are ODR-used and C++14 requires a definition for ODR-used
+    // static constexpr members. Unfortunately any definition here in the header would result in multiple definitions
+    // across the different translation units, therefore we are forced to do it this way. Once we drop support for C++14
+    // we can change these to be static constexpr member variables which are implicitly inline and therefore won't
+    // result in multiple definitions.
+    inline static constexpr std::size_t initial_shift() noexcept
+    {
+        return 2;
+    }
+    inline static constexpr std::size_t int16_shift() noexcept
+    {
+        return 32 - int16_bits - (initial_shift() - 1);
+    }
+    inline static constexpr float32_t float32_scaler() noexcept
+    {
+        return detail::float_convert_traits<int32_t>::divisor;
+    }
+
     static constexpr uint32_t default_seed = 0x8914c30c;
-    static constexpr std::size_t initial_shift = 2;
-    static constexpr std::size_t int16_shift = 32 - int16_bits - (initial_shift - 1);
-    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
 
     detail::batch_linear_congruential_generator rng_{default_seed};
     detail::batch_sample_value_type_t<int32_t> previous_{};
 };
-
-#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
-constexpr uint32_t batch_shaped_dither_generator::default_seed;
-constexpr std::size_t batch_shaped_dither_generator::initial_shift;
-constexpr std::size_t batch_shaped_dither_generator::int16_shift;
-constexpr float32_t batch_shaped_dither_generator::float32_scaler;
-#    endif
 
 #else
 

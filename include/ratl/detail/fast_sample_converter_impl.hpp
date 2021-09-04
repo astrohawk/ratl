@@ -122,9 +122,9 @@ struct fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, Di
 {
 private:
     static constexpr float32_t positive_scaler =
-        static_cast<float32_t>(sample_limits<SampleValueType>::max) - DitherGenerator::float32_max;
+        static_cast<float32_t>(sample_limits<SampleValueType>::max()) - DitherGenerator::float32_max;
     static constexpr float32_t negative_scaler =
-        -static_cast<float32_t>(sample_limits<SampleValueType>::min) - DitherGenerator::float32_max;
+        -static_cast<float32_t>(sample_limits<SampleValueType>::min()) - DitherGenerator::float32_max;
 
 public:
     static inline SampleValueType convert(float32_t input, DitherGenerator& dither_gen) noexcept

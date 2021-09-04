@@ -37,13 +37,13 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputBatchConvert)
     using output_sample_type = sample<output_sample_value_type>;
     using output_batch_sample_type = detail::batch_sample_value_type_t<output_sample_value_type>;
     using test_dither_generator = detail::batch_null_dither_generator;
-    for (std::int64_t i = input_sample_limits::min; i <= input_sample_limits::max; i += detail::batch_size)
+    for (std::int64_t i = input_sample_limits::min(); i <= input_sample_limits::max(); i += detail::batch_size)
     {
         input_batch_sample_type batch_input{};
         output_batch_sample_type batch_refrence_output{};
         for (std::int64_t j = i; j < std::min(
                                          static_cast<std::int64_t>(i + detail::batch_size),
-                                         static_cast<std::int64_t>(input_sample_limits::max) + 1);
+                                         static_cast<std::int64_t>(input_sample_limits::max()) + 1);
              ++j)
         {
             auto sample_value = static_cast<input_sample_value_type>(j);
@@ -74,13 +74,13 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputNetworkOutputBatchConvert)
     using output_sample_type = network_sample<output_sample_value_type>;
     using output_batch_sample = detail::batch_network_sample_value_type_t<output_sample_value_type>;
     using test_dither_generator = detail::batch_null_dither_generator;
-    for (std::int64_t i = input_sample_limits::min; i <= input_sample_limits::max; i += detail::batch_size)
+    for (std::int64_t i = input_sample_limits::min(); i <= input_sample_limits::max(); i += detail::batch_size)
     {
         input_batch_sample batch_input{};
         output_batch_sample batch_refrence_output{};
         for (std::int64_t j = i; j < std::min(
                                          static_cast<std::int64_t>(i + detail::batch_size),
-                                         static_cast<std::int64_t>(input_sample_limits::max) + 1);
+                                         static_cast<std::int64_t>(input_sample_limits::max()) + 1);
              ++j)
         {
             auto sample_value = static_cast<input_sample_value_type>(j);
@@ -115,13 +115,13 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputNetworkInputBatchConvert)
     using output_sample_type = sample<output_sample_value_type>;
     using output_batch_sample = detail::batch_sample_value_type_t<output_sample_value_type>;
     using test_dither_generator = detail::batch_null_dither_generator;
-    for (std::int64_t i = input_sample_limits::min; i <= input_sample_limits::max; i += detail::batch_size)
+    for (std::int64_t i = input_sample_limits::min(); i <= input_sample_limits::max(); i += detail::batch_size)
     {
         input_batch_sample batch_input{};
         output_batch_sample batch_refrence_output{};
         for (std::int64_t j = i; j < std::min(
                                          static_cast<std::int64_t>(i + detail::batch_size),
-                                         static_cast<std::int64_t>(input_sample_limits::max) + 1);
+                                         static_cast<std::int64_t>(input_sample_limits::max()) + 1);
              ++j)
         {
             auto sample_value = detail::sample_to_network_sample(static_cast<input_sample_value_type>(j));
@@ -160,13 +160,13 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputConvert)
     using output_batch_sample = detail::batch_sample_value_type_t<output_sample_value_type>;
     using int32_sample_limits = sample_limits<int32_t>;
     using test_dither_generator = detail::batch_null_dither_generator;
-    for (std::int64_t i = int32_sample_limits::min; i <= int32_sample_limits::max; i += detail::batch_size)
+    for (std::int64_t i = int32_sample_limits::min(); i <= int32_sample_limits::max(); i += detail::batch_size)
     {
         input_batch_sample batch_input{};
         output_batch_sample batch_refrence_output{};
         for (std::int64_t j = i; j < std::min(
                                          static_cast<std::int64_t>(i + detail::batch_size),
-                                         static_cast<std::int64_t>(int32_sample_limits::max) + 1);
+                                         static_cast<std::int64_t>(int32_sample_limits::max()) + 1);
              ++j)
         {
             auto sample_value = reference_convert<input_sample_type>(sample<int32_t>(static_cast<int32_t>(j))).get();
@@ -196,13 +196,13 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputNetworkOutputConvert)
     using output_batch_sample = detail::batch_network_sample_value_type_t<output_sample_value_type>;
     using int32_sample_limits = sample_limits<int32_t>;
     using test_dither_generator = detail::batch_null_dither_generator;
-    for (std::int64_t i = int32_sample_limits::min; i <= int32_sample_limits::max; i += detail::batch_size)
+    for (std::int64_t i = int32_sample_limits::min(); i <= int32_sample_limits::max(); i += detail::batch_size)
     {
         input_batch_sample batch_input{};
         output_batch_sample batch_refrence_output{};
         for (std::int64_t j = i; j < std::min(
                                          static_cast<std::int64_t>(i + detail::batch_size),
-                                         static_cast<std::int64_t>(int32_sample_limits::max) + 1);
+                                         static_cast<std::int64_t>(int32_sample_limits::max()) + 1);
              ++j)
         {
             auto sample_value = reference_convert<input_sample_type>(sample<int32_t>(static_cast<int32_t>(j))).get();
@@ -236,13 +236,13 @@ TYPED_TEST(FloatInputBatchConvertSameAsConvert, FloatInputNetworkInputConvert)
     using output_batch_sample = detail::batch_sample_value_type_t<output_sample_value_type>;
     using int32_sample_limits = sample_limits<int32_t>;
     using test_dither_generator = detail::batch_null_dither_generator;
-    for (std::int64_t i = int32_sample_limits::min; i <= int32_sample_limits::max; i += detail::batch_size)
+    for (std::int64_t i = int32_sample_limits::min(); i <= int32_sample_limits::max(); i += detail::batch_size)
     {
         input_batch_sample batch_input{};
         output_batch_sample batch_refrence_output{};
         for (std::int64_t j = i; j < std::min(
                                          static_cast<std::int64_t>(i + detail::batch_size),
-                                         static_cast<std::int64_t>(int32_sample_limits::max) + 1);
+                                         static_cast<std::int64_t>(int32_sample_limits::max()) + 1);
              ++j)
         {
             auto sample_value = detail::sample_to_network_sample(

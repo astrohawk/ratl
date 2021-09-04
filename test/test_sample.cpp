@@ -80,42 +80,42 @@ static_assert(
 
 TEST(SampleLimits, Int16Min)
 {
-    EXPECT_EQ(ratl::sample_limits<int16_t>::min, static_cast<int16_t>(-32768));
+    EXPECT_EQ(ratl::sample_limits<int16_t>::min(), static_cast<int16_t>(-32768));
 }
 
 TEST(SampleLimits, Int16Max)
 {
-    EXPECT_EQ(ratl::sample_limits<int16_t>::max, static_cast<int16_t>(32767));
+    EXPECT_EQ(ratl::sample_limits<int16_t>::max(), static_cast<int16_t>(32767));
 }
 
 TEST(SampleLimits, Int24Min)
 {
-    EXPECT_EQ(ratl::sample_limits<int24_t>::min, static_cast<int24_t>(-8388608));
+    EXPECT_EQ(ratl::sample_limits<int24_t>::min(), static_cast<int24_t>(-8388608));
 }
 
 TEST(SampleLimits, Int24Max)
 {
-    EXPECT_EQ(ratl::sample_limits<int24_t>::max, static_cast<int24_t>(8388607));
+    EXPECT_EQ(ratl::sample_limits<int24_t>::max(), static_cast<int24_t>(8388607));
 }
 
 TEST(SampleLimits, Int32Min)
 {
-    EXPECT_EQ(ratl::sample_limits<int32_t>::min, static_cast<int32_t>(-2147483647 - 1));
+    EXPECT_EQ(ratl::sample_limits<int32_t>::min(), static_cast<int32_t>(-2147483647 - 1));
 }
 
 TEST(SampleLimits, Int32Max)
 {
-    EXPECT_EQ(ratl::sample_limits<int32_t>::max, static_cast<int32_t>(2147483647));
+    EXPECT_EQ(ratl::sample_limits<int32_t>::max(), static_cast<int32_t>(2147483647));
 }
 
 TEST(SampleLimits, Float32Min)
 {
-    EXPECT_EQ(ratl::sample_limits<float32_t>::min, static_cast<float32_t>(-1));
+    EXPECT_EQ(ratl::sample_limits<float32_t>::min(), static_cast<float32_t>(-1));
 }
 
 TEST(SampleLimits, Float32Max)
 {
-    EXPECT_EQ(ratl::sample_limits<float32_t>::max, static_cast<float32_t>(1));
+    EXPECT_EQ(ratl::sample_limits<float32_t>::max(), static_cast<float32_t>(1));
 }
 
 // sample_int16

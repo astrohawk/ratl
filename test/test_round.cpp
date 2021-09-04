@@ -15,13 +15,13 @@ namespace test
 template<typename SampleValueType, typename Converter>
 SampleValueType convert(ratl::float32_t sample)
 {
-    if (RATL_UNLIKELY(sample >= ratl::sample_limits<ratl::float32_t>::max))
+    if (RATL_UNLIKELY(sample >= ratl::sample_limits<ratl::float32_t>::max()))
     {
-        return ratl::sample_limits<SampleValueType>::max;
+        return ratl::sample_limits<SampleValueType>::max();
     }
-    if (RATL_UNLIKELY(sample < ratl::sample_limits<ratl::float32_t>::min))
+    if (RATL_UNLIKELY(sample < ratl::sample_limits<ratl::float32_t>::min()))
     {
-        return ratl::sample_limits<SampleValueType>::min;
+        return ratl::sample_limits<SampleValueType>::min();
     }
     return static_cast<SampleValueType>(
         Converter::convert(sample * detail::float_convert_traits<SampleValueType>::multiplier));
@@ -58,13 +58,13 @@ TYPED_TEST(TestRound, MagicEqualToRoundHalfUp)
 
     static constexpr auto float_min = static_cast<float32_t>(1e-10f);
 
-    for (float32_t input = ratl::sample_limits<float32_t>::max; input > float_min; input = std::nextafter(input, 0.f))
+    for (float32_t input = ratl::sample_limits<float32_t>::max(); input > float_min; input = std::nextafter(input, 0.f))
     {
         auto reference_output = static_cast<std::int64_t>(convert<sample_type, RoundHalfUpConverter>(input));
         auto test_output = static_cast<std::int64_t>(convert<sample_type, MagicConverter>(input));
         EXPECT_EQ(test_output, reference_output);
     }
-    for (float32_t input = ratl::sample_limits<float32_t>::min; input < -float_min; input = std::nextafter(input, 0.f))
+    for (float32_t input = ratl::sample_limits<float32_t>::min(); input < -float_min; input = std::nextafter(input, 0.f))
     {
         auto reference_output = static_cast<std::int64_t>(convert<sample_type, RoundHalfUpConverter>(input));
         auto test_output = static_cast<std::int64_t>(convert<sample_type, MagicConverter>(input));

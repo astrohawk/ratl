@@ -33,8 +33,8 @@ static NetworkSampleType generateRandom()
         std::random_device random_device_;
         std::mt19937 random_generator_{random_device_()};
         std::uniform_int_distribution<uint32_t> distribution_{
-            static_cast<uint32_t>(sample_limits<sample_type>::min),
-            static_cast<uint32_t>(sample_limits<sample_type>::max)};
+            static_cast<uint32_t>(sample_limits<sample_type>::min()),
+            static_cast<uint32_t>(sample_limits<sample_type>::max())};
     } random_state;
     return random_state.generate();
 }

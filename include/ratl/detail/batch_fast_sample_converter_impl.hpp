@@ -161,9 +161,9 @@ struct base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleVal
 {
 private:
     static constexpr float32_t positive_scaler =
-        static_cast<float32_t>(sample_limits<SampleValueType>::max) - DitherGenerator::float32_max;
+        static_cast<float32_t>(sample_limits<SampleValueType>::max()) - DitherGenerator::float32_max;
     static constexpr float32_t negative_scaler =
-        -static_cast<float32_t>(sample_limits<SampleValueType>::min) - DitherGenerator::float32_max;
+        -static_cast<float32_t>(sample_limits<SampleValueType>::min()) - DitherGenerator::float32_max;
 
 public:
     static inline batch_sample_value_type_t<SampleValueType> batch_convert(

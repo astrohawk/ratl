@@ -66,7 +66,7 @@ template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x007FFF80);
-    static constexpr int16_t sample_out_max = sample_limits<int16_t>::max;
+    static constexpr int16_t sample_out_max = sample_limits<int16_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x80);
     static constexpr std::size_t total_shift = 8;
     static constexpr std::size_t pre_dither_shift =
@@ -106,7 +106,7 @@ template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFF8000);
-    static constexpr int16_t sample_out_max = sample_limits<int16_t>::max;
+    static constexpr int16_t sample_out_max = sample_limits<int16_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x8000);
     static constexpr std::size_t total_shift = 16;
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
@@ -133,7 +133,7 @@ template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
 {
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFFFF80);
-    static constexpr int24_t sample_out_max = sample_limits<int24_t>::max;
+    static constexpr int24_t sample_out_max = sample_limits<int24_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x80);
 
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
@@ -170,11 +170,11 @@ struct reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType
 {
 private:
     static constexpr float32_t sample_in_max =
-        static_cast<float32_t>(sample_limits<SampleValueType>::max) * float_convert_traits<SampleValueType>::divisor;
-    static constexpr SampleValueType sample_out_max = sample_limits<SampleValueType>::max;
+        static_cast<float32_t>(sample_limits<SampleValueType>::max()) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr SampleValueType sample_out_max = sample_limits<SampleValueType>::max();
     static constexpr float32_t sample_in_min =
-        static_cast<float32_t>(sample_limits<SampleValueType>::min) * float_convert_traits<SampleValueType>::divisor;
-    static constexpr SampleValueType sample_out_min = sample_limits<SampleValueType>::min;
+        static_cast<float32_t>(sample_limits<SampleValueType>::min()) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr SampleValueType sample_out_min = sample_limits<SampleValueType>::min();
     static constexpr float32_t scaler =
         float_convert_traits<SampleValueType>::multiplier - DitherGenerator::float32_max;
 

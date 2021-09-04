@@ -390,19 +390,19 @@ protected:
     struct reference_converter
     {
         const float32_t sample_abs_max_ = static_cast<float32_t>(std::max(
-            std::abs(sample_limits<output_sample_value_type>::max),
-            std::abs(sample_limits<output_sample_value_type>::min)));
+            std::abs(sample_limits<output_sample_value_type>::max()),
+            std::abs(sample_limits<output_sample_value_type>::min())));
 
         output_sample_type operator()(sample<float32_t> input) const noexcept
         {
             float32_t scaled = input.get() * sample_abs_max_;
-            if (scaled >= static_cast<float32_t>(sample_limits<output_sample_value_type>::max))
+            if (scaled >= static_cast<float32_t>(sample_limits<output_sample_value_type>::max()))
             {
-                return output_sample_type(sample_limits<output_sample_value_type>::max);
+                return output_sample_type(sample_limits<output_sample_value_type>::max());
             }
-            if (scaled < static_cast<float32_t>(sample_limits<output_sample_value_type>::min))
+            if (scaled < static_cast<float32_t>(sample_limits<output_sample_value_type>::min()))
             {
-                return output_sample_type(sample_limits<output_sample_value_type>::min);
+                return output_sample_type(sample_limits<output_sample_value_type>::min());
             }
             return output_sample_type(static_cast<output_sample_value_type>(std::lrint(scaled)));
         }
@@ -453,7 +453,7 @@ TYPED_TEST(ConvertFloat32Transparent, Typical)
     using sample_type = sample<sample_value_type>;
     using sample_limits = sample_limits<sample_value_type>;
 
-    for (std::int64_t i = sample_limits::min; i <= sample_limits::max; ++i)
+    for (std::int64_t i = sample_limits::min(); i <= sample_limits::max(); ++i)
     {
         auto input = sample_type(static_cast<sample_value_type>(i));
         auto temp_float = reference_convert<sample<float32_t>>(input);
@@ -509,13 +509,13 @@ TYPED_TEST(ConvertIntInputNegativeTransparent, IntInputConvert)
     using output_sample_type = sample<output_sample_value_type>;
     using output_sample_limits = sample_limits<output_sample_value_type>;
 
-    for (std::int64_t i = 0; i < static_cast<std::int64_t>(input_sample_limits::max); ++i)
+    for (std::int64_t i = 0; i < static_cast<std::int64_t>(input_sample_limits::max()); ++i)
     {
         auto positive_input = input_sample_type(static_cast<input_sample_value_type>(i));
         auto positive_output = reference_convert<output_sample_type>(positive_input);
         auto negative_input = input_sample_type(static_cast<input_sample_value_type>(-i));
         auto negative_output = reference_convert<output_sample_type>(negative_input);
-        if (negative_output.get() != output_sample_limits::min)
+        if (negative_output.get() != output_sample_limits::min())
         {
             EXPECT_EQ(positive_output.get(), -negative_output.get());
         }
@@ -540,14 +540,14 @@ TYPED_TEST(ConvertFloatInputNegativeTransparent, FloatInputConvert)
     using output_sample_type = sample<output_sample_value_type>;
     using output_sample_limits = sample_limits<output_sample_value_type>;
     using int32_sample_limits = sample_limits<int32_t>;
-    for (std::int64_t i = 0; i < static_cast<std::int64_t>(int32_sample_limits::max); ++i)
+    for (std::int64_t i = 0; i < static_cast<std::int64_t>(int32_sample_limits::max()); ++i)
     {
         auto sample_value = reference_convert<input_sample_type>(sample<int32_t>(static_cast<int32_t>(i))).get();
         auto positive_input = input_sample_type(sample_value);
         auto positive_output = reference_convert<output_sample_type>(positive_input);
         auto negative_input = input_sample_type(-sample_value);
         auto negative_output = reference_convert<output_sample_type>(negative_input);
-        if (negative_output.get() != output_sample_limits::min)
+        if (negative_output.get() != output_sample_limits::min())
         {
             EXPECT_EQ(positive_output.get(), -negative_output.get());
         }

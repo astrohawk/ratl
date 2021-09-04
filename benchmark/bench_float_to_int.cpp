@@ -35,7 +35,7 @@ static float32_t generateRandom()
         std::random_device random_device_;
         std::mt19937 random_generator_{random_device_()};
         std::uniform_real_distribution<float32_t> distribution_{
-            sample_limits<float32_t>::min, sample_limits<float32_t>::max};
+            sample_limits<float32_t>::min(), sample_limits<float32_t>::max()};
     } random_state;
     return random_state.generate();
 }
@@ -63,13 +63,13 @@ static void benchFloatToInt(benchmark::State& state)
             output.begin(),
             [](float32_t sample)
             {
-                if (RATL_UNLIKELY(sample >= sample_limits<float32_t>::max))
+                if (RATL_UNLIKELY(sample >= sample_limits<float32_t>::max()))
                 {
-                    return sample_limits<int32_t>::max;
+                    return sample_limits<int32_t>::max();
                 }
-                if (RATL_UNLIKELY(sample < sample_limits<float32_t>::min))
+                if (RATL_UNLIKELY(sample < sample_limits<float32_t>::min()))
                 {
-                    return sample_limits<int32_t>::min;
+                    return sample_limits<int32_t>::min();
                 }
                 return Converter::template convert<detail::float_convert_traits<int32_t>>(sample);
             }));
@@ -78,11 +78,11 @@ static void benchFloatToInt(benchmark::State& state)
 
 struct PositiveAsymmetricFloatConvertTraits
 {
-    static constexpr float32_t multiplier = static_cast<float32_t>(sample_limits<int32_t>::max);
+    static constexpr float32_t multiplier = static_cast<float32_t>(sample_limits<int32_t>::max());
 };
 struct NegativeAsymmetricFloatConvertTraits
 {
-    static constexpr float32_t multiplier = -static_cast<float32_t>(sample_limits<int32_t>::min);
+    static constexpr float32_t multiplier = -static_cast<float32_t>(sample_limits<int32_t>::min());
 };
 
 template<typename Converter>

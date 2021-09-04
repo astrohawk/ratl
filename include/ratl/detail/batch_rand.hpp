@@ -44,13 +44,13 @@ public:
 
     inline batch_type operator()() noexcept
     {
-        state_ = (multiplier * state_) + increment;
+        state_ = (multiplier() * state_) + increment();
         return state_;
     }
 
     inline void jump() noexcept
     {
-        state_ = (*this)() ^ jump_mask;
+        state_ = (*this)() ^ jump_mask();
     }
 
 private:
@@ -68,17 +68,26 @@ private:
         return batch_type(make_state(gen, I)...);
     }
 
-    static constexpr uint32_t multiplier = 0x0bb38435;
-    static constexpr uint32_t increment = 0x3619636b;
-    static constexpr uint32_t jump_mask = 0x8739cbf1;
+    // We cannot use static constexpr members here as they are ODR-used and C++14 requires a definition for ODR-used
+    // static constexpr members. Unfortunately any definition here in the header would result in multiple definitions
+    // across the different translation units, therefore we are forced to do it this way. Once we drop support for C++14
+    // we can change these to be static constexpr member variables which are implicitly inline and therefore won't
+    // result in multiple definitions.
+    inline static constexpr uint32_t multiplier() noexcept
+    {
+        return 0x0bb38435;
+    }
+    inline static constexpr uint32_t increment() noexcept
+    {
+        return 0x3619636b;
+    }
+    inline static constexpr uint32_t jump_mask() noexcept
+    {
+        return 0x8739cbf1;
+    }
+
     batch_type state_;
 };
-
-#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
-constexpr uint32_t batch_linear_congruential_generator::multiplier;
-constexpr uint32_t batch_linear_congruential_generator::increment;
-constexpr uint32_t batch_linear_congruential_generator::jump_mask;
-#    endif
 
 } // namespace detail
 } // namespace ratl

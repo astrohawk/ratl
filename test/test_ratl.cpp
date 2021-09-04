@@ -51,14 +51,14 @@ template<typename SampleValueType, std::enable_if_t<!std::is_floating_point<samp
 std::uniform_int_distribution<int32_t> generate_distribution()
 {
     using sample_limits = ratl::sample_limits<sample_type>;
-    return std::uniform_int_distribution<int32_t>(sample_limits::min, sample_limits::max);
+    return std::uniform_int_distribution<int32_t>(sample_limits::min(), sample_limits::max());
 }
 
 template<typename SampleValueType, std::enable_if_t<std::is_floating_point<sample_type>::value, bool> = true>
 std::uniform_real_distribution<float32_t> generate_distribution()
 {
     using sample_limits = ratl::sample_limits<sample_type>;
-    return std::uniform_real_distribution<float32_t>(sample_limits::min, sample_limits::max);
+    return std::uniform_real_distribution<float32_t>(sample_limits::min(), sample_limits::max());
 }
 
 template<typename SampleType>
