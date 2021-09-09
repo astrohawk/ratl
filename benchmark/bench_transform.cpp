@@ -33,10 +33,7 @@ InputType generateRandomInput(std::size_t num_channels, std::size_t num_frames)
     }
 
     InputType input(num_channels, num_frames);
-    for (std::size_t i = 0; i < num_channels; ++i)
-    {
-        transform(float_container.channel(i).begin(), float_container.channel(i).end(), input.channel(i).begin());
-    }
+    transform(float_container.begin(), float_container.end(), input.begin());
     return input;
 }
 
