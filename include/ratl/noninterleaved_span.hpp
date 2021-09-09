@@ -285,37 +285,6 @@ inline typename basic_noninterleaved_span<SampleType, SampleTraits>::const_refer
     return (*this)[n];
 }
 
-template<
-    typename SampleTypeA,
-    typename SampleTraitsA,
-    typename SampleTypeB,
-    typename SampleTraitsB,
-    std::enable_if_t<
-        std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
-        bool> = true>
-inline bool operator==(
-    const basic_noninterleaved_span<SampleTypeA, SampleTraitsA>& a,
-    const basic_noninterleaved_span<SampleTypeB, SampleTraitsB>& b) noexcept
-{
-    return (a.channels() == b.channels()) && (a.frames() == b.frames()) &&
-           std::equal(a.data(), a.data() + a.samples(), b.data());
-}
-
-template<
-    typename SampleTypeA,
-    typename SampleTraitsA,
-    typename SampleTypeB,
-    typename SampleTraitsB,
-    std::enable_if_t<
-        std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
-        bool> = true>
-inline bool operator!=(
-    const basic_noninterleaved_span<SampleTypeA, SampleTraitsA>& a,
-    const basic_noninterleaved_span<SampleTypeB, SampleTraitsB>& b) noexcept
-{
-    return !(a == b);
-}
-
 template<typename SampleValueType>
 using noninterleaved_span =
     basic_noninterleaved_span<sample<SampleValueType>, detail::sample_traits<sample<SampleValueType>>>;

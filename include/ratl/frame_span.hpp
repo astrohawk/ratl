@@ -251,40 +251,6 @@ inline typename basic_frame_span<SampleType, SampleTraits, Contiguous>::const_re
     return (*this)[n];
 }
 
-template<
-    typename SampleTypeA,
-    typename SampleTraitsA,
-    typename ContiguousA,
-    typename SampleTypeB,
-    typename SampleTraitsB,
-    typename ContiguousB,
-    std::enable_if_t<
-        std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
-        bool> = true>
-inline bool operator==(
-    const basic_frame_span<SampleTypeA, SampleTraitsA, ContiguousA>& a,
-    const basic_frame_span<SampleTypeB, SampleTraitsB, ContiguousB>& b) noexcept
-{
-    return (a.channels() == b.channels()) && std::equal(a.begin(), a.end(), b.begin());
-}
-
-template<
-    typename SampleTypeA,
-    typename SampleTraitsA,
-    typename ContiguousA,
-    typename SampleTypeB,
-    typename SampleTraitsB,
-    typename ContiguousB,
-    std::enable_if_t<
-        std::is_same<typename SampleTraitsA::const_sample_type, typename SampleTraitsB::const_sample_type>::value,
-        bool> = true>
-inline bool operator!=(
-    const basic_frame_span<SampleTypeA, SampleTraitsA, ContiguousA>& a,
-    const basic_frame_span<SampleTypeB, SampleTraitsB, ContiguousB>& b) noexcept
-{
-    return !(a == b);
-}
-
 template<typename SampleValueType>
 using frame_span = basic_frame_span<sample<SampleValueType>, detail::sample_traits<sample<SampleValueType>>>;
 
