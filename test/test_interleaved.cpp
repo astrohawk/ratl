@@ -14,679 +14,677 @@ namespace test
 {
 // DefaultConstructor
 
-template<typename SampleValueType>
+template<typename InterleavedWrapper>
 class DefaultConstructor : public ::testing::Test
 {
-protected:
-    ratl::interleaved<SampleValueType> container_;
+    using container_type = typename InterleavedWrapper::container_type;
+
+    container_type container_;
+
+public:
+    container_type& container()
+    {
+        return container_;
+    }
 };
 
-TYPED_TEST_SUITE(DefaultConstructor, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(DefaultConstructor, PossibleInterleaved, );
 
 TYPED_TEST(DefaultConstructor, DataNull)
 {
-    EXPECT_EQ(this->container_.data(), nullptr);
+    EXPECT_EQ(this->container().data(), nullptr);
 }
 
 TYPED_TEST(DefaultConstructor, Empty)
 {
-    EXPECT_TRUE(this->container_.empty());
+    EXPECT_TRUE(this->container().empty());
 }
 
 TYPED_TEST(DefaultConstructor, ChannelsZero)
 {
-    EXPECT_EQ(this->container_.channels(), 0);
+    EXPECT_EQ(this->container().channels(), 0);
 }
 
 TYPED_TEST(DefaultConstructor, FramesZero)
 {
-    EXPECT_EQ(this->container_.frames(), 0);
+    EXPECT_EQ(this->container().frames(), 0);
 }
 
 TYPED_TEST(DefaultConstructor, SamplesZero)
 {
-    EXPECT_EQ(this->container_.samples(), 0);
+    EXPECT_EQ(this->container().samples(), 0);
 }
 
 TYPED_TEST(DefaultConstructor, AtBeginThrow)
 {
-    EXPECT_THROW(this->container_.at(0), std::out_of_range);
+    EXPECT_THROW(this->container().at(0), std::out_of_range);
 }
 
 TYPED_TEST(DefaultConstructor, IteratorEqual)
 {
-    EXPECT_EQ(this->container_.begin(), this->container_.end());
+    EXPECT_EQ(this->container().begin(), this->container().end());
 }
 
 TYPED_TEST(DefaultConstructor, ReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.rbegin(), this->container_.rend());
+    EXPECT_EQ(this->container().rbegin(), this->container().rend());
 }
 
 TYPED_TEST(DefaultConstructor, ConstIteratorEqual)
 {
-    EXPECT_EQ(this->container_.cbegin(), this->container_.cend());
+    EXPECT_EQ(this->container().cbegin(), this->container().cend());
 }
 
 TYPED_TEST(DefaultConstructor, ConstReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.crbegin(), this->container_.crend());
+    EXPECT_EQ(this->container().crbegin(), this->container().crend());
 }
 
 // ZeroConstructor
 
-template<typename SampleValueType>
-class ZeroConstructor : public ZeroInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class ZeroConstructor : public ZeroFramesAndChannelsTestBase<InterleavedWrapper>
 {
 };
 
-TYPED_TEST_SUITE(ZeroConstructor, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(ZeroConstructor, PossibleInterleaved, );
 
 TYPED_TEST(ZeroConstructor, DataNull)
 {
-    EXPECT_EQ(this->container_.data(), nullptr);
+    EXPECT_EQ(this->container().data(), nullptr);
 }
 
 TYPED_TEST(ZeroConstructor, Empty)
 {
-    EXPECT_TRUE(this->container_.empty());
+    EXPECT_TRUE(this->container().empty());
 }
 
 TYPED_TEST(ZeroConstructor, ChannelsZero)
 {
-    EXPECT_EQ(this->container_.channels(), 0);
+    EXPECT_EQ(this->container().channels(), 0);
 }
 
 TYPED_TEST(ZeroConstructor, FramesZero)
 {
-    EXPECT_EQ(this->container_.frames(), 0);
+    EXPECT_EQ(this->container().frames(), 0);
 }
 
 TYPED_TEST(ZeroConstructor, SamplesZero)
 {
-    EXPECT_EQ(this->container_.samples(), 0);
+    EXPECT_EQ(this->container().samples(), 0);
 }
 
 TYPED_TEST(ZeroConstructor, AtBeginThrow)
 {
-    EXPECT_THROW(this->container_.at(0), std::out_of_range);
+    EXPECT_THROW(this->container().at(0), std::out_of_range);
 }
 
 TYPED_TEST(ZeroConstructor, IteratorEqual)
 {
-    EXPECT_EQ(this->container_.begin(), this->container_.end());
+    EXPECT_EQ(this->container().begin(), this->container().end());
 }
 
 TYPED_TEST(ZeroConstructor, ReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.rbegin(), this->container_.rend());
+    EXPECT_EQ(this->container().rbegin(), this->container().rend());
 }
 
 TYPED_TEST(ZeroConstructor, ConstIteratorEqual)
 {
-    EXPECT_EQ(this->container_.cbegin(), this->container_.cend());
+    EXPECT_EQ(this->container().cbegin(), this->container().cend());
 }
 
 TYPED_TEST(ZeroConstructor, ConstReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.crbegin(), this->container_.crend());
+    EXPECT_EQ(this->container().crbegin(), this->container().crend());
 }
 
 // ZeroChannelsConstructor
 
-template<typename SampleValueType>
-class ZeroChannelsConstructor : public ZeroChannelsInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class ZeroChannelsConstructor : public ZeroChannelsTestBase<InterleavedWrapper>
 {
 };
 
-TYPED_TEST_SUITE(ZeroChannelsConstructor, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(ZeroChannelsConstructor, PossibleInterleaved, );
 
 TYPED_TEST(ZeroChannelsConstructor, DataNull)
 {
-    EXPECT_EQ(this->container_.data(), nullptr);
+    EXPECT_EQ(this->container().data(), nullptr);
 }
 
 TYPED_TEST(ZeroChannelsConstructor, Empty)
 {
-    EXPECT_TRUE(this->container_.empty());
+    EXPECT_TRUE(this->container().empty());
 }
 
 TYPED_TEST(ZeroChannelsConstructor, ChannelsZero)
 {
-    EXPECT_EQ(this->container_.channels(), 0);
+    EXPECT_EQ(this->container().channels(), 0);
 }
 
 TYPED_TEST(ZeroChannelsConstructor, Frames)
 {
-    EXPECT_EQ(this->container_.frames(), this->frames());
+    EXPECT_EQ(this->container().frames(), this->configured_frames());
 }
 
 TYPED_TEST(ZeroChannelsConstructor, SamplesZero)
 {
-    EXPECT_EQ(this->container_.samples(), 0);
+    EXPECT_EQ(this->container().samples(), 0);
 }
 
 TYPED_TEST(ZeroChannelsConstructor, AtBeginNoThrow)
 {
-    EXPECT_NO_THROW(this->container_.at(0));
+    EXPECT_NO_THROW(this->container().at(0));
 }
 
 TYPED_TEST(ZeroChannelsConstructor, AtEndThrow)
 {
-    EXPECT_THROW(this->container_.at(this->frames()), std::out_of_range);
+    EXPECT_THROW(this->container().at(this->configured_frames()), std::out_of_range);
 }
 
 TYPED_TEST(ZeroChannelsConstructor, IteratorEqual)
 {
-    EXPECT_EQ(this->container_.begin(), this->container_.end());
+    EXPECT_EQ(this->container().begin(), this->container().end());
 }
 
 TYPED_TEST(ZeroChannelsConstructor, ReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.rbegin(), this->container_.rend());
+    EXPECT_EQ(this->container().rbegin(), this->container().rend());
 }
 
 TYPED_TEST(ZeroChannelsConstructor, ConstIteratorEqual)
 {
-    EXPECT_EQ(this->container_.cbegin(), this->container_.cend());
+    EXPECT_EQ(this->container().cbegin(), this->container().cend());
 }
 
 TYPED_TEST(ZeroChannelsConstructor, ConstReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.crbegin(), this->container_.crend());
+    EXPECT_EQ(this->container().crbegin(), this->container().crend());
 }
 
 // ZeroFramesConstructor
 
-template<typename SampleValueType>
-class ZeroFramesConstructor : public ZeroFramesInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class ZeroFramesConstructor : public ZeroFramesTestBase<InterleavedWrapper>
 {
 };
 
-TYPED_TEST_SUITE(ZeroFramesConstructor, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(ZeroFramesConstructor, PossibleInterleaved, );
 
 TYPED_TEST(ZeroFramesConstructor, DataNull)
 {
-    EXPECT_EQ(this->container_.data(), nullptr);
+    EXPECT_EQ(this->container().data(), nullptr);
 }
 
 TYPED_TEST(ZeroFramesConstructor, Empty)
 {
-    EXPECT_TRUE(this->container_.empty());
+    EXPECT_TRUE(this->container().empty());
 }
 
 TYPED_TEST(ZeroFramesConstructor, Channels)
 {
-    EXPECT_EQ(this->container_.channels(), this->channels());
+    EXPECT_EQ(this->container().channels(), this->configured_channels());
 }
 
 TYPED_TEST(ZeroFramesConstructor, FramesZero)
 {
-    EXPECT_EQ(this->container_.frames(), 0);
+    EXPECT_EQ(this->container().frames(), 0);
 }
 
 TYPED_TEST(ZeroFramesConstructor, SamplesZero)
 {
-    EXPECT_EQ(this->container_.samples(), 0);
+    EXPECT_EQ(this->container().samples(), 0);
 }
 
 TYPED_TEST(ZeroFramesConstructor, AtBeginThrow)
 {
-    EXPECT_THROW(this->container_.at(0), std::out_of_range);
+    EXPECT_THROW(this->container().at(0), std::out_of_range);
 }
 
 TYPED_TEST(ZeroFramesConstructor, IteratorEqual)
 {
-    EXPECT_EQ(this->container_.begin(), this->container_.end());
+    EXPECT_EQ(this->container().begin(), this->container().end());
 }
 
 TYPED_TEST(ZeroFramesConstructor, ReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.rbegin(), this->container_.rend());
+    EXPECT_EQ(this->container().rbegin(), this->container().rend());
 }
 
 TYPED_TEST(ZeroFramesConstructor, ConstIteratorEqual)
 {
-    EXPECT_EQ(this->container_.cbegin(), this->container_.cend());
+    EXPECT_EQ(this->container().cbegin(), this->container().cend());
 }
 
 TYPED_TEST(ZeroFramesConstructor, ConstReverseIteratorEqual)
 {
-    EXPECT_EQ(this->container_.crbegin(), this->container_.crend());
+    EXPECT_EQ(this->container().crbegin(), this->container().crend());
 }
 
 // TypedTypical
 
-template<typename SampleValueType>
-class TypedTypical : public TypicalInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class TypedTypical : public TypicalTestBase<InterleavedWrapper>
 {
 };
 
-TYPED_TEST_SUITE(TypedTypical, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(TypedTypical, PossibleInterleaved, );
 
 TYPED_TEST(TypedTypical, DataNotNull)
 {
-    EXPECT_NE(this->container_.data(), nullptr);
+    EXPECT_NE(this->container().data(), nullptr);
 }
 
 TYPED_TEST(TypedTypical, NotEmpty)
 {
-    EXPECT_FALSE(this->container_.empty());
+    EXPECT_FALSE(this->container().empty());
 }
 
 TYPED_TEST(TypedTypical, Channels)
 {
-    EXPECT_EQ(this->container_.channels(), this->channels());
+    EXPECT_EQ(this->container().channels(), this->configured_channels());
 }
 
 TYPED_TEST(TypedTypical, Frames)
 {
-    EXPECT_EQ(this->container_.frames(), this->frames());
+    EXPECT_EQ(this->container().frames(), this->configured_frames());
 }
 
 TYPED_TEST(TypedTypical, Samples)
 {
-    EXPECT_EQ(this->container_.samples(), this->samples());
+    EXPECT_EQ(this->container().samples(), this->configured_samples());
 }
 
 TYPED_TEST(TypedTypical, ZeroInitialised)
 {
-    auto data = this->container_.data();
-    for (size_t i = 0; i < this->container_.samples(); ++i)
+    auto data = this->container().data();
+    for (size_t i = 0; i < this->container().samples(); ++i)
     {
-        EXPECT_EQ(data[i].get(), 0);
+        EXPECT_EQ(data[i].get(), typename TestFixture::sample_value_type());
     }
 }
 
 TYPED_TEST(TypedTypical, FrameArrayAccessEquality)
 {
-    for (size_t i = 0; i < this->frames(); ++i)
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
-        EXPECT_EQ(this->container_.frame(i), this->container_[i]);
+        EXPECT_TRUE(IsContainerEqual(this->container().frame(i), this->container()[i]));
     }
 }
 
 TYPED_TEST(TypedTypical, FrameAtEquality)
 {
-    for (size_t i = 0; i < this->frames(); ++i)
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
-        EXPECT_EQ(this->container_.frame(i), this->container_.at(i));
+        EXPECT_TRUE(IsContainerEqual(this->container().frame(i), this->container().at(i)));
     }
 }
 
 TYPED_TEST(TypedTypical, AtEndThrow)
 {
-    EXPECT_THROW(this->container_.at(this->frames()), std::out_of_range);
+    EXPECT_THROW(this->container().at(this->configured_frames()), std::out_of_range);
 }
 
 TYPED_TEST(TypedTypical, FrameFrontEquality)
 {
-    EXPECT_EQ(this->container_.frame(0), this->container_.front());
+    EXPECT_TRUE(IsContainerEqual(this->container().frame(0), this->container().front()));
 }
 
 TYPED_TEST(TypedTypical, FrameBackEquality)
 {
-    EXPECT_EQ(this->container_.frame(this->frames() - 1), this->container_.back());
+    EXPECT_TRUE(IsContainerEqual(this->container().frame(this->configured_frames() - 1), this->container().back()));
 }
 
 TYPED_TEST(TypedTypical, IteratorBaseData)
 {
-    EXPECT_EQ(this->container_.begin().base(), this->container_.data());
+    EXPECT_EQ(this->container().begin().base(), this->container().data());
 }
 
 TYPED_TEST(TypedTypical, IteratorPlus)
 {
-    EXPECT_EQ(this->container_.begin() + this->frames(), this->container_.end());
+    EXPECT_EQ(this->container().begin() + this->configured_frames(), this->container().end());
 }
 
 TYPED_TEST(TypedTypical, IteratorPlusOverwrite)
 {
-    auto iter = this->container_.begin();
-    iter = iter + this->frames();
-    EXPECT_EQ(iter, this->container_.end());
+    auto iter = this->container().begin();
+    iter = iter + this->configured_frames();
+    EXPECT_EQ(iter, this->container().end());
 }
 
 TYPED_TEST(TypedTypical, IteratorPlusEquals)
 {
-    auto iter = this->container_.begin();
-    iter += this->frames();
-    EXPECT_EQ(iter, this->container_.end());
+    auto iter = this->container().begin();
+    iter += this->configured_frames();
+    EXPECT_EQ(iter, this->container().end());
 }
 
 TYPED_TEST(TypedTypical, IteratorMinus)
 {
-    EXPECT_EQ(this->container_.end() - this->frames(), this->container_.begin());
+    EXPECT_EQ(this->container().end() - this->configured_frames(), this->container().begin());
 }
 
 TYPED_TEST(TypedTypical, IteratorMinusOverwrite)
 {
-    auto iter = this->container_.end();
-    iter = iter - this->frames();
-    EXPECT_EQ(iter, this->container_.begin());
+    auto iter = this->container().end();
+    iter = iter - this->configured_frames();
+    EXPECT_EQ(iter, this->container().begin());
 }
 
 TYPED_TEST(TypedTypical, IteratorMinusEquals)
 {
-    auto iter = this->container_.end();
-    iter -= this->frames();
-    EXPECT_EQ(iter, this->container_.begin());
+    auto iter = this->container().end();
+    iter -= this->configured_frames();
+    EXPECT_EQ(iter, this->container().begin());
 }
 
 TYPED_TEST(TypedTypical, IteratorDistance)
 {
     EXPECT_EQ(
-        static_cast<std::size_t>(std::distance(this->container_.begin(), this->container_.end())), this->frames());
+        static_cast<std::size_t>(std::distance(this->container().begin(), this->container().end())),
+        this->configured_frames());
 }
 
 TYPED_TEST(TypedTypical, IteratorIncrement)
 {
-    auto iter = this->container_.begin();
-    for (size_t i = 0; i < this->frames(); ++i)
+    auto iter = this->container().begin();
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
         iter++;
     }
-    EXPECT_EQ(iter, this->container_.end());
+    EXPECT_EQ(iter, this->container().end());
 }
 
 TYPED_TEST(TypedTypical, IteratorOffsetIteratorIncrement)
 {
-    auto iter = this->container_.begin();
-    for (size_t i = 0; i < this->frames(); ++i)
+    auto iter = this->container().begin();
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
-        EXPECT_EQ(this->container_.begin() + i, iter++);
+        EXPECT_EQ(this->container().begin() + i, iter++);
     }
 }
 
 TYPED_TEST(TypedTypical, IteratorIncrementBaseData)
 {
-    auto iter = this->container_.begin();
-    for (size_t i = 0; i < this->frames(); ++i)
+    auto iter = this->container().begin();
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
-        EXPECT_EQ((iter++).base(), &this->container_.data()[i * this->channels()]);
+        EXPECT_EQ((iter++).base(), &this->container().data()[i * this->configured_channels()]);
     }
 }
 
 TYPED_TEST(TypedTypical, IteratorDereferenceBeginFront)
 {
-    EXPECT_EQ(*this->container_.begin(), this->container_.front());
+    EXPECT_TRUE(IsContainerEqual(*this->container().begin(), this->container().front()));
 }
 
 TYPED_TEST(TypedTypical, IteratorDereferenceEndBack)
 {
-    EXPECT_EQ(*(this->container_.end() - 1), this->container_.back());
+    EXPECT_TRUE(IsContainerEqual(*(this->container().end() - 1), this->container().back()));
 }
 
 TYPED_TEST(TypedTypical, IteratorOffsetDereferenceFrame)
 {
-    for (size_t i = 0; i < this->frames(); ++i)
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
-        EXPECT_EQ(*(this->container_.begin() + i), this->container_.frame(i));
+        EXPECT_TRUE(IsContainerEqual(*(this->container().begin() + i), this->container().frame(i)));
     }
 }
 
 TYPED_TEST(TypedTypical, IteratorIncrementDereferenceFrame)
 {
-    auto iter = this->container_.begin();
-    for (size_t i = 0; i < this->frames(); ++i)
+    auto iter = this->container().begin();
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
-        EXPECT_EQ(*iter++, this->container_.frame(i));
+        EXPECT_TRUE(IsContainerEqual(*iter++, this->container().frame(i)));
     }
-    EXPECT_EQ(iter, this->container_.end());
+    EXPECT_EQ(iter, this->container().end());
 }
 
 TYPED_TEST(TypedTypical, IteratorArrayAccessFrame)
 {
-    for (size_t i = 0; i < this->frames(); ++i)
+    for (size_t i = 0; i < this->configured_frames(); ++i)
     {
-        EXPECT_EQ(this->container_.begin()[i], this->container_.frame(i));
+        EXPECT_TRUE(IsContainerEqual(this->container().begin()[i], this->container().frame(i)));
     }
 }
 
 TYPED_TEST(TypedTypical, ReverseIteratorPlus)
 {
-    EXPECT_EQ(this->container_.rbegin() + this->frames(), this->container_.rend());
+    EXPECT_EQ(this->container().rbegin() + this->configured_frames(), this->container().rend());
 }
 
 TYPED_TEST(TypedTypical, ReverseIteratorMinus)
 {
-    EXPECT_EQ(this->container_.rend() - this->frames(), this->container_.rbegin());
+    EXPECT_EQ(this->container().rend() - this->configured_frames(), this->container().rbegin());
 }
 
 TYPED_TEST(TypedTypical, ConstIteratorPlus)
 {
-    EXPECT_EQ(this->container_.cbegin() + this->frames(), this->container_.cend());
+    EXPECT_EQ(this->container().cbegin() + this->configured_frames(), this->container().cend());
 }
 
 TYPED_TEST(TypedTypical, ConstIteratorMinus)
 {
-    EXPECT_EQ(this->container_.cend() - this->frames(), this->container_.cbegin());
+    EXPECT_EQ(this->container().cend() - this->configured_frames(), this->container().cbegin());
 }
 
 TYPED_TEST(TypedTypical, ConstReverseIteratorPlus)
 {
-    EXPECT_EQ(this->container_.crbegin() + this->frames(), this->container_.crend());
+    EXPECT_EQ(this->container().crbegin() + this->configured_frames(), this->container().crend());
 }
 
 TYPED_TEST(TypedTypical, ConstReverseIteratorMinus)
 {
-    EXPECT_EQ(this->container_.crend() - this->frames(), this->container_.crbegin());
+    EXPECT_EQ(this->container().crend() - this->configured_frames(), this->container().crbegin());
 }
 
 TYPED_TEST(TypedTypical, RangeBasedForLoopFrame)
 {
     int i = 0;
-    for (const auto& frame : this->container_)
+    for (const auto& frame : this->container())
     {
-        EXPECT_EQ(frame, this->container_.frame(i++));
+        EXPECT_TRUE(IsContainerEqual(frame, this->container().frame(i++)));
     }
-    EXPECT_EQ(i, this->frames());
+    EXPECT_EQ(i, this->configured_frames());
 }
 
 // Equality
 
-template<typename SampleValueType>
-class Equality : public ::testing::Test
+template<typename InterleavedWrapper>
+class Equality : public TypicalTestBase<InterleavedWrapper>
 {
-protected:
-    using sample_value_type = SampleValueType;
-
-    static ratl::interleaved<sample_value_type> generate_default()
-    {
-        return ratl::interleaved<sample_value_type>();
-    }
-
-    static ratl::interleaved<sample_value_type> generate_typical()
-    {
-        return ratl::interleaved<sample_value_type>(TEST_RATL_TYPICAL_CHANNELS, TEST_RATL_TYPICAL_FRAMES);
-    }
 };
 
-TYPED_TEST_SUITE(Equality, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(Equality, PossibleInterleaved, );
 
 TYPED_TEST(Equality, DefaultEqual)
 {
-    EXPECT_EQ(this->generate_default(), this->generate_default());
+    EXPECT_TRUE(IsContainerContentEqual(
+        TestFixture::generate_default_wrapper().container(), TestFixture::generate_default_wrapper().container()));
 }
 
 TYPED_TEST(Equality, TypicalEqual)
 {
-    EXPECT_EQ(this->generate_typical(), this->generate_typical());
+    EXPECT_TRUE(IsContainerContentEqual(
+        TestFixture::generate_configured_wrapper().container(),
+        TestFixture::generate_configured_wrapper().container()));
 }
 
 TYPED_TEST(Equality, DefaultZeroConstructorEqual)
 {
-    EXPECT_EQ(this->generate_default(), (ratl::interleaved<typename TestFixture::sample_value_type>(0, 0)));
+    EXPECT_TRUE(IsContainerContentEqual(
+        TestFixture::generate_default_wrapper().container(), TestFixture::generate_wrapper(0, 0).container()));
 }
 
 TYPED_TEST(Equality, DefaultZeroChannelsConstructorNotEqual)
 {
-    EXPECT_NE(
-        this->generate_default(),
-        (ratl::interleaved<typename TestFixture::sample_value_type>(0, TEST_RATL_TYPICAL_FRAMES)));
+    EXPECT_TRUE(IsContainerContentNotEqual(
+        TestFixture::generate_default_wrapper().container(),
+        TestFixture::generate_wrapper(0, TEST_RATL_TYPICAL_FRAMES).container()));
 }
 
 TYPED_TEST(Equality, DefaultZeroFramesConstructorNotEqual)
 {
-    EXPECT_NE(
-        this->generate_default(),
-        (ratl::interleaved<typename TestFixture::sample_value_type>(TEST_RATL_TYPICAL_CHANNELS, 0)));
+    EXPECT_TRUE(IsContainerContentNotEqual(
+        TestFixture::generate_default_wrapper().container(),
+        TestFixture::generate_wrapper(TEST_RATL_TYPICAL_CHANNELS, 0).container()));
 }
 
 TYPED_TEST(Equality, DefaultTypicalNotEqual)
 {
-    EXPECT_NE(this->generate_default(), this->generate_typical());
+    EXPECT_TRUE(IsContainerContentNotEqual(
+        TestFixture::generate_default_wrapper().container(), TestFixture::generate_configured_wrapper().container()));
 }
 
 TYPED_TEST(Equality, TypicalAllWriteNotEqual)
 {
-    auto typical = this->generate_typical();
-    std::fill_n(typical.data(), typical.samples(), static_cast<typename TestFixture::sample_value_type>(1));
-    EXPECT_NE(typical, this->generate_typical());
+    auto typical = TestFixture::generate_configured_wrapper();
+    std::fill_n(typical.storage().data(), typical.container().samples(), TestFixture::make_sample(1000000));
+    EXPECT_TRUE(
+        IsContainerContentNotEqual(typical.container(), TestFixture::generate_configured_wrapper().container()));
 }
 
 TYPED_TEST(Equality, TypicalAllWriteBackEqual)
 {
-    auto typical = this->generate_typical();
-    std::fill_n(typical.data(), typical.samples(), static_cast<typename TestFixture::sample_value_type>(1));
-    std::fill_n(typical.data(), typical.samples(), static_cast<typename TestFixture::sample_value_type>(0));
-    EXPECT_EQ(typical, this->generate_typical());
+    auto typical = TestFixture::generate_configured_wrapper();
+    std::fill_n(typical.storage().data(), typical.container().samples(), TestFixture::make_sample(1000000));
+    std::fill_n(typical.storage().data(), typical.container().samples(), TestFixture::make_sample(0));
+    EXPECT_TRUE(IsContainerContentEqual(typical.container(), TestFixture::generate_configured_wrapper().container()));
 }
 
 TYPED_TEST(Equality, TypicalOneWriteNotEqual)
 {
-    auto typical = this->generate_typical();
-    size_t middle_sample = (TEST_RATL_TYPICAL_CHANNELS * TEST_RATL_TYPICAL_FRAMES) / 2;
-    typical.data()[middle_sample] = static_cast<typename TestFixture::sample_value_type>(1);
-    EXPECT_NE(typical, this->generate_typical());
+    auto typical = TestFixture::generate_configured_wrapper();
+    size_t middle_index = typical.container().samples() / 2;
+    typical.storage().data()[middle_index] = TestFixture::make_sample(1000000);
+    EXPECT_TRUE(
+        IsContainerContentNotEqual(typical.container(), TestFixture::generate_configured_wrapper().container()));
 }
 
 TYPED_TEST(Equality, TypicalOneWriteBackEqual)
 {
-    auto typical = this->generate_typical();
-    size_t middle_sample = (TEST_RATL_TYPICAL_CHANNELS * TEST_RATL_TYPICAL_FRAMES) / 2;
-    typical.data()[middle_sample] = static_cast<typename TestFixture::sample_value_type>(1);
-    typical.data()[middle_sample] = static_cast<typename TestFixture::sample_value_type>(0);
-    EXPECT_EQ(typical, this->generate_typical());
+    auto typical = TestFixture::generate_configured_wrapper();
+    auto middle_index = typical.container().samples() / 2;
+    typical.storage().data()[middle_index] = TestFixture::make_sample(1000000);
+    typical.storage().data()[middle_index] = TestFixture::make_sample(0);
+    EXPECT_TRUE(IsContainerContentEqual(typical.container(), TestFixture::generate_configured_wrapper().container()));
 }
 
-// CopyConstructor
+// Copy
 
-template<typename SampleValueType>
-class CopyConstructor : public CopyInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class Copy : public CopyTestBase<InterleavedWrapper>
 {
-protected:
-    using super_type = TypicalInterleavedBase<SampleValueType>;
-    using interleaved_type = typename super_type::container_type;
 };
 
-TYPED_TEST_SUITE(CopyConstructor, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(Copy, PossibleInterleaved, );
 
-TYPED_TEST(CopyConstructor, CopyConstructor)
+TYPED_TEST(Copy, CopyConstructor)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_copy = this->container_;
-    EXPECT_EQ(interleaved_copy, this->generate());
+    auto copy = this->container();
+    EXPECT_TRUE(IsContainerEqual(copy, this->container()));
 }
 
-// CopyAssignmentOperator
-
-template<typename SampleValueType>
-class CopyAssignmentOperator : public CopyInterleavedBase<SampleValueType>
+TYPED_TEST(Copy, CopyAssignmentOperator)
 {
-protected:
-    using super_type = TypicalInterleavedBase<SampleValueType>;
-    using interleaved_type = typename super_type::container_type;
-};
-
-TYPED_TEST_SUITE(CopyAssignmentOperator, PossibleSampleValueTypes, );
-
-TYPED_TEST(CopyAssignmentOperator, CopyAssignmentOperator)
-{
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_copy;
-    interleaved_copy = this->container_;
-    EXPECT_EQ(interleaved_copy, this->generate());
+    typename TestFixture::container_type copy;
+    copy = this->container();
+    EXPECT_TRUE(IsContainerEqual(copy, this->container()));
 }
 
-// MoveConstructor
+// BufferMove
 
-template<typename SampleValueType>
-class MoveConstructor : public MoveInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class BufferMove : public MoveTestBase<InterleavedWrapper>
 {
-protected:
-    using super_type = TypicalInterleavedBase<SampleValueType>;
-    using interleaved_type = typename super_type::container_type;
 };
 
-TYPED_TEST_SUITE(MoveConstructor, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(BufferMove, PossibleInterleavedBuffers, );
 
-TYPED_TEST(MoveConstructor, MoveConstructor)
+TYPED_TEST(BufferMove, MoveConstructor)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_move = std::move(this->container_);
-    EXPECT_EQ(interleaved_move, this->generate());
+    auto copy = this->container();
+    auto move = std::move(this->container());
+    EXPECT_TRUE(IsContainerEqual(move, copy));
 }
 
-// MoveAssignmentOperator
-
-template<typename SampleValueType>
-class MoveAssignmentOperator : public MoveInterleavedBase<SampleValueType>
+TYPED_TEST(BufferMove, MoveAssignmentOperator)
 {
-protected:
-    using super_type = TypicalInterleavedBase<SampleValueType>;
-    using interleaved_type = typename super_type::container_type;
+    auto copy = this->container();
+    typename TestFixture::container_type move;
+    move = std::move(this->container());
+    EXPECT_TRUE(IsContainerEqual(move, copy));
+}
+
+// SpanMove
+
+template<typename InterleavedWrapper>
+class SpanMove : public CopyTestBase<InterleavedWrapper>
+{
 };
 
-TYPED_TEST_SUITE(MoveAssignmentOperator, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(SpanMove, PossibleInterleavedSpans, );
 
-TYPED_TEST(MoveAssignmentOperator, MoveAssignmentOperator)
+TYPED_TEST(SpanMove, MoveConstructor)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_move;
-    interleaved_move = std::move(this->container_);
-    EXPECT_EQ(interleaved_move, this->generate());
+    auto copy = this->container();
+    auto move = std::move(this->container());
+    EXPECT_TRUE(IsContainerEqual(move, copy));
+}
+
+TYPED_TEST(SpanMove, MoveAssignmentOperator)
+{
+    auto copy = this->container();
+    typename TestFixture::container_type move;
+    move = std::move(this->container());
+    EXPECT_TRUE(IsContainerEqual(move, copy));
 }
 
 // Swap
 
-template<typename SampleValueType>
-class Swap : public TypicalInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class Swap : public TypicalTestBase<InterleavedWrapper>
 {
-protected:
-    using super_type = TypicalInterleavedBase<SampleValueType>;
-    using interleaved_type = typename super_type::container_type;
+    using super_type = typename Swap::TypicalTestBase;
+    using wrapper_type = typename super_type::wrapper_type;
+    using container_type = typename super_type::container_type;
 
-    static interleaved_type generate_swap()
+public:
+    static wrapper_type generate_swap_wrapper()
     {
-        return interleaved_type(super_type::generate().channels() + 10, super_type::generate().frames() + 50);
+        return super_type::generate_wrapper(
+            super_type::configured_channels() + 10, super_type::configured_frames() + 50);
     }
 };
 
-TYPED_TEST_SUITE(Swap, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(Swap, PossibleInterleaved, );
 
 TYPED_TEST(Swap, SwapFree)
 {
-    auto interleaved_swap = this->generate_swap();
-    std::swap(this->container_, interleaved_swap);
-    EXPECT_EQ(this->container_, this->generate_swap());
-    EXPECT_EQ(interleaved_swap, this->generate());
+    auto swap = this->generate_swap_wrapper();
+    std::swap(this->container(), swap.container());
+    EXPECT_TRUE(IsContainerContentEqual(this->container(), this->generate_swap_wrapper().container()));
+    EXPECT_TRUE(IsContainerContentEqual(swap.container(), this->generate_configured_wrapper().container()));
 }
 
 TYPED_TEST(Swap, SwapMember)
 {
-    auto interleaved_swap = this->generate_swap();
-    interleaved_swap.swap(this->container_);
-    EXPECT_EQ(this->container_, this->generate_swap());
-    EXPECT_EQ(interleaved_swap, this->generate());
+    auto swap = this->generate_swap_wrapper();
+    swap.container().swap(this->container());
+    EXPECT_TRUE(IsContainerContentEqual(this->container(), this->generate_swap_wrapper().container()));
+    EXPECT_TRUE(IsContainerContentEqual(swap.container(), this->generate_configured_wrapper().container()));
 }
 
 // allocator
 
-template<typename SampleValueType>
-class Allocate : public TypicalInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class Allocate : public TypicalTestBase<InterleavedWrapper>
 {
-protected:
-    using super_type = TypicalInterleavedBase<SampleValueType>;
+public:
+    using super_type = typename Allocate::TypicalTestBase;
+    using container_type = typename super_type::container_type;
     using sample_type = typename super_type::sample_type;
 
     class allocator : public ratl::allocator<sample_type>
@@ -776,81 +774,83 @@ protected:
         size_type n_;
         sample_type* p_;
     };
-
-    using interleaved_type = ratl::basic_interleaved<sample_type, allocator>;
 };
 
-TYPED_TEST_SUITE(Allocate, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(Allocate, PossibleInterleavedBuffers, );
 
 TYPED_TEST(Allocate, TypicalAllocate)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type(this->channels(), this->frames(), typename TestFixture::allocator());
+    using container_type = typename TestFixture::container_type;
+    container_type(this->container().channels(), this->container().frames(), typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, CopyConstructor)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator());
-    interleaved_type(interleaved_allocated, typename TestFixture::allocator());
+    using container_type = typename TestFixture::container_type;
+    container_type container_allocated(
+        this->container().channels(), this->container().frames(), typename TestFixture::allocator());
+    container_type(container_allocated, typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, CopyAssignmentOperator)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated_1(this->channels(), this->frames(), typename TestFixture::allocator());
-    interleaved_type interleaved_allocated_2(this->channels(), this->frames(), typename TestFixture::allocator());
-    interleaved_allocated_1 = interleaved_allocated_2;
+    using container_type = typename TestFixture::container_type;
+    container_type container_allocated_1(
+        this->container().channels(), this->container().frames(), typename TestFixture::allocator());
+    container_type container_allocated_2(
+        this->container().channels(), this->container().frames(), typename TestFixture::allocator());
+    container_allocated_1 = container_allocated_2;
 }
 
 TYPED_TEST(Allocate, MoveConstructorOperator)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator());
-    interleaved_type(interleaved_allocated, typename TestFixture::allocator());
+    using container_type = typename TestFixture::container_type;
+    container_type container_allocated(
+        this->container().channels(), this->container().frames(), typename TestFixture::allocator());
+    container_type(container_allocated, typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, MoveAssignmentOperator)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated(this->channels(), this->frames(), typename TestFixture::allocator());
-    interleaved_allocated = interleaved_type(this->channels(), this->frames(), typename TestFixture::allocator());
+    using container_type = typename TestFixture::container_type;
+    container_type container_allocated(
+        this->container().channels(), this->container().frames(), typename TestFixture::allocator());
+    container_allocated =
+        container_type(this->container().channels(), this->container().frames(), typename TestFixture::allocator());
 }
 
 TYPED_TEST(Allocate, Swap)
 {
-    using interleaved_type = typename TestFixture::interleaved_type;
-    interleaved_type interleaved_allocated_1(this->channels(), this->frames(), typename TestFixture::allocator());
-    interleaved_type interleaved_allocated_2(this->channels(), this->frames(), typename TestFixture::allocator());
-    std::swap(interleaved_allocated_1, interleaved_allocated_2);
+    using container_type = typename TestFixture::container_type;
+    container_type container_allocated_1(
+        this->container().channels(), this->container().frames(), typename TestFixture::allocator());
+    container_type container_allocated_2(
+        this->container().channels(), this->container().frames(), typename TestFixture::allocator());
+    std::swap(container_allocated_1, container_allocated_2);
 }
 
 // ReadWrite
 
-template<typename SampleValueType>
-class RawReadWrite : public TypicalInterleavedBase<SampleValueType>
+template<typename InterleavedWrapper>
+class RawReadWrite : public TypicalTestBase<InterleavedWrapper>
 {
-protected:
-    using sample_value_type = SampleValueType;
 };
 
-TYPED_TEST_SUITE(RawReadWrite, PossibleSampleValueTypes, );
+TYPED_TEST_SUITE(RawReadWrite, PossibleNonConstInterleaved, );
 
 TYPED_TEST(RawReadWrite, Write)
 {
-    auto iter = std::fill_n(
-        this->container_.data(), this->container_.samples(), static_cast<typename TestFixture::sample_value_type>(1));
-    EXPECT_EQ(iter, this->container_.data() + this->container_.samples());
+    auto iter = std::fill_n(this->container().data(), this->container().samples(), TestFixture::make_sample(1));
+    EXPECT_EQ(iter, this->container().data() + this->container().samples());
 }
 
 TYPED_TEST(RawReadWrite, Read)
 {
-    std::fill_n(
-        this->container_.data(), this->container_.samples(), static_cast<typename TestFixture::sample_value_type>(1));
+    std::fill_n(this->container().data(), this->container().samples(), TestFixture::make_sample(1));
 
-    for (size_t i = 0; i < this->container_.samples(); ++i)
+    for (size_t i = 0; i < this->container().samples(); ++i)
     {
-        EXPECT_EQ(this->container_.data()[i].get(), static_cast<typename TestFixture::sample_value_type>(1));
+        EXPECT_EQ(this->container().data()[i].get(), TestFixture::make_sample(1).get());
     }
 }
 

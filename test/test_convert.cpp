@@ -19,7 +19,7 @@ namespace test
 
 class ConvertInt16 : public ::testing::Test
 {
-protected:
+public:
     sample<int16_t> sample_{static_cast<int16_t>(0x1234)};
 };
 
@@ -79,7 +79,7 @@ TEST_F(ConvertInt16, NetworkFloat32)
 
 class ConvertInt24 : public ::testing::Test
 {
-protected:
+public:
     sample<int24_t> sample_{static_cast<int24_t>(0x123456)};
 };
 
@@ -139,7 +139,7 @@ TEST_F(ConvertInt24, NetworkFloat32)
 
 class ConvertInt32 : public ::testing::Test
 {
-protected:
+public:
     sample<int32_t> sample_{0x12345678};
 };
 
@@ -199,7 +199,7 @@ TEST_F(ConvertInt32, NetworkFloat32)
 
 class ConvertFloat32 : public ::testing::Test
 {
-protected:
+public:
     sample<float32_t> sample_{static_cast<float32_t>(0.1234f)};
 };
 
@@ -237,7 +237,7 @@ TEST_F(ConvertFloat32, NetworkFloat32)
 
 class ConvertNetworkInt16 : public ::testing::Test
 {
-protected:
+public:
     network_sample<int16_t> network_{
         detail::network_underlying_to_network_cast<int16_t>(static_cast<uint16_t>(0x3412))};
 };
@@ -268,7 +268,7 @@ TEST_F(ConvertNetworkInt16, Float32)
 
 class ConvertNetworkInt24 : public ::testing::Test
 {
-protected:
+public:
     network_sample<int24_t> network_{
         detail::network_underlying_to_network_cast<int24_t>(static_cast<uint24_t>(0x563412))};
 };
@@ -299,7 +299,7 @@ TEST_F(ConvertNetworkInt24, Float32)
 
 class ConvertNetworkInt32 : public ::testing::Test
 {
-protected:
+public:
     network_sample<int32_t> network_{
         detail::network_underlying_to_network_cast<int32_t>(static_cast<uint32_t>(0x78563412))};
 };
@@ -330,7 +330,7 @@ TEST_F(ConvertNetworkInt32, Float32)
 
 class ConvertNetworkFloat32 : public ::testing::Test
 {
-protected:
+public:
     network_sample<float32_t> network_{
         detail::network_underlying_to_network_cast<float32_t>(static_cast<uint32_t>(0x24b9fc3d))};
 };
@@ -383,7 +383,7 @@ TEST(Convert, CustomConverterFunctor)
 template<typename OutputSampleValueType>
 class ConvertFloat32Correct : public ::testing::Test
 {
-protected:
+public:
     using output_sample_value_type = OutputSampleValueType;
     using output_sample_type = sample<output_sample_value_type>;
 
@@ -439,7 +439,7 @@ TYPED_TEST(ConvertFloat32Correct, Typical)
 template<typename SampleValueType>
 class ConvertFloat32Transparent : public ::testing::Test
 {
-protected:
+public:
     using sample_value_type = SampleValueType;
 };
 
@@ -467,7 +467,7 @@ TYPED_TEST(ConvertFloat32Transparent, Typical)
 template<typename SampleValueType>
 class ConvertFloatIntNoWrapping : public ::testing::Test
 {
-protected:
+public:
     using sample_value_type = SampleValueType;
 };
 
@@ -493,7 +493,7 @@ TYPED_TEST(ConvertFloatIntNoWrapping, ConvertFloatIntNoWrapping)
 template<typename SampleValueTypeCombination>
 class ConvertIntInputNegativeTransparent : public ::testing::Test
 {
-protected:
+public:
     using input_sample_value_type = typename SampleValueTypeCombination::input_sample_value_type;
     using output_sample_value_type = typename SampleValueTypeCombination::output_sample_value_type;
 };
@@ -527,7 +527,7 @@ TYPED_TEST(ConvertIntInputNegativeTransparent, IntInputConvert)
 template<typename OutputSampleValueType>
 class ConvertFloatInputNegativeTransparent : public ::testing::Test
 {
-protected:
+public:
     using output_sample_value_type = OutputSampleValueType;
 };
 

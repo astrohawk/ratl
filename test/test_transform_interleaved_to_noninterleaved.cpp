@@ -12,12 +12,12 @@ namespace ratl
 {
 namespace test
 {
-template<typename InterleavedTransformCombination>
-class TransformInterleaved : public TypicalTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformInterleaved : public TypicalTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformInterleaved, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformInterleaved, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformInterleaved, Typical)
 {
@@ -34,7 +34,7 @@ TYPED_TEST(TransformInterleaved, Typical)
         for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
         {
             EXPECT_EQ(
-                output_container[frame_num][channel_num],
+                output_container[channel_num][frame_num],
                 reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][channel_num]));
         }
     }
@@ -48,7 +48,7 @@ TYPED_TEST(TransformInterleaved, MoreOutputFrames)
     auto& output_container = output_wrapper.container();
 
     auto output_end = reference_transform(input_container.begin(), input_container.end(), output_container.begin());
-    EXPECT_EQ(output_end, output_container.end() - 1);
+    EXPECT_EQ(output_end, output_container.end());
 
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_container.frames(); ++frame_num)
@@ -56,7 +56,7 @@ TYPED_TEST(TransformInterleaved, MoreOutputFrames)
         for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
         {
             EXPECT_EQ(
-                output_container[frame_num][channel_num],
+                output_container[channel_num][frame_num],
                 reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][channel_num]));
         }
     }
@@ -77,7 +77,7 @@ TYPED_TEST(TransformInterleaved, MoreOutputChannels)
     auto& output_container = output_wrapper.container();
 
     auto output_end = reference_transform(input_container.begin(), input_container.end(), output_container.begin());
-    EXPECT_EQ(output_end, output_container.end());
+    EXPECT_EQ(output_end, output_container.end() - 1);
 
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_container.frames(); ++frame_num)
@@ -85,7 +85,7 @@ TYPED_TEST(TransformInterleaved, MoreOutputChannels)
         for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
         {
             EXPECT_EQ(
-                output_container[frame_num][channel_num],
+                output_container[channel_num][frame_num],
                 reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][channel_num]));
         }
     }
@@ -114,7 +114,7 @@ TYPED_TEST(TransformInterleaved, MoreOutputFramesMoreOutputChannels)
         for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
         {
             EXPECT_EQ(
-                output_container[frame_num][channel_num],
+                output_container[channel_num][frame_num],
                 reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][channel_num]));
         }
     }
@@ -153,18 +153,18 @@ TYPED_TEST(TransformInterleaved, ConstInputIterators)
         for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
         {
             EXPECT_EQ(
-                output_container[frame_num][channel_num],
+                output_container[channel_num][frame_num],
                 reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][channel_num]));
         }
     }
 }
 
-template<typename InterleavedTransformCombination>
-class TransformFrame : public TypicalTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformFrame : public TypicalTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformFrame, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformFrame, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformFrame, Typical)
 {
@@ -187,9 +187,9 @@ TYPED_TEST(TransformFrame, Typical)
     }
 
     // verify all other output frames are still empty
-    for (auto frame_iter = output_container.begin() + 1; frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin(); channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin() + 1; sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -218,9 +218,9 @@ TYPED_TEST(TransformFrame, MoreOutputFrames)
     }
 
     // verify all other output frames are still empty
-    for (auto frame_iter = output_container.begin() + 1; frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin(); channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin() + 1; sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -249,9 +249,9 @@ TYPED_TEST(TransformFrame, MoreOutputChannels)
     }
 
     // verify all other output frames are still empty
-    for (auto frame_iter = output_container.begin() + 1; frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin(); channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin() + 1; sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -283,9 +283,9 @@ TYPED_TEST(TransformFrame, MoreOutputFramesMoreOutputChannels)
     }
 
     // verify all other output frames are still empty
-    for (auto frame_iter = output_container.begin() + 1; frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin(); channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin() + 1; sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -320,21 +320,21 @@ TYPED_TEST(TransformFrame, ConstInputIterators)
     }
 
     // verify all other output frames are still empty
-    for (auto frame_iter = output_container.begin() + 1; frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin(); channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin() + 1; sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
     }
 }
 
-template<typename InterleavedTransformCombination>
-class TransformChannel : public TypicalTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformChannel : public TypicalTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformChannel, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformChannel, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformChannel, Typical)
 {
@@ -357,9 +357,9 @@ TYPED_TEST(TransformChannel, Typical)
     }
 
     // verify all other output channels are still empty
-    for (auto frame_iter = output_container.begin(); frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin() + 1; channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin(); sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -388,9 +388,9 @@ TYPED_TEST(TransformChannel, MoreOutputFrames)
     }
 
     // verify all other output channels are still empty
-    for (auto frame_iter = output_container.begin(); frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin() + 1; channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin(); sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -422,9 +422,9 @@ TYPED_TEST(TransformChannel, MoreOutputChannels)
     }
 
     // verify all other output channels are still empty
-    for (auto frame_iter = output_container.begin(); frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin() + 1; channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin(); sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -453,9 +453,9 @@ TYPED_TEST(TransformChannel, MoreOutputFramesMoreOutputChannels)
     }
 
     // verify all other output channels are still empty
-    for (auto frame_iter = output_container.begin(); frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin() + 1; channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin(); sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -490,21 +490,22 @@ TYPED_TEST(TransformChannel, ConstInputIterators)
     }
 
     // verify all other output channels are still empty
-    for (auto frame_iter = output_container.begin(); frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin() + 1; channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin() + 1; sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin(); sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
     }
 }
 
-template<typename InterleavedTransformCombination>
-class TransformInterleavedSingleFrame : public SingleFrameTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformInterleavedSingleFrame :
+    public SingleFrameTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformInterleavedSingleFrame, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformInterleavedSingleFrame, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformInterleavedSingleFrame, Typical)
 {
@@ -519,7 +520,7 @@ TYPED_TEST(TransformInterleavedSingleFrame, Typical)
     for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
     {
         EXPECT_EQ(
-            output_container[0][channel_num],
+            output_container[channel_num][0],
             reference_convert<typename TestFixture::output_sample_type>(input_container[0][channel_num]));
     }
 }
@@ -532,13 +533,13 @@ TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputFrames)
     auto& output_container = output_wrapper.container();
 
     auto output_end = reference_transform(input_container.begin(), input_container.end(), output_container.begin());
-    EXPECT_EQ(output_end, output_container.end() - 1);
+    EXPECT_EQ(output_end, output_container.end());
 
     // verify all samples have been copied correctly
     for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
     {
         EXPECT_EQ(
-            output_container[0][channel_num],
+            output_container[channel_num][0],
             reference_convert<typename TestFixture::output_sample_type>(input_container[0][channel_num]));
     }
 
@@ -558,18 +559,18 @@ TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputChannels)
     auto& output_container = output_wrapper.container();
 
     auto output_end = reference_transform(input_container.begin(), input_container.end(), output_container.begin());
-    EXPECT_EQ(output_end, output_container.end());
+    EXPECT_EQ(output_end, output_container.end() - 1);
 
     // verify all samples have been copied correctly
     for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
     {
         EXPECT_EQ(
-            output_container[0][channel_num],
+            output_container[channel_num][0],
             reference_convert<typename TestFixture::output_sample_type>(input_container[0][channel_num]));
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_container[0][input_container.channels()], typename TestFixture::output_sample_type());
+    EXPECT_EQ(output_container[input_container.channels()][0], typename TestFixture::output_sample_type());
 }
 
 TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputFramesMoreOutputChannels)
@@ -586,7 +587,7 @@ TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputFramesMoreOutputChannels)
     for (size_t channel_num = 0; channel_num < input_container.channels(); ++channel_num)
     {
         EXPECT_EQ(
-            output_container[0][channel_num],
+            output_container[channel_num][0],
             reference_convert<typename TestFixture::output_sample_type>(input_container[0][channel_num]));
     }
 
@@ -598,15 +599,15 @@ TYPED_TEST(TransformInterleavedSingleFrame, MoreOutputFramesMoreOutputChannels)
     }
 
     // verify extra output channel is still empty
-    EXPECT_EQ(output_container[0][input_container.channels()], typename TestFixture::output_sample_type());
+    EXPECT_EQ(output_container[input_container.channels()][0], typename TestFixture::output_sample_type());
 }
 
-template<typename InterleavedTransformCombination>
-class TransformFrameSingleFrame : public SingleFrameTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformFrameSingleFrame : public SingleFrameTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformFrameSingleFrame, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformFrameSingleFrame, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformFrameSingleFrame, Typical)
 {
@@ -680,9 +681,9 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputChannels)
     }
 
     // verify all other output frames are still empty
-    for (auto frame_iter = output_container.begin() + 1; frame_iter != output_container.end(); ++frame_iter)
+    for (auto channel_iter = output_container.begin(); channel_iter != output_container.end(); ++channel_iter)
     {
-        for (auto sample_iter = frame_iter->begin(); sample_iter != frame_iter->end(); ++sample_iter)
+        for (auto sample_iter = channel_iter->begin() + 1; sample_iter != channel_iter->end(); ++sample_iter)
         {
             EXPECT_EQ(*sample_iter, typename TestFixture::output_sample_type());
         }
@@ -724,12 +725,12 @@ TYPED_TEST(TransformFrameSingleFrame, MoreOutputFramesMoreOutputChannels)
     EXPECT_EQ(output_frame[input_frame.channels()], typename TestFixture::output_sample_type());
 }
 
-template<typename InterleavedTransformCombination>
-class TransformChannelSingleFrame : public SingleFrameTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformChannelSingleFrame : public SingleFrameTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformChannelSingleFrame, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformChannelSingleFrame, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformChannelSingleFrame, Typical)
 {
@@ -836,12 +837,13 @@ TYPED_TEST(TransformChannelSingleFrame, MoreOutputFramesMoreOutputChannels)
     }
 }
 
-template<typename InterleavedTransformCombination>
-class TransformInterleavedSingleChannel : public SingleChannelTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformInterleavedSingleChannel :
+    public SingleChannelTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformInterleavedSingleChannel, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformInterleavedSingleChannel, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformInterleavedSingleChannel, Typical)
 {
@@ -856,7 +858,7 @@ TYPED_TEST(TransformInterleavedSingleChannel, Typical)
     for (size_t frame_num = 0; frame_num < input_container.frames(); ++frame_num)
     {
         EXPECT_EQ(
-            output_container[frame_num][0],
+            output_container[0][frame_num],
             reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][0]));
     }
 }
@@ -869,18 +871,18 @@ TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputFrames)
     auto& output_container = output_wrapper.container();
 
     auto output_end = reference_transform(input_container.begin(), input_container.end(), output_container.begin());
-    EXPECT_EQ(output_end, output_container.end() - 1);
+    EXPECT_EQ(output_end, output_container.end());
 
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_container.frames(); ++frame_num)
     {
         EXPECT_EQ(
-            output_container[frame_num][0],
+            output_container[0][frame_num],
             reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][0]));
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_container[input_container.frames()][0], typename TestFixture::output_sample_type());
+    EXPECT_EQ(output_container[0][input_container.frames()], typename TestFixture::output_sample_type());
 }
 
 TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputChannels)
@@ -891,13 +893,13 @@ TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputChannels)
     auto& output_container = output_wrapper.container();
 
     auto output_end = reference_transform(input_container.begin(), input_container.end(), output_container.begin());
-    EXPECT_EQ(output_end, output_container.end());
+    EXPECT_EQ(output_end, output_container.end() - 1);
 
     // verify all samples have been copied correctly
     for (size_t frame_num = 0; frame_num < input_container.frames(); ++frame_num)
     {
         EXPECT_EQ(
-            output_container[frame_num][0],
+            output_container[0][frame_num],
             reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][0]));
     }
 
@@ -923,12 +925,12 @@ TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputFramesMoreOutputChannels
     for (size_t frame_num = 0; frame_num < input_container.frames(); ++frame_num)
     {
         EXPECT_EQ(
-            output_container[frame_num][0],
+            output_container[0][frame_num],
             reference_convert<typename TestFixture::output_sample_type>(input_container[frame_num][0]));
     }
 
     // verify extra output frame is still empty
-    EXPECT_EQ(output_container[input_container.frames()][0], typename TestFixture::output_sample_type());
+    EXPECT_EQ(output_container[0][input_container.frames()], typename TestFixture::output_sample_type());
 
     // verify extra output channel is still empty
     auto extra_channel = output_container.channel(1);
@@ -938,12 +940,13 @@ TYPED_TEST(TransformInterleavedSingleChannel, MoreOutputFramesMoreOutputChannels
     }
 }
 
-template<typename InterleavedTransformCombination>
-class TransformFrameSingleChannel : public SingleChannelTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformFrameSingleChannel :
+    public SingleChannelTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformFrameSingleChannel, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformFrameSingleChannel, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformFrameSingleChannel, Typical)
 {
@@ -1050,12 +1053,13 @@ TYPED_TEST(TransformFrameSingleChannel, MoreOutputFramesMoreOutputChannels)
     }
 }
 
-template<typename InterleavedTransformCombination>
-class TransformChannelSingleChannel : public SingleChannelTransformTestBase<InterleavedTransformCombination>
+template<typename InterleavedToNoninterleavedTransformCombination>
+class TransformChannelSingleChannel :
+    public SingleChannelTransformTestBase<InterleavedToNoninterleavedTransformCombination>
 {
 };
 
-TYPED_TEST_SUITE(TransformChannelSingleChannel, SelectedInterleavedTransformCombinations, );
+TYPED_TEST_SUITE(TransformChannelSingleChannel, SelectedInterleavedToNoninterleavedTransformCombinations, );
 
 TYPED_TEST(TransformChannelSingleChannel, Typical)
 {

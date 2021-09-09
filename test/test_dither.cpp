@@ -18,7 +18,7 @@ namespace test
 template<typename Generator>
 class DitherGeneratorTest : public testing::Test
 {
-protected:
+public:
     using generator = Generator;
 
     static constexpr std::size_t num_tests = 10000000;

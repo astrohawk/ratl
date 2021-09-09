@@ -20,7 +20,7 @@ namespace test
 template<typename SampleValueTypeCombination>
 class IntInputBatchConvertSameAsConvert : public ::testing::Test
 {
-protected:
+public:
     using input_sample_value_type = typename SampleValueTypeCombination::input_sample_value_type;
     using output_sample_value_type = typename SampleValueTypeCombination::output_sample_value_type;
 };
@@ -145,7 +145,7 @@ TYPED_TEST(IntInputBatchConvertSameAsConvert, IntInputNetworkInputBatchConvert)
 template<typename OutputSampleValueType>
 class FloatInputBatchConvertSameAsConvert : public ::testing::Test
 {
-protected:
+public:
     using output_sample_value_type = OutputSampleValueType;
 };
 

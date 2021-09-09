@@ -64,7 +64,8 @@ TYPED_TEST(TestRound, MagicEqualToRoundHalfUp)
         auto test_output = static_cast<std::int64_t>(convert<sample_type, MagicConverter>(input));
         EXPECT_EQ(test_output, reference_output);
     }
-    for (float32_t input = ratl::sample_limits<float32_t>::min(); input < -float_min; input = std::nextafter(input, 0.f))
+    for (float32_t input = ratl::sample_limits<float32_t>::min(); input < -float_min;
+         input = std::nextafter(input, 0.f))
     {
         auto reference_output = static_cast<std::int64_t>(convert<sample_type, RoundHalfUpConverter>(input));
         auto test_output = static_cast<std::int64_t>(convert<sample_type, MagicConverter>(input));
