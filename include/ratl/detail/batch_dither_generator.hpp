@@ -44,14 +44,14 @@ class batch_triangular_dither_generator : public triangular_dither_generator
 public:
     inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift()) +
-               (xsimd::batch_cast<int32_t>(rng_()) >> int16_shift());
+        return (xsimd::batch_cast<int32_t>(rng_()) >> static_cast<int32_t>(int16_shift())) +
+               (xsimd::batch_cast<int32_t>(rng_()) >> static_cast<int32_t>(int16_shift()));
     }
 
     inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
     {
-        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift()) +
-                       (xsimd::batch_cast<int32_t>(rng_()) >> float32_shift());
+        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> static_cast<int32_t>(float32_shift())) +
+                       (xsimd::batch_cast<int32_t>(rng_()) >> static_cast<int32_t>(float32_shift()));
         return xsimd::to_float(current) * float32_scaler();
     }
 
@@ -84,7 +84,7 @@ class batch_shaped_dither_generator : public shaped_dither_generator
 public:
     inline detail::batch_sample_value_type_t<int32_t> generate_batch_int16() noexcept
     {
-        return generate_high_pass() >> int16_shift();
+        return generate_high_pass() >> static_cast<int32_t>(int16_shift());
     }
 
     inline detail::batch_sample_value_type_t<float32_t> generate_batch_float32() noexcept
@@ -95,8 +95,8 @@ public:
 private:
     inline detail::batch_sample_value_type_t<int32_t> generate_high_pass() noexcept
     {
-        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift()) +
-                       (xsimd::batch_cast<int32_t>(rng_()) >> initial_shift());
+        auto current = (xsimd::batch_cast<int32_t>(rng_()) >> static_cast<int32_t>(initial_shift())) +
+                       (xsimd::batch_cast<int32_t>(rng_()) >> static_cast<int32_t>(initial_shift()));
         auto high_pass = current - previous_;
         previous_ = current;
         return high_pass;
