@@ -94,7 +94,6 @@ PYBIND11_MODULE(ratl_pybind, m)
             {
                 samples[i] = amplitude * tone(static_cast<double>(i) / samples_per_cycle);
             }
-
             return samples;
         });
     m.def(
@@ -109,14 +108,11 @@ PYBIND11_MODULE(ratl_pybind, m)
                     static_cast<float>(amplitude * tone(static_cast<double>(i) / samples_per_cycle));
             }
 
-            ratl::interleaved<ratl::int32_t> temp1(1, frame_size);
-            ratl::transform(input.begin(), input.end(), temp1.begin());
-
-            ratl::interleaved<ratl::int16_t> temp2(1, frame_size);
-            ratl::transform(temp1.begin(), temp1.end(), temp2.begin());
+            ratl::interleaved<ratl::int16_t> temp(1, frame_size);
+            ratl::transform(input.begin(), input.end(), temp.begin());
 
             ratl::interleaved<ratl::float32_t> output(1, frame_size);
-            ratl::transform(temp2.begin(), temp2.end(), output.begin());
+            ratl::transform(temp.begin(), temp.end(), output.begin());
 
             std::vector<float> samples(frame_size);
             for (std::size_t i = 0; i < samples.size(); ++i)
@@ -139,14 +135,11 @@ PYBIND11_MODULE(ratl_pybind, m)
                     static_cast<float>(amplitude * tone(static_cast<double>(i) / samples_per_cycle));
             }
 
-            ratl::interleaved<ratl::int32_t> temp1(1, frame_size);
-            ratl::transform(input.begin(), input.end(), temp1.begin(), dither_gen);
-
-            ratl::interleaved<ratl::int16_t> temp2(1, frame_size);
-            ratl::transform(temp1.begin(), temp1.end(), temp2.begin(), dither_gen);
+            ratl::interleaved<ratl::int16_t> temp(1, frame_size);
+            ratl::transform(input.begin(), input.end(), temp.begin(), dither_gen);
 
             ratl::interleaved<ratl::float32_t> output(1, frame_size);
-            ratl::transform(temp2.begin(), temp2.end(), output.begin(), dither_gen);
+            ratl::transform(temp.begin(), temp.end(), output.begin(), dither_gen);
 
             std::vector<float> samples(frame_size);
             for (std::size_t i = 0; i < samples.size(); ++i)
