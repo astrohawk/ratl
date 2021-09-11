@@ -5,172 +5,189 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-/**
- * Copyright (C) 2009 Alessandro Ghedini <al3xbio@gmail.com>
- * --------------------------------------------------------------
- * "THE BEER-WARE LICENSE" (Revision 42):
- * Alessandro Ghedini wrote this file. As long as you retain this
- * notice you can do whatever you want with this stuff. If we
- * meet some day, and you think this stuff is worth it, you can
- * buy me a beer in return.
- * --------------------------------------------------------------
- */
-
 // ratl includes
-#include <ratl/ratl.hpp>
+#include "alsa_playback.hpp"
 
 // other includes
-#include <alsa/asoundlib.h>
-#include <cstdio>
-#include <string>
+#include <stdexcept>
 
-#define PCM_DEVICE "default"
-
-double sine(double position)
+namespace ratl
 {
-    return std::sin(2 * M_PI * position);
+namespace example
+{
+namespace alsa
+{
+result::operator bool() const
+{
+    return result_ == 0;
 }
 
-double square(double position)
+const char* result::c_str() const
 {
-    return std::fmod(position, 1.0) >= 0.5 ? 1.0 : -1.0;
+    return result_ != 0 ? snd_strerror(result_) : nullptr;
 }
 
-double triangle(double position)
+optional_result<snd_pcm_access_t> alsa_playback::hardware_params::get_access()
 {
-    return 1 - std::fabs(2 * ((2 * std::fmod(position, 1.0)) - 1));
+    snd_pcm_access_t access;
+    auto res = snd_pcm_hw_params_get_access(pcm_hw_params_.get(), &access);
+    if (res < 0)
+    {
+        return {optional_result<snd_pcm_access_t>::fail{}, res};
+    }
+    return {optional_result<snd_pcm_access_t>::success{}, access};
 }
 
-double sawtooth(double position)
+result alsa_playback::hardware_params::set_access(snd_pcm_access_t access)
 {
-    return 2 * (std::fmod(position, 1.0) - 1);
+    return result(snd_pcm_hw_params_set_access(&pcm_handle_.get(), pcm_hw_params_.get(), access));
 }
 
-static constexpr double Amplitude = 0.5;
-
-int main(int argc, char** argv)
+optional_result<snd_pcm_format_t> alsa_playback::hardware_params::get_format()
 {
-    if (argc < 4)
+    snd_pcm_format_t format;
+    auto res = snd_pcm_hw_params_get_format(pcm_hw_params_.get(), &format);
+    if (res < 0)
     {
-        printf("Usage: %s <sample_rate> <channels> <seconds>\n", argv[0]);
-        return -1;
+        return {optional_result<snd_pcm_format_t>::fail{}, res};
     }
+    return {optional_result<snd_pcm_format_t>::success{}, format};
+}
 
-    auto rate = static_cast<unsigned int>(std::stoul(argv[1]));
-    auto channels = static_cast<unsigned int>(std::stoul(argv[2]));
-    auto seconds = static_cast<unsigned int>(std::stoul(argv[3]));
+result alsa_playback::hardware_params::set_format(snd_pcm_format_t format)
+{
+    return result(snd_pcm_hw_params_set_format(&pcm_handle_.get(), pcm_hw_params_.get(), format));
+}
 
-    /* Open the PCM device in playback mode */
-    snd_pcm_t* pcm_handle;
-    auto open_result = snd_pcm_open(&pcm_handle, PCM_DEVICE, SND_PCM_STREAM_PLAYBACK, 0);
-    if (open_result < 0)
+optional_result<std::size_t> alsa_playback::hardware_params::get_channels()
+{
+    unsigned int channels;
+    auto res = snd_pcm_hw_params_get_channels(pcm_hw_params_.get(), &channels);
+    if (res < 0)
     {
-        printf("ERROR: Can't open \"%s\" PCM device. %s\n", PCM_DEVICE, snd_strerror(open_result));
+        return {optional_result<std::size_t>::fail{}, res};
     }
+    return {optional_result<std::size_t>::success{}, static_cast<std::size_t>(channels)};
+}
 
-    /* Allocate parameters object and fill it with default values*/
-    snd_pcm_hw_params_t* params;
-    snd_pcm_hw_params_alloca(&params);
+result alsa_playback::hardware_params::set_channels(std::size_t channels)
+{
+    return result(
+        snd_pcm_hw_params_set_channels(&pcm_handle_.get(), pcm_hw_params_.get(), static_cast<unsigned int>(channels)));
+}
 
-    snd_pcm_hw_params_any(pcm_handle, params);
-
-    /* Set parameters */
-    auto access_result = snd_pcm_hw_params_set_access(pcm_handle, params, SND_PCM_ACCESS_RW_INTERLEAVED);
-    if (access_result < 0)
+optional_result<std::size_t> alsa_playback::hardware_params::get_rate()
+{
+    unsigned int rate;
+    auto res = snd_pcm_hw_params_get_rate(pcm_hw_params_.get(), &rate, nullptr);
+    if (res < 0)
     {
-        printf("ERROR: Can't set interleaved mode. %s\n", snd_strerror(access_result));
+        return {optional_result<std::size_t>::fail{}, res};
     }
+    return {optional_result<std::size_t>::success{}, static_cast<std::size_t>(rate)};
+}
 
-    auto format_result = snd_pcm_hw_params_set_format(pcm_handle, params, SND_PCM_FORMAT_S16_LE);
-    if (format_result < 0)
+result alsa_playback::hardware_params::set_rate(std::size_t rate)
+{
+    return result(snd_pcm_hw_params_set_rate(&pcm_handle_.get(), pcm_hw_params_.get(), rate, 0));
+}
+
+optional_result<std::size_t> alsa_playback::hardware_params::get_period_time()
+{
+    unsigned int period_time;
+    auto res = snd_pcm_hw_params_get_period_time(pcm_hw_params_.get(), &period_time, nullptr);
+    if (res < 0)
     {
-        printf("ERROR: Can't set format. %s\n", snd_strerror(format_result));
+        return {optional_result<std::size_t>::fail{}, res};
     }
+    return {optional_result<std::size_t>::success{}, static_cast<std::size_t>(period_time)};
+}
 
-    auto channels_result = snd_pcm_hw_params_set_channels(pcm_handle, params, channels);
-    if (channels_result < 0)
+result alsa_playback::hardware_params::set_period_time(std::size_t period_time)
+{
+    return result(snd_pcm_hw_params_set_period_time(
+        &pcm_handle_.get(), pcm_hw_params_.get(), static_cast<unsigned int>(period_time), 0));
+}
+
+optional_result<std::size_t> alsa_playback::hardware_params::get_period_size()
+{
+    snd_pcm_uframes_t period_size;
+    auto res = snd_pcm_hw_params_get_period_size(pcm_hw_params_.get(), &period_size, nullptr);
+    if (res < 0)
     {
-        printf("ERROR: Can't set channels number. %s\n", snd_strerror(channels_result));
+        return {optional_result<std::size_t>::fail{}, res};
     }
+    return {optional_result<std::size_t>::success{}, static_cast<std::size_t>(period_size)};
+}
 
-    auto rate_result = snd_pcm_hw_params_set_rate_near(pcm_handle, params, &rate, nullptr);
-    if (rate_result < 0)
+result alsa_playback::hardware_params::set_period_size(std::size_t period_size)
+{
+    return result(snd_pcm_hw_params_set_period_size(
+        &pcm_handle_.get(), pcm_hw_params_.get(), static_cast<snd_pcm_uframes_t>(period_size), 0));
+}
+
+alsa_playback::hardware_params::hardware_params(pcm_ptr& pcm) :
+    pcm_handle_(*pcm), pcm_hw_params_(make_hardware_params_ptr(pcm_handle_))
+{
+}
+
+snd_pcm_hw_params_t* alsa_playback::hardware_params::get()
+{
+    return pcm_hw_params_.get();
+}
+
+alsa_playback::hardware_params::pcm_hw_params_ptr alsa_playback::hardware_params::make_hardware_params_ptr(
+    std::reference_wrapper<snd_pcm_t> pcm)
+{
+    snd_pcm_hw_params_t* pcm_hw_params;
+    auto result = snd_pcm_hw_params_malloc(&pcm_hw_params);
+    if (result < 0)
     {
-        printf("ERROR: Can't set rate. %s\n", snd_strerror(rate_result));
+        throw std::runtime_error(std::string() + "Can't malloc hw params: " + snd_strerror(result));
     }
-
-    /* Write parameters */
-    auto params_result = snd_pcm_hw_params(pcm_handle, params);
-    if (params_result < 0)
+    result = snd_pcm_hw_params_any(&pcm.get(), pcm_hw_params);
+    if (result < 0)
     {
-        printf("ERROR: Can't set harware parameters. %s\n", snd_strerror(params_result));
+        throw std::runtime_error(
+            std::string() + "Unable to fill hw params with full configuration space: " + snd_strerror(result));
     }
-
-    /* Resume information */
-    printf("PCM name: '%s'\n", snd_pcm_name(pcm_handle));
-    printf("PCM state: %s\n", snd_pcm_state_name(snd_pcm_state(pcm_handle)));
-
-    unsigned int tmp_channels;
-    snd_pcm_hw_params_get_channels(params, &tmp_channels);
-    printf("channels: %i ", tmp_channels);
-    if (tmp_channels == 1)
-    {
-        printf("(mono)\n");
-    }
-    else if (tmp_channels == 2)
-    {
-        printf("(stereo)\n");
-    }
-
-    unsigned int tmp_rate;
-    snd_pcm_hw_params_get_rate(params, &tmp_rate, nullptr);
-    printf("rate: %d bps\n", tmp_rate);
-
-    printf("seconds: %d\n", seconds);
-
-    /* Allocate buffer to hold single period */
-    snd_pcm_uframes_t frames;
-    snd_pcm_hw_params_get_period_size(params, &frames, nullptr);
-
-    ratl::interleaved<ratl::float32_t> float_interleaved(tmp_channels, frames);
-    ratl::interleaved<ratl::int16_t> int_interleaved(tmp_channels, frames);
-
-    unsigned int tmp_period;
-    snd_pcm_hw_params_get_period_time(params, &tmp_period, nullptr);
-
-    std::size_t num_loops = (seconds * 1000000) / tmp_period;
-    std::size_t wave_position = 0;
-    std::size_t wave_frames = tmp_rate / 1000;
-    ratl::dither_generator dither_gen;
-    for (std::size_t i = 0; i < num_loops; ++i)
-    {
-        for (auto frame : float_interleaved)
+    return {
+        pcm_hw_params,
+        [](snd_pcm_hw_params_t* pcm_hw_params)
         {
-            auto sine_sample = ratl::sample<ratl::float32_t>(static_cast<float>(
-                sine(static_cast<double>(wave_position) / static_cast<double>(wave_frames)) * Amplitude));
-            for (auto& sample : frame)
-            {
-                sample = sine_sample;
-            }
-            wave_position = (wave_position + 1) % wave_frames;
-        }
-
-        ratl::transform(float_interleaved.begin(), float_interleaved.end(), int_interleaved.begin(), dither_gen);
-
-        auto writei_result = snd_pcm_writei(pcm_handle, int_interleaved.data(), int_interleaved.frames());
-        if (writei_result == -EPIPE)
-        {
-            printf("XRUN.\n");
-            snd_pcm_prepare(pcm_handle);
-        }
-        else if (writei_result < 0)
-        {
-            printf("ERROR. Can't write to PCM device. %s\n", snd_strerror(writei_result));
-        }
-    }
-
-    snd_pcm_drain(pcm_handle);
-    snd_pcm_close(pcm_handle);
-
-    return 0;
+            snd_pcm_hw_params_free(pcm_hw_params);
+        }};
 }
+
+alsa_playback::alsa_playback(const std::string& device_name) : pcm_handle_(make_pcm_ptr(device_name)) {}
+
+alsa_playback::hardware_params alsa_playback::construct_hardware_params()
+{
+    return hardware_params(pcm_handle_);
+}
+
+result alsa_playback::write_hardware_params(hardware_params& params)
+{
+    return result(snd_pcm_hw_params(pcm_handle_.get(), params.get()));
+}
+
+alsa_playback::pcm_ptr alsa_playback::make_pcm_ptr(const std::string& device_name)
+{
+    snd_pcm_t* pcm;
+    auto result = snd_pcm_open(&pcm, device_name.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
+    if (result < 0)
+    {
+        throw std::runtime_error(std::string() + "Can't open " + device_name + " PCM device: " + snd_strerror(result));
+    }
+    return {
+        pcm,
+        [](snd_pcm_t* pcm)
+        {
+            snd_pcm_drain(pcm);
+            snd_pcm_close(pcm);
+        }};
+}
+
+} // namespace alsa
+} // namespace example
+} // namespace ratl
