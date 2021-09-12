@@ -29,7 +29,7 @@ namespace detail
 {
 // reference_sample_converter_impl
 
-template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator, typename = void>
 struct reference_sample_converter_impl;
 
 template<typename SampleValueType, typename DitherGenerator>
@@ -152,7 +152,11 @@ constexpr int24_t reference_sample_converter_impl<sample<int32_t>, sample<int24_
 #endif
 
 template<typename SampleValueType, typename DitherGenerator>
-struct reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
+struct reference_sample_converter_impl<
+    sample<SampleValueType>,
+    sample<float32_t>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
     static constexpr float32_t scaler = symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
@@ -166,7 +170,11 @@ struct reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t
 // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
 template<typename SampleValueType, typename DitherGenerator>
-struct reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
+struct reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
 private:
     static constexpr float32_t sample_in_max = static_cast<float32_t>(sample_limits<SampleValueType>::max()) *
@@ -196,24 +204,18 @@ public:
 
 #if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType, typename DitherGenerator>
-constexpr SampleValueType
-    reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::sample_out_max;
+constexpr SampleValueType reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::sample_out_max;
 template<typename SampleValueType, typename DitherGenerator>
-constexpr SampleValueType
-    reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::sample_out_min;
+constexpr SampleValueType reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::sample_out_min;
 #endif
-
-// This is required as sample_converter<float32_t, sample_type> is more specific than
-// sample_converter<sample_type, sample_type>
-
-template<typename DitherGenerator>
-struct reference_sample_converter_impl<sample<float32_t>, sample<float32_t>, DitherGenerator>
-{
-    static inline float32_t convert(float32_t input, DitherGenerator&) noexcept
-    {
-        return input;
-    }
-};
 
 template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<InputSampleType>, network_sample<OutputSampleType>, DitherGenerator>

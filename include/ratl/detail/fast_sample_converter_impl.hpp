@@ -28,7 +28,7 @@ namespace detail
 {
 // fast_sample_converter_impl
 
-template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator, typename = void>
 struct fast_sample_converter_impl;
 
 template<typename SampleValueType, typename DitherGenerator>
@@ -106,7 +106,11 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenera
 };
 
 template<typename SampleValueType, typename DitherGenerator>
-struct fast_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
+struct fast_sample_converter_impl<
+    sample<SampleValueType>,
+    sample<float32_t>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
     static constexpr float32_t scaler = asymmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
@@ -117,7 +121,11 @@ struct fast_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, Di
 };
 
 template<typename SampleValueType, typename DitherGenerator>
-struct fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
+struct fast_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
 private:
     static constexpr float32_t scaler =
@@ -128,18 +136,6 @@ public:
     {
         return narrowing_cast<SampleValueType>(
             round_float32_to_int32_fast((input * scaler) + dither_gen.generate_float32()));
-    }
-};
-
-// This is required as sample_converter<float32_t, sample_type> is more specific than
-// sample_converter<sample_type, sample_type>
-
-template<typename DitherGenerator>
-struct fast_sample_converter_impl<sample<float32_t>, sample<float32_t>, DitherGenerator>
-{
-    static inline float32_t convert(float32_t input, DitherGenerator&) noexcept
-    {
-        return input;
     }
 };
 

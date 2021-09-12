@@ -30,7 +30,7 @@ namespace detail
 
 // base_batch_reference_sample_converter_impl
 
-template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
+template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator, typename = void>
 struct base_batch_reference_sample_converter_impl;
 
 template<typename SampleValueType, typename DitherGenerator>
@@ -188,7 +188,11 @@ constexpr int32_t
 #    endif
 
 template<typename SampleValueType, typename DitherGenerator>
-struct base_batch_reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<
+    sample<SampleValueType>,
+    sample<float32_t>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
     static constexpr float32_t scaler = symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
@@ -201,12 +205,19 @@ struct base_batch_reference_sample_converter_impl<sample<SampleValueType>, sampl
 
 #    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType, typename DitherGenerator>
-constexpr float32_t
-    base_batch_reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>::scaler;
+constexpr float32_t base_batch_reference_sample_converter_impl<
+    sample<SampleValueType>,
+    sample<float32_t>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::scaler;
 #    endif
 
 template<typename SampleValueType, typename DitherGenerator>
-struct base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
+struct base_batch_reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
 private:
     static constexpr float32_t sample_in_max = static_cast<float32_t>(sample_limits<SampleValueType>::max()) *
@@ -233,35 +244,36 @@ public:
 
 #    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType, typename DitherGenerator>
-constexpr float32_t
-    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
-        sample_in_max;
+constexpr float32_t base_batch_reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::sample_in_max;
 template<typename SampleValueType, typename DitherGenerator>
-constexpr SampleValueType
-    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
-        sample_out_max;
+constexpr SampleValueType base_batch_reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::sample_out_max;
 template<typename SampleValueType, typename DitherGenerator>
-constexpr float32_t
-    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
-        sample_in_min;
+constexpr float32_t base_batch_reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::sample_in_min;
 template<typename SampleValueType, typename DitherGenerator>
-constexpr SampleValueType
-    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::
-        sample_out_min;
+constexpr SampleValueType base_batch_reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::sample_out_min;
 template<typename SampleValueType, typename DitherGenerator>
-constexpr float32_t
-    base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::scaler;
+constexpr float32_t base_batch_reference_sample_converter_impl<
+    sample<float32_t>,
+    sample<SampleValueType>,
+    DitherGenerator,
+    std::enable_if_t<sample_limits<SampleValueType>::is_integer>>::scaler;
 #    endif
-
-template<typename DitherGenerator>
-struct base_batch_reference_sample_converter_impl<sample<float32_t>, sample<float32_t>, DitherGenerator>
-{
-    static inline batch_sample_value_type_t<float32_t> batch_convert(
-        const batch_sample_value_type_t<float32_t>& input, DitherGenerator&) noexcept
-    {
-        return input;
-    }
-};
 
 template<typename InputSampleType, typename OutputSampleType, typename DitherGenerator>
 struct base_batch_reference_sample_converter_impl<
