@@ -59,9 +59,6 @@ struct reference_sample_converter_impl<sample<int16_t>, sample<int32_t>, DitherG
     }
 };
 
-// sample >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
-// this is added to the rounding constant to perform round half away from zero as opposed to just round half up
-
 template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
@@ -73,6 +70,13 @@ struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherG
         DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
     static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
 
+    static inline int32_t round(int32_t input)
+    {
+        // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
+        // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
+        return input + (rounding + (input >> 31));
+    }
+
     static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
         if (input >= sample_in_max)
@@ -80,8 +84,7 @@ struct reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherG
             return sample_out_max;
         }
         return narrowing_cast<int16_t>(
-            (((input + (rounding + (input >> 31))) << pre_dither_shift) + dither_gen.generate_int16()) >>
-            post_dither_shift);
+            ((round(input) << pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
 
@@ -99,9 +102,6 @@ struct reference_sample_converter_impl<sample<int24_t>, sample<int32_t>, DitherG
     }
 };
 
-// sample >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
-// this is added to the rounding constant to perform round half away from zero as opposed to just round half up
-
 template<typename DitherGenerator>
 struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
@@ -112,6 +112,13 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherG
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
     static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 
+    static inline int32_t round(int32_t input)
+    {
+        // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
+        // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
+        return input + (rounding + (input >> 31));
+    }
+
     static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
         if (input >= sample_in_max)
@@ -119,8 +126,7 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherG
             return sample_out_max;
         }
         return narrowing_cast<int16_t>(
-            (((input + (rounding + (input >> 31))) >> pre_dither_shift) + dither_gen.generate_int16()) >>
-            post_dither_shift);
+            ((round(input) >> pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
 
@@ -136,13 +142,20 @@ struct reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherG
     static constexpr int24_t sample_out_max = sample_limits<int24_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x80);
 
+    static inline int32_t round(int32_t input)
+    {
+        // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
+        // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
+        return input + (rounding + (input >> 31));
+    }
+
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
         if (input >= sample_in_max)
         {
             return sample_out_max;
         }
-        return narrowing_cast<int24_t>((input + (rounding + (input >> 31))) >> 8);
+        return narrowing_cast<int24_t>(round(input) >> 8);
     }
 };
 
@@ -165,9 +178,6 @@ struct reference_sample_converter_impl<
         return static_cast<float32_t>(input) * scaler;
     }
 };
-
-// sample >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
-// this is added to the rounding constant to perform round half away from zero as opposed to just round half up
 
 template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<

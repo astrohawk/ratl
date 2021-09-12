@@ -74,13 +74,19 @@ struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_
         DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
     static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
 
+    static inline batch_sample_value_type_t<int24_t> round(const batch_sample_value_type_t<int24_t>& input)
+    {
+        // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
+        // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
+        return input + (rounding + (input >> 31));
+    }
+
     static inline batch_sample_value_type_t<int16_t> batch_convert(
         const batch_sample_value_type_t<int24_t>& input, DitherGenerator& dither_gen) noexcept
     {
         static const batch_sample_value_type_t<int24_t> max(sample_out_max);
         auto cmp = input >= sample_in_max;
-        auto temp = (((input + (rounding + (input >> 31))) << pre_dither_shift) + dither_gen.generate_batch_int16()) >>
-                    post_dither_shift;
+        auto temp = ((round(input) << pre_dither_shift) + dither_gen.generate_batch_int16()) >> post_dither_shift;
         return batch_sample_cast<int16_t>(xsimd::select(cmp, max, temp));
     }
 };
@@ -126,13 +132,19 @@ struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
     static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 
+    static inline batch_sample_value_type_t<int32_t> round(const batch_sample_value_type_t<int32_t>& input)
+    {
+        // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
+        // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
+        return input + (rounding + (input >> 31));
+    }
+
     static inline batch_sample_value_type_t<int16_t> batch_convert(
         const batch_sample_value_type_t<int32_t>& input, DitherGenerator& dither_gen) noexcept
     {
         static const batch_sample_value_type_t<int32_t> max(sample_out_max);
         auto cmp = input >= sample_in_max;
-        auto temp = (((input + (rounding + (input >> 31))) >> pre_dither_shift) + dither_gen.generate_batch_int16()) >>
-                    post_dither_shift;
+        auto temp = ((round(input) >> pre_dither_shift) + dither_gen.generate_batch_int16()) >> post_dither_shift;
         return batch_sample_cast<int16_t>(xsimd::select(cmp, max, temp));
     }
 };
@@ -165,12 +177,19 @@ struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int24_
     static constexpr int24_t sample_out_max = sample_limits<int24_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x80);
 
+    static inline batch_sample_value_type_t<int32_t> round(const batch_sample_value_type_t<int32_t>& input)
+    {
+        // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
+        // this is added to the rounding constant to perform round half away from zero as opposed to just round half up
+        return input + (rounding + (input >> 31));
+    }
+
     static inline batch_sample_value_type_t<int24_t> batch_convert(
         const batch_sample_value_type_t<int32_t>& input, DitherGenerator&) noexcept
     {
         static const batch_sample_value_type_t<int32_t> max(sample_out_max);
         auto cmp = input >= sample_in_max;
-        auto temp = (input + (rounding + (input >> 31))) >> 8;
+        auto temp = round(input) >> 8;
         return batch_sample_cast<int24_t>(xsimd::select(cmp, max, temp));
     }
 };
