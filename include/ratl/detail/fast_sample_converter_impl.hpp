@@ -109,7 +109,7 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenera
 template<typename SampleValueType, typename DitherGenerator>
 struct fast_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
 {
-    static constexpr float32_t scaler = float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t scaler = asymmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
     static inline float32_t convert(SampleValueType input, DitherGenerator&) noexcept
     {
@@ -121,16 +121,14 @@ template<typename SampleValueType, typename DitherGenerator>
 struct fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
 {
 private:
-    static constexpr float32_t positive_scaler =
-        static_cast<float32_t>(sample_limits<SampleValueType>::max()) - DitherGenerator::float32_max;
-    static constexpr float32_t negative_scaler =
-        -static_cast<float32_t>(sample_limits<SampleValueType>::min()) - DitherGenerator::float32_max;
+    static constexpr float32_t scaler =
+        asymmetric_float_convert_traits<SampleValueType>::float_to_int_scaler - DitherGenerator::float32_max;
 
 public:
     static inline SampleValueType convert(float32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return narrowing_cast<SampleValueType>(round_float32_to_int32_fast(
-            (input * (input < 0 ? negative_scaler : positive_scaler)) + dither_gen.generate_float32()));
+        return narrowing_cast<SampleValueType>(
+            round_float32_to_int32_fast((input * scaler) + dither_gen.generate_float32()));
     }
 };
 

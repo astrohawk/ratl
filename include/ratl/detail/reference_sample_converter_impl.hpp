@@ -154,7 +154,7 @@ constexpr int24_t reference_sample_converter_impl<sample<int32_t>, sample<int24_
 template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
 {
-    static constexpr float32_t scaler = float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t scaler = symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
     static inline float32_t convert(SampleValueType input, DitherGenerator&) noexcept
     {
@@ -169,14 +169,14 @@ template<typename SampleValueType, typename DitherGenerator>
 struct reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
 {
 private:
-    static constexpr float32_t sample_in_max =
-        static_cast<float32_t>(sample_limits<SampleValueType>::max()) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t sample_in_max = static_cast<float32_t>(sample_limits<SampleValueType>::max()) *
+                                               symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
     static constexpr SampleValueType sample_out_max = sample_limits<SampleValueType>::max();
-    static constexpr float32_t sample_in_min =
-        static_cast<float32_t>(sample_limits<SampleValueType>::min()) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t sample_in_min = static_cast<float32_t>(sample_limits<SampleValueType>::min()) *
+                                               symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
     static constexpr SampleValueType sample_out_min = sample_limits<SampleValueType>::min();
     static constexpr float32_t scaler =
-        float_convert_traits<SampleValueType>::multiplier - DitherGenerator::float32_max;
+        symmetric_float_convert_traits<SampleValueType>::float_to_int_scaler - DitherGenerator::float32_max;
 
 public:
     static inline SampleValueType convert(float32_t input, DitherGenerator& dither_gen) noexcept
@@ -185,7 +185,7 @@ public:
         {
             return sample_out_max;
         }
-        if (RATL_UNLIKELY(input < sample_in_min))
+        if (RATL_UNLIKELY(input <= sample_in_min))
         {
             return sample_out_min;
         }

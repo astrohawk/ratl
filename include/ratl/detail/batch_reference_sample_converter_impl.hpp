@@ -190,7 +190,7 @@ constexpr int32_t
 template<typename SampleValueType, typename DitherGenerator>
 struct base_batch_reference_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
 {
-    static constexpr float32_t scaler = float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t scaler = symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
     static inline batch_sample_value_type_t<float32_t> batch_convert(
         const batch_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
@@ -209,14 +209,14 @@ template<typename SampleValueType, typename DitherGenerator>
 struct base_batch_reference_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
 {
 private:
-    static constexpr float32_t sample_in_max =
-        static_cast<float32_t>(sample_limits<SampleValueType>::max()) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t sample_in_max = static_cast<float32_t>(sample_limits<SampleValueType>::max()) *
+                                               symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
     static constexpr SampleValueType sample_out_max = sample_limits<SampleValueType>::max();
-    static constexpr float32_t sample_in_min =
-        static_cast<float32_t>(sample_limits<SampleValueType>::min()) * float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t sample_in_min = static_cast<float32_t>(sample_limits<SampleValueType>::min()) *
+                                               symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
     static constexpr SampleValueType sample_out_min = sample_limits<SampleValueType>::min();
     static constexpr float32_t scaler =
-        float_convert_traits<SampleValueType>::multiplier - DitherGenerator::float32_max;
+        symmetric_float_convert_traits<SampleValueType>::float_to_int_scaler - DitherGenerator::float32_max;
 
 public:
     static inline batch_sample_value_type_t<SampleValueType> batch_convert(
@@ -226,7 +226,7 @@ public:
         static const batch_sample_value_type_t<int32_t> max(sample_out_max);
         auto out = batch_round_float32_to_int32((input * scaler) + dither_gen.generate_batch_float32());
         out = xsimd::select(xsimd::bool_cast(input >= sample_in_max), max, out);
-        out = xsimd::select(xsimd::bool_cast(input < sample_in_min), min, out);
+        out = xsimd::select(xsimd::bool_cast(input <= sample_in_min), min, out);
         return batch_sample_cast<SampleValueType>(out);
     }
 };

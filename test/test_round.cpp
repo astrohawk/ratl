@@ -24,7 +24,7 @@ SampleValueType convert(ratl::float32_t sample)
         return ratl::sample_limits<SampleValueType>::min();
     }
     return static_cast<SampleValueType>(
-        Converter::convert(sample * detail::float_convert_traits<SampleValueType>::multiplier));
+        Converter::convert(sample * detail::symmetric_float_convert_traits<SampleValueType>::float_to_int_scaler));
 }
 
 struct RoundHalfUpConverter

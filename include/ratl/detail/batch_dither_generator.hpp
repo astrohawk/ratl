@@ -71,7 +71,7 @@ private:
     }
     static constexpr float32_t float32_scaler() noexcept
     {
-        return detail::float_convert_traits<int32_t>::divisor;
+        return detail::symmetric_float_convert_traits<int32_t>::int_to_float_scaler;
     }
 
     static constexpr std::uint32_t default_seed = 0xfad46483;
@@ -117,7 +117,7 @@ private:
     }
     static constexpr float32_t float32_scaler() noexcept
     {
-        return detail::float_convert_traits<int32_t>::divisor;
+        return detail::symmetric_float_convert_traits<int32_t>::int_to_float_scaler;
     }
 
     static constexpr std::uint32_t default_seed = 0x8914c30c;

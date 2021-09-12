@@ -60,7 +60,7 @@ private:
     static constexpr std::uint32_t default_seed = 0x1942da21;
     static constexpr std::size_t int16_shift = (32 - int16_bits);
     static constexpr std::size_t float32_shift = 1;
-    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
+    static constexpr float32_t float32_scaler = detail::symmetric_float_convert_traits<int32_t>::int_to_float_scaler;
 
     detail::linear_congruential_generator rng_{default_seed};
 };
@@ -94,7 +94,7 @@ private:
     static constexpr std::uint32_t default_seed = 0xac9ad704;
     static constexpr std::size_t initial_shift = 2;
     static constexpr std::size_t int16_shift = 32 - int16_bits - (initial_shift - 1);
-    static constexpr float32_t float32_scaler = detail::float_convert_traits<int32_t>::divisor;
+    static constexpr float32_t float32_scaler = detail::symmetric_float_convert_traits<int32_t>::int_to_float_scaler;
 
     detail::linear_congruential_generator rng_{default_seed};
     int32_t previous_{};

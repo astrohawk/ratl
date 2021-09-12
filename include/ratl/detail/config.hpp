@@ -33,9 +33,9 @@
 
 #if defined(__clang__)
 #    define RATL_CPP_COMPILER_CLANG
-#if defined(_MSC_VER)
-#    define RATL_CPP_COMPILER_BACKEND_MSVC
-#endif
+#    if defined(_MSC_VER)
+#        define RATL_CPP_COMPILER_BACKEND_MSVC
+#    endif
 #elif defined(__GNUC__)
 #    define RATL_CPP_COMPILER_GCC
 #elif defined(_MSC_VER)

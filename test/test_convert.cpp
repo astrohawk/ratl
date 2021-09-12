@@ -417,7 +417,7 @@ TYPED_TEST(ConvertFloat32Correct, Typical)
     using output_sample_type = typename TestFixture::output_sample_type;
     using reference_converter = typename TestFixture::reference_converter;
 
-    auto min = detail::float_convert_traits<output_sample_value_type>::divisor / 10;
+    auto min = detail::symmetric_float_convert_traits<output_sample_value_type>::int_to_float_scaler / 10;
     for (float32_t f = 1.1f; f > min; f = std::nextafter(f, 0.f))
     {
         auto input_sample_type = sample<float32_t>(f);

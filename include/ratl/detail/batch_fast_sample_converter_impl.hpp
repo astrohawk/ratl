@@ -141,7 +141,7 @@ struct base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, D
 template<typename SampleValueType, typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<SampleValueType>, sample<float32_t>, DitherGenerator>
 {
-    static constexpr float32_t scaler = float_convert_traits<SampleValueType>::divisor;
+    static constexpr float32_t scaler = asymmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
     static inline batch_sample_value_type_t<float32_t> batch_convert(
         const batch_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
@@ -160,30 +160,22 @@ template<typename SampleValueType, typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>
 {
 private:
-    static constexpr float32_t positive_scaler =
-        static_cast<float32_t>(sample_limits<SampleValueType>::max()) - DitherGenerator::float32_max;
-    static constexpr float32_t negative_scaler =
-        -static_cast<float32_t>(sample_limits<SampleValueType>::min()) - DitherGenerator::float32_max;
+    static constexpr float32_t scaler =
+        asymmetric_float_convert_traits<SampleValueType>::float_to_int_scaler - DitherGenerator::float32_max;
 
 public:
     static inline batch_sample_value_type_t<SampleValueType> batch_convert(
         batch_sample_value_type_t<float32_t> input, DitherGenerator& dither_gen) noexcept
     {
-        auto dither = dither_gen.generate_batch_float32();
-        auto positive_out = batch_round_float32_to_int32((input * positive_scaler) + dither);
-        auto negative_out = batch_round_float32_to_int32((input * negative_scaler) + dither);
         return batch_sample_cast<SampleValueType>(
-            xsimd::select(xsimd::bool_cast(input < 0), negative_out, positive_out));
+            batch_round_float32_to_int32((input * scaler) + dither_gen.generate_batch_float32()));
     }
 };
 
 #    if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType, typename DitherGenerator>
 constexpr float32_t
-    base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::positive_scaler;
-template<typename SampleValueType, typename DitherGenerator>
-constexpr float32_t
-    base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::negative_scaler;
+    base_batch_fast_sample_converter_impl<sample<float32_t>, sample<SampleValueType>, DitherGenerator>::scaler;
 #    endif
 
 template<typename DitherGenerator>

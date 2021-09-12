@@ -15,20 +15,39 @@ namespace ratl
 {
 namespace detail
 {
-// float_convert_traits
+// symmetric_float_convert_traits
 
-template<typename SampleValueType>
-struct float_convert_traits
+template<typename IntSampleValueType>
+struct symmetric_float_convert_traits
 {
-    static constexpr float32_t multiplier = -static_cast<float32_t>(sample_limits<SampleValueType>::min());
-    static constexpr float32_t divisor = 1.f / multiplier;
+    static_assert(sample_limits<IntSampleValueType>::is_integer, "IntSampleValueType must be an integer type");
+    static constexpr float32_t float_to_int_scaler = -static_cast<float32_t>(sample_limits<IntSampleValueType>::min());
+    static constexpr float32_t int_to_float_scaler = 1.f / float_to_int_scaler;
 };
 
 #if !defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType>
-constexpr float32_t float_convert_traits<SampleValueType>::multiplier;
+constexpr float32_t symmetric_float_convert_traits<SampleValueType>::float_to_int_scaler;
 template<typename SampleValueType>
-constexpr float32_t float_convert_traits<SampleValueType>::divisor;
+constexpr float32_t symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
+#endif
+
+// asymmetric_float_convert_traits
+
+template<typename IntSampleValueType>
+struct asymmetric_float_convert_traits
+{
+    static_assert(sample_limits<IntSampleValueType>::is_integer, "IntSampleValueType must be an integer type");
+    static constexpr float32_t float_to_int_scaler = static_cast<float32_t>(sample_limits<IntSampleValueType>::max());
+    static constexpr float32_t int_to_float_scaler =
+        1.f / -static_cast<float32_t>(sample_limits<IntSampleValueType>::min());
+};
+
+#if !defined(RATL_CPP_VERSION_HAS_CPP17)
+template<typename SampleValueType>
+constexpr float32_t asymmetric_float_convert_traits<SampleValueType>::float_to_int_scaler;
+template<typename SampleValueType>
+constexpr float32_t asymmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 #endif
 
 } // namespace detail
