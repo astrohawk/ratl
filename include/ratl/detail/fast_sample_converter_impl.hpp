@@ -16,7 +16,6 @@
 #include <ratl/detail/round.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
-#include <ratl/sample_limits.hpp>
 
 // other includes
 #include <cfenv>

@@ -16,7 +16,6 @@
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/convert_traits.hpp>
 #include <ratl/detail/fast_sample_converter_impl.hpp>
-#include <ratl/sample_limits.hpp>
 
 // other includes
 #include <cmath>
