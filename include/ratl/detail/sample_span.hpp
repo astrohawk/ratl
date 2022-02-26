@@ -92,12 +92,7 @@ public:
 
     inline void swap(sample_span& other) noexcept;
 
-    inline sample_pointer data() noexcept
-    {
-        return start_;
-    }
-
-    inline const_sample_pointer data() const noexcept
+    inline sample_pointer data() const noexcept
     {
         return start_;
     }
@@ -264,12 +259,7 @@ public:
 
     inline void swap(sample_span& other) noexcept;
 
-    inline sample_pointer data() noexcept
-    {
-        return start_;
-    }
-
-    inline const_sample_pointer data() const noexcept
+    inline sample_pointer data() const noexcept
     {
         return start_;
     }
