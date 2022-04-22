@@ -60,18 +60,20 @@ private:
     template<typename Iterator, std::size_t... I>
     static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
     {
+        alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_type::size];
+        input.store_aligned(buffer);
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
-        (store_element<I>(input, output), ...);
+        (store_element<I>(buffer, output), ...);
 #    else
-        int fake[] = {(store_element<I>(input, output), 0)...};
+        int fake[] = {(store_element<I>(buffer, output), 0)...};
         (void)fake;
 #    endif
     }
 
     template<std::size_t I, typename Iterator>
-    static inline void store_element(const batch_type& input, Iterator output) noexcept
+    static inline void store_element(const typename batch_type::value_type* buffer, Iterator output) noexcept
     {
-        output[I].get() = convert_output(input[I]);
+        output[I].get() = convert_output(buffer[I]);
     }
 
     static inline SampleValueType convert_output(typename batch_type::value_type input)
@@ -113,18 +115,20 @@ private:
     template<typename Iterator, std::size_t... I>
     static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
     {
+        alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_type::size];
+        input.store_aligned(buffer);
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
-        (store_element<I>(input, output), ...);
+        (store_element<I>(buffer, output), ...);
 #    else
-        int fake[] = {(store_element<I>(input, output), 0)...};
+        int fake[] = {(store_element<I>(buffer, output), 0)...};
         (void)fake;
 #    endif
     }
 
     template<std::size_t I, typename Iterator>
-    static inline void store_element(const batch_type& input, Iterator output) noexcept
+    static inline void store_element(const typename batch_type::value_type* buffer, Iterator output) noexcept
     {
-        output[I].get() = convert_output(input[I]);
+        output[I].get() = convert_output(buffer[I]);
     }
 
     static inline network_sample_value_type_t<SampleValueType> convert_output(typename batch_type::value_type input)
