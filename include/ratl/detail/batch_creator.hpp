@@ -60,7 +60,7 @@ private:
     template<typename Iterator, std::size_t... I>
     static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
     {
-        alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_type::size];
+        alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_size];
         input.store_aligned(buffer);
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
         (store_element<I>(buffer, output), ...);
@@ -115,7 +115,7 @@ private:
     template<typename Iterator, std::size_t... I>
     static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
     {
-        alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_type::size];
+        alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_size];
         input.store_aligned(buffer);
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
         (store_element<I>(buffer, output), ...);
