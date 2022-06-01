@@ -109,6 +109,7 @@ if (TARGET xsimd)
     target_link_libraries(ratl INTERFACE
             xsimd)
 endif ()
+add_library(ratl::ratl ALIAS ratl)
 
 option(RATL_BUILD_TESTING "Build tests" OFF)
 if (RATL_BUILD_TESTING)

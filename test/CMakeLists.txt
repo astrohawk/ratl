@@ -15,7 +15,7 @@ function(ratl_add_test test_target)
     add_executable(${test_target}
             ${CMAKE_CURRENT_LIST_DIR}/${test_target}.cpp)
     target_link_libraries(${test_target}
-            ratl
+            ratl::ratl
             GTest::Main)
     if (UNIX AND CMAKE_CXX_COMPILER_ID MATCHES "(Clang|AppleClang)")
         target_compile_options(${test_target}

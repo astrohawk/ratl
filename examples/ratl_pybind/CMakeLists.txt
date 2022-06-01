@@ -10,5 +10,5 @@ if (TARGET pybind11::pybind11)
 
     pybind11_add_module(ratl_pybind ${CMAKE_CURRENT_LIST_DIR}/ratl_pybind.cpp)
     target_link_libraries(ratl_pybind PRIVATE
-            ratl)
+            ratl::ratl)
 endif ()

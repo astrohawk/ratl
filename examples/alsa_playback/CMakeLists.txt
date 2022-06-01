@@ -14,7 +14,7 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL Linux)
                 ${CMAKE_CURRENT_LIST_DIR}/alsa_playback.cpp
                 ${CMAKE_CURRENT_LIST_DIR}/alsa_playback_example.cpp)
         target_link_libraries(alsa_playback
-                ratl
+                ratl::ratl
                 ALSA::ALSA)
     endif ()
 endif ()
