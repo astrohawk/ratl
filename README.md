@@ -38,8 +38,6 @@ ratl::transform(input.begin(), input.end(), output.begin());
 
 ## Supported Platforms
 
-Ratl uses C++14 and therefore requires a compiler with support for that.
-
 ### Operating Systems
 
 1. Linux
@@ -47,6 +45,8 @@ Ratl uses C++14 and therefore requires a compiler with support for that.
 1. Windows
 
 ### Compilers
+
+Ratl uses C++14 and is therefore limited to a compiler that has support for this.
 
 1. gcc 5.0+
 1. clang 3.4+
