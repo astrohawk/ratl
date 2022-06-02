@@ -110,7 +110,7 @@ public:
 //                  << "sample_rate = " << (static_cast<double>(clock_duration::period::den) * sample_duration_per_clock_) << ", "
 //                  << "sample_projection_clock_duration = " << std::llround(sample_projection_clock_duration) << ", "
 //                  << "projected_sample_duration = " << projected_sample_duration << ", "
-//                  << "actual_sample_duration = " << std::llround(actual_sample_duration) << ", "
+//                  << "actual_subsample_duration = " << actual_subsample_duration.subsample_count() << ", "
 //                  << "sample_duration_error = " << sample_duration_error << ", "
 //                  << "percent error = " << std::abs((sample_duration_error / projected_sample_duration) * 100)<< ", "
 //                  << "error_multiplier = " << error_multiplier << ", "
