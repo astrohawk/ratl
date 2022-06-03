@@ -45,7 +45,7 @@ struct fast_sample_converter_impl<sample<int16_t>, sample<int24_t>, DitherGenera
 {
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return narrowing_cast<int24_t>(input << 8);
+        return sample_value_narrowing_cast<int24_t>(input << 8);
     }
 };
 
@@ -68,7 +68,7 @@ struct fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenera
 
     static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return narrowing_cast<int16_t>(
+        return sample_value_narrowing_cast<int16_t>(
             ((input << pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
@@ -91,7 +91,7 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenera
 
     static inline int16_t convert(int32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return narrowing_cast<int16_t>(
+        return sample_value_narrowing_cast<int16_t>(
             ((input >> pre_dither_shift) + dither_gen.generate_int16()) >> post_dither_shift);
     }
 };
@@ -101,7 +101,7 @@ struct fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenera
 {
     static inline int24_t convert(int32_t input, DitherGenerator&) noexcept
     {
-        return narrowing_cast<int24_t>(input >> 8);
+        return sample_value_narrowing_cast<int24_t>(input >> 8);
     }
 };
 
@@ -134,7 +134,7 @@ private:
 public:
     static inline SampleValueType convert(float32_t input, DitherGenerator& dither_gen) noexcept
     {
-        return narrowing_cast<SampleValueType>(
+        return sample_value_narrowing_cast<SampleValueType>(
             round_float32_to_int32_fast((input * scaler) + dither_gen.generate_float32()));
     }
 };
