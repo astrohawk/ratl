@@ -17,8 +17,8 @@
 // other includes
 #include <gtest/gtest.h>
 
-#define TEST_RATL_TYPICAL_CHANNELS 32
-#define TEST_RATL_TYPICAL_FRAMES 480
+#define TEST_RATL_TYPICAL_CHANNELS 31
+#define TEST_RATL_TYPICAL_FRAMES 479
 
 namespace ratl
 {
