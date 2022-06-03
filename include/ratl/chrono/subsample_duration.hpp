@@ -25,12 +25,15 @@ class subsample_duration
 {
 public:
     using samples_rep = std::int64_t;
+    using sample_fraction_rep = std::uint32_t;
 
     inline subsample_duration() = default;
 
     inline subsample_duration(double duration, std::size_t sample_rate) :
         sample_count_(static_cast<samples_rep>(duration)),
-        sample_fraction_(duration - static_cast<double>(sample_count_)),
+        sample_fraction_(static_cast<sample_fraction_rep>(std::round(
+            (duration - static_cast<double>(sample_count_)) *
+            static_cast<double>(std::numeric_limits<sample_fraction_rep>::max())))),
         sample_rate_(sample_rate)
     {
     }
@@ -51,14 +54,16 @@ public:
         return sample_count_;
     }
 
-    inline double sample_fraction() const noexcept
+    inline sample_fraction_rep sample_fraction() const noexcept
     {
         return sample_fraction_;
     }
 
     inline double subsample_count() const noexcept
     {
-        return static_cast<double>(sample_count_) + sample_fraction_;
+        return static_cast<double>(sample_count_) +
+               (static_cast<double>(sample_fraction_) /
+                static_cast<double>(std::numeric_limits<sample_fraction_rep>::max()));
     }
 
     inline std::size_t sample_rate() const noexcept
@@ -68,17 +73,23 @@ public:
 
     subsample_duration& operator+=(const subsample_duration& other)
     {
+        using temp_sample_fraction_rep = std::uint64_t;
+        static constexpr auto max_temp_sample_fraction =
+            static_cast<temp_sample_fraction_rep>(std::numeric_limits<sample_fraction_rep>::max());
+
         if (sample_rate_ != other.sample_rate_)
         {
             throw std::invalid_argument("sample rates are different");
         }
         sample_count_ += other.sample_count_;
-        sample_fraction_ += other.sample_fraction_;
-        if (sample_fraction_ > 1)
+        auto temp_sample_fraction = static_cast<temp_sample_fraction_rep>(sample_fraction_);
+        temp_sample_fraction += static_cast<temp_sample_fraction_rep>(other.sample_fraction_);
+        if (temp_sample_fraction > max_temp_sample_fraction)
         {
             sample_count_ += 1;
-            sample_fraction_ -= 1;
+            temp_sample_fraction -= max_temp_sample_fraction;
         }
+        sample_fraction_ = static_cast<sample_fraction_rep>(temp_sample_fraction);
         return *this;
     }
 
@@ -101,17 +112,23 @@ public:
 
     subsample_duration& operator-=(const subsample_duration& other)
     {
+        using temp_sample_fraction_rep = std::int64_t;
+        static constexpr auto max_temp_sample_fraction =
+            static_cast<temp_sample_fraction_rep>(std::numeric_limits<sample_fraction_rep>::max());
+
         if (sample_rate_ != other.sample_rate_)
         {
             throw std::invalid_argument("sample rates are different");
         }
         sample_count_ -= other.sample_count_;
-        sample_fraction_ -= other.sample_fraction_;
-        if (sample_fraction_ < 0)
+        auto temp_sample_fraction = static_cast<temp_sample_fraction_rep>(sample_fraction_);
+        temp_sample_fraction -= static_cast<temp_sample_fraction_rep>(other.sample_fraction_);
+        if (temp_sample_fraction < 0)
         {
             sample_count_ -= 1;
-            sample_fraction_ += 1;
+            temp_sample_fraction += max_temp_sample_fraction;
         }
+        sample_fraction_ = static_cast<sample_fraction_rep>(temp_sample_fraction);
         return *this;
     }
 
@@ -133,7 +150,7 @@ public:
     }
 
 private:
-    inline subsample_duration(samples_rep sample_count, double sample_fraction, std::size_t sample_rate) :
+    inline subsample_duration(samples_rep sample_count, sample_fraction_rep sample_fraction, std::size_t sample_rate) :
         sample_count_{sample_count}, sample_fraction_{sample_fraction}, sample_rate_{sample_rate}
     {
     }
@@ -142,22 +159,38 @@ private:
     static subsample_duration make_subsample_duration(
         const std::chrono::duration<Rep, Period>& duration, std::size_t sample_rate)
     {
-        auto current_time_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
-        auto current_time_subsecond_duration = duration - std::chrono::duration<Rep, Period>(current_time_seconds);
+        using unscaled_sample_fraction_rep = std::uint64_t;
+
+        static constexpr auto sample_scaler_num = static_cast<samples_rep>(Period::num);
+        static constexpr auto sample_scaler_den = static_cast<samples_rep>(Period::den);
+
+        auto duration_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+        auto duration_subseconds_remainder = duration - std::chrono::duration<Rep, Period>(duration_seconds);
         auto sample_count_seconds =
-            static_cast<samples_rep>(current_time_seconds.count()) * static_cast<samples_rep>(sample_rate);
-        auto sample_count_subsecond_duration_and_proportion =
-            static_cast<double>(
-                current_time_subsecond_duration.count() * static_cast<samples_rep>(sample_rate) * Period::num) /
-            static_cast<double>(Period::den);
-        auto sample_count_subsecond_duration = std::trunc(sample_count_subsecond_duration_and_proportion);
-        auto sample_count = sample_count_seconds + static_cast<samples_rep>(sample_count_subsecond_duration);
-        auto sample_fraction = sample_count_subsecond_duration_and_proportion - sample_count_subsecond_duration;
+            static_cast<samples_rep>(duration_seconds.count()) * static_cast<samples_rep>(sample_rate);
+        auto sample_count_subseconds_remainder_unscaled =
+            static_cast<unscaled_sample_fraction_rep>(duration_subseconds_remainder.count()) *
+            static_cast<unscaled_sample_fraction_rep>(sample_rate);
+        auto sample_count_subseconds_remainder =
+            (static_cast<samples_rep>(sample_count_subseconds_remainder_unscaled) * sample_scaler_num) /
+            sample_scaler_den;
+        auto sample_count = sample_count_seconds + sample_count_subseconds_remainder;
+
+        auto sample_fraction_unscaled =
+            sample_count_subseconds_remainder_unscaled -
+            static_cast<unscaled_sample_fraction_rep>(
+                (sample_count_subseconds_remainder * sample_scaler_den) / sample_scaler_num);
+        auto sample_fraction = static_cast<sample_fraction_rep>(
+            (sample_fraction_unscaled *
+             static_cast<unscaled_sample_fraction_rep>(std::numeric_limits<sample_fraction_rep>::max()) *
+             static_cast<unscaled_sample_fraction_rep>(Period::num)) /
+            static_cast<unscaled_sample_fraction_rep>(Period::den));
+
         return {sample_count, sample_fraction, sample_rate};
     }
 
     samples_rep sample_count_{};
-    double sample_fraction_{};
+    sample_fraction_rep sample_fraction_{};
     std::size_t sample_rate_{};
 };
 
