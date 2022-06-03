@@ -25,55 +25,17 @@ namespace ratl
 namespace detail
 {
 template<typename SampleType>
-class base_batch_creator;
+class batch_creator_sample_converter;
 
 template<typename SampleValueType>
-class base_batch_creator<sample<SampleValueType>>
+class batch_creator_sample_converter<sample<SampleValueType>>
 {
 public:
     using batch_type = batch_sample_value_type_t<SampleValueType>;
 
-    template<typename Iterator>
-    static inline batch_type load(Iterator input) noexcept
-    {
-        return load_impl(input, std::make_index_sequence<batch_size>());
-    }
-
-    template<typename Iterator>
-    static inline void store(const batch_type& input, Iterator output) noexcept
-    {
-        store_impl(input, output, std::make_index_sequence<batch_size>());
-    }
-
-private:
-    template<typename Iterator, std::size_t... I>
-    static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
-    {
-        return batch_type(convert_input(input[I].get())...);
-    }
-
     static inline typename batch_type::value_type convert_input(SampleValueType input)
     {
         return input;
-    }
-
-    template<typename Iterator, std::size_t... I>
-    static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
-    {
-        alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_size];
-        input.store_aligned(buffer);
-#    if defined(RATL_CPP_VERSION_HAS_CPP17)
-        (store_element<I>(buffer, output), ...);
-#    else
-        int fake[] = {(store_element<I>(buffer, output), 0)...};
-        (void)fake;
-#    endif
-    }
-
-    template<std::size_t I, typename Iterator>
-    static inline void store_element(const typename batch_type::value_type* buffer, Iterator output) noexcept
-    {
-        output[I].get() = convert_output(buffer[I]);
     }
 
     static inline SampleValueType convert_output(typename batch_type::value_type input)
@@ -83,15 +45,41 @@ private:
 };
 
 template<typename SampleValueType>
-class base_batch_creator<network_sample<SampleValueType>>
+class batch_creator_sample_converter<network_sample<SampleValueType>>
 {
 public:
     using batch_type = batch_network_sample_value_type_t<SampleValueType>;
 
+    static inline typename batch_type::value_type convert_input(network_sample_value_type_t<SampleValueType> input)
+    {
+        return network_to_network_underlying_cast<SampleValueType>(input);
+    }
+
+    static inline network_sample_value_type_t<SampleValueType> convert_output(typename batch_type::value_type input)
+    {
+        return network_underlying_to_network_cast<SampleValueType>(
+            narrowing_cast<network_sample_value_underlying_type_t<SampleValueType>>(input));
+    }
+};
+
+template<typename SampleType>
+class base_batch_creator
+{
+    using sample_converter = batch_creator_sample_converter<SampleType>;
+
+public:
+    using batch_type = typename sample_converter::batch_type;
+
     template<typename Iterator>
     static inline batch_type load(Iterator input) noexcept
     {
-        return load_impl(input, std::make_index_sequence<batch_size>());
+        return load_impl(input, std::make_index_sequence<batch_size>(), std::make_index_sequence<0>());
+    }
+
+    template<typename Iterator>
+    static inline batch_type load(Iterator input, std::size_t size) noexcept
+    {
+        return partial_load(input, size, std::make_index_sequence<batch_size>());
     }
 
     template<typename Iterator>
@@ -100,16 +88,51 @@ public:
         store_impl(input, output, std::make_index_sequence<batch_size>());
     }
 
-private:
-    template<typename Iterator, std::size_t... I>
-    static inline batch_type load_impl(Iterator input, std::index_sequence<I...>) noexcept
+    template<typename Iterator>
+    static inline void store(const batch_type& input, Iterator output, std::size_t size) noexcept
     {
-        return batch_type(convert_input(input[I].get())...);
+        partial_store(input, output, size, std::make_index_sequence<batch_size>());
     }
 
-    static inline typename batch_type::value_type convert_input(network_sample_value_type_t<SampleValueType> input)
+private:
+    template<typename Iterator, std::size_t... I>
+    static inline batch_type partial_load(Iterator input, std::size_t size, std::index_sequence<I...>) noexcept
     {
-        return network_to_network_underlying_cast<SampleValueType>(input);
+        using partial_load_impl_fn = batch_type (*)(Iterator);
+        static constexpr partial_load_impl_fn partial_load_impl_fns[] = {&partial_load_impl<Iterator, I>...};
+        return (*partial_load_impl_fns[size])(input);
+    }
+
+    template<typename Iterator, std::size_t Size>
+    static inline batch_type partial_load_impl(Iterator input) noexcept
+    {
+        return load_impl(input, std::make_index_sequence<Size>(), std::make_index_sequence<batch_size - Size>());
+    }
+
+    template<typename Iterator, std::size_t... I, std::size_t... J>
+    static inline batch_type load_impl(Iterator input, std::index_sequence<I...>, std::index_sequence<J...>) noexcept
+    {
+        return batch_type(sample_converter::convert_input(input[I].get())..., null_input(J)...);
+    }
+
+    static inline typename batch_type::value_type null_input(std::size_t)
+    {
+        return {};
+    }
+
+    template<typename Iterator, std::size_t... I>
+    static inline void partial_store(
+        const batch_type& input, Iterator output, std::size_t size, std::index_sequence<I...>) noexcept
+    {
+        using partial_store_impl_fn = void (*)(const batch_type&, Iterator);
+        static constexpr partial_store_impl_fn partial_store_impl_fns[] = {&partial_store_impl<Iterator, I>...};
+        return (*partial_store_impl_fns[size])(input, output);
+    }
+
+    template<typename Iterator, std::size_t Size>
+    static inline void partial_store_impl(const batch_type& input, Iterator output) noexcept
+    {
+        store_impl(input, output, std::make_index_sequence<Size>());
     }
 
     template<typename Iterator, std::size_t... I>
@@ -120,7 +143,7 @@ private:
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
         (store_element<I>(buffer, output), ...);
 #    else
-        int fake[] = {(store_element<I>(buffer, output), 0)...};
+        int fake[] = {(store_element<I>(buffer, output), 0)..., 0};
         (void)fake;
 #    endif
     }
@@ -128,13 +151,7 @@ private:
     template<std::size_t I, typename Iterator>
     static inline void store_element(const typename batch_type::value_type* buffer, Iterator output) noexcept
     {
-        output[I].get() = convert_output(buffer[I]);
-    }
-
-    static inline network_sample_value_type_t<SampleValueType> convert_output(typename batch_type::value_type input)
-    {
-        return network_underlying_to_network_cast<SampleValueType>(
-            narrowing_cast<network_sample_value_underlying_type_t<SampleValueType>>(input));
+        output[I].get() = sample_converter::convert_output(buffer[I]);
     }
 };
 

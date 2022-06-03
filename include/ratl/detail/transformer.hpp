@@ -63,16 +63,24 @@ public:
     template<typename input_iterator, typename output_iterator>
     inline output_iterator transform(input_iterator first, input_iterator last, output_iterator result) const noexcept
     {
-        std::size_t distance = std::distance(first, last);
-        std::size_t vec_distance = distance - distance % batch_size;
-        input_iterator vec_last = first + vec_distance;
-        for (; first != vec_last; first += batch_size, result += batch_size)
+        auto distance = std::distance(first, last);
+        auto remainder_distance = distance % batch_size;
+        auto full_batch_distance = distance - remainder_distance;
+        auto full_batch_last = first + full_batch_distance;
+        for (; first != full_batch_last; first += batch_size, result += batch_size)
         {
             auto input = input_batch_creator::load(first);
             auto output = convert(input, sample_converter_);
             output_batch_creator::store(output, result);
         }
-        return std::transform(first, last, result, sample_converter_);
+        if (remainder_distance > 0)
+        {
+            auto input = input_batch_creator::load(first, remainder_distance);
+            auto output = convert(input, sample_converter_);
+            output_batch_creator::store(output, result, remainder_distance);
+            result += remainder_distance;
+        }
+        return result;
     }
 
 private:
