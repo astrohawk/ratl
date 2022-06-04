@@ -112,6 +112,7 @@ private:
     template<typename Iterator, std::size_t... I, std::size_t... J>
     static inline batch_type load_impl(Iterator input, std::index_sequence<I...>, std::index_sequence<J...>) noexcept
     {
+        (void)input; // stops gcc from complaining due to input not being used when I is 0
         return batch_type(sample_converter::convert_input(input[I].get())..., null_input(J)...);
     }
 
@@ -138,6 +139,7 @@ private:
     template<typename Iterator, std::size_t... I>
     static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
     {
+        (void)output; // stops gcc from complaining due to output not being used when I is 0
         alignas(xsimd::simd_batch_traits<batch_type>::align) typename batch_type::value_type buffer[batch_size];
         input.store_aligned(buffer);
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
