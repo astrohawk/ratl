@@ -173,7 +173,7 @@ struct batch_creator : public base_batch_creator<SampleType>
 // the corresponding performance boost
 
 template<typename SampleValueType>
-class batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_type_v<SampleValueType>>::type> :
+class batch_creator<sample<SampleValueType>, std::enable_if_t<has_batch_type_v<SampleValueType>>> :
     public base_batch_creator<sample<SampleValueType>>
 {
     using base = typename batch_creator::base_batch_creator;
@@ -208,7 +208,7 @@ public:
 template<typename SampleValueType>
 class batch_creator<
     network_sample<SampleValueType>,
-    typename std::enable_if<has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>::type> :
+    std::enable_if_t<has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>> :
     public base_batch_creator<network_sample<SampleValueType>>
 {
     using base = typename batch_creator::base_batch_creator;
