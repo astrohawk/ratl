@@ -49,41 +49,86 @@ class basic_transformer_impl
     using input_batch_creator = batch_creator<InputSampleType>;
     using output_batch_creator = batch_creator<OutputSampleType>;
 
+    using input_alignment_checker = typename input_batch_creator::alignment_checker;
+    using output_alignment_checker = typename output_batch_creator::alignment_checker;
+
     using input_batch_type = typename input_batch_creator::batch_type;
     using output_batch_type = typename output_batch_creator::batch_type;
+
+    using sample_converter = SampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
     static constexpr std::size_t batch_size = input_batch_type::size;
     static_assert(batch_size == output_batch_type::size, "Input and output batch size are not equal");
 
-    using sample_converter = SampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
-
 public:
     explicit basic_transformer_impl(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
 
-    template<typename input_iterator, typename output_iterator>
-    inline output_iterator transform(input_iterator first, input_iterator last, output_iterator result) const noexcept
+    template<typename InputIterator, typename OutputIterator>
+    inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
+        return transform_impl(
+            first,
+            last,
+            result,
+            typename input_alignment_checker::template alignment_t<InputIterator>(),
+            typename output_alignment_checker::template alignment_t<OutputIterator>());
+    }
+
+private:
+    template<typename InputIterator, typename OutputIterator, typename OutputAlignment>
+    inline OutputIterator transform_impl(
+        InputIterator first, InputIterator last, OutputIterator result, batch_unknown_alignment, OutputAlignment)
+        const noexcept
+    {
+        return input_alignment_checker::unknown_alignment_dispatcher(
+            first,
+            [&](auto input_alignment)
+            {
+                return transform_impl(first, last, result, input_alignment, OutputAlignment());
+            });
+    }
+
+    template<typename InputIterator, typename OutputIterator, typename InputAlignment>
+    inline std::enable_if_t<!std::is_same<InputAlignment, batch_unknown_alignment>::value, OutputIterator>
+    transform_impl(
+        InputIterator first, InputIterator last, OutputIterator result, InputAlignment, batch_unknown_alignment)
+        const noexcept
+    {
+        return output_alignment_checker::unknown_alignment_dispatcher(
+            result,
+            [&](auto output_alignment)
+            {
+                return transform_impl(first, last, result, InputAlignment(), output_alignment);
+            });
+    }
+
+    template<typename InputIterator, typename OutputIterator, typename InputAlignment, typename OutputAlignment>
+    inline OutputIterator transform_impl(
+        InputIterator first, InputIterator last, OutputIterator result, InputAlignment, OutputAlignment) const noexcept
+    {
+        static_assert(!std::is_same<InputAlignment, batch_unknown_alignment>::value, "");
+        static_assert(!std::is_same<OutputAlignment, batch_unknown_alignment>::value, "");
+
         auto distance = std::distance(first, last);
         auto remainder_distance = distance % batch_size;
         auto full_batch_distance = distance - remainder_distance;
         auto full_batch_last = first + full_batch_distance;
         for (; first != full_batch_last; first += batch_size, result += batch_size)
         {
-            auto input = input_batch_creator::load(first);
+            auto input = input_batch_creator::load(first, InputAlignment());
             auto output = convert(input, sample_converter_);
-            output_batch_creator::store(output, result);
+            output_batch_creator::store(output, result, OutputAlignment());
         }
         if (remainder_distance > 0)
         {
-            auto input = input_batch_creator::load(first, remainder_distance);
+            auto input = input_batch_creator::load(first, remainder_distance, InputAlignment());
             auto output = convert(input, sample_converter_);
-            output_batch_creator::store(output, result, remainder_distance);
+            output_batch_creator::store(output, result, remainder_distance, OutputAlignment());
             result += remainder_distance;
         }
         return result;
     }
 
-private:
     sample_converter sample_converter_;
 };
 
@@ -102,8 +147,8 @@ class basic_transformer_impl
 public:
     explicit basic_transformer_impl(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
 
-    template<typename input_iterator, typename output_iterator>
-    inline output_iterator transform(input_iterator first, input_iterator last, output_iterator result) const noexcept
+    template<typename InputIterator, typename OutputIterator>
+    inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
         return std::transform(first, last, result, sample_converter_);
     }
@@ -118,8 +163,8 @@ struct basic_transformer_impl<SampleConverter, SampleType, SampleType, DitherGen
 {
     explicit basic_transformer_impl(DitherGenerator&) {}
 
-    template<typename input_iterator, typename output_iterator>
-    inline output_iterator transform(input_iterator first, input_iterator last, output_iterator result) const noexcept
+    template<typename InputIterator, typename OutputIterator>
+    inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
         return std::copy(first, last, result);
     }

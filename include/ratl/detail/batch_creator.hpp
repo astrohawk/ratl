@@ -9,6 +9,7 @@
 #define _ratl_detail_batch_creator_
 
 // ratl includes
+#include <ratl/detail/batch_alignment.hpp>
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/xsimd.hpp>
@@ -69,27 +70,31 @@ class base_batch_creator
 
 public:
     using batch_type = typename sample_converter::batch_type;
+    using alignment_checker = batch_alignment_checker<SampleType, batch_type>;
 
     template<typename Iterator>
-    static inline batch_type load(Iterator input) noexcept
+    using is_maybe_aligned_t = batch_unaligned;
+
+    template<typename Iterator, typename Alignment>
+    static inline batch_type load(Iterator input, Alignment) noexcept
     {
         return load_impl(input, std::make_index_sequence<batch_size>(), std::make_index_sequence<0>());
     }
 
-    template<typename Iterator>
-    static inline batch_type load(Iterator input, std::size_t size) noexcept
+    template<typename Iterator, typename Alignment>
+    static inline batch_type load(Iterator input, std::size_t size, Alignment) noexcept
     {
         return partial_load(input, size, std::make_index_sequence<batch_size>());
     }
 
-    template<typename Iterator>
-    static inline void store(const batch_type& input, Iterator output) noexcept
+    template<typename Iterator, typename Alignment>
+    static inline void store(const batch_type& input, Iterator output, Alignment) noexcept
     {
         store_impl(input, output, std::make_index_sequence<batch_size>());
     }
 
-    template<typename Iterator>
-    static inline void store(const batch_type& input, Iterator output, std::size_t size) noexcept
+    template<typename Iterator, typename Alignment>
+    static inline void store(const batch_type& input, Iterator output, std::size_t size, Alignment) noexcept
     {
         partial_store(input, output, size, std::make_index_sequence<batch_size>());
     }
@@ -112,6 +117,7 @@ private:
     template<typename Iterator, std::size_t... I, std::size_t... J>
     static inline batch_type load_impl(Iterator input, std::index_sequence<I...>, std::index_sequence<J...>) noexcept
     {
+        static_assert(sizeof...(I) + sizeof...(J) == batch_size, "");
         (void)input; // stops gcc from complaining due to input not being used when I is 0
         return batch_type(sample_converter::convert_input(input[I].get())..., null_input(J)...);
     }
@@ -174,23 +180,28 @@ class batch_creator<sample<SampleValueType>, typename std::enable_if<has_batch_t
 
 public:
     using batch_type = typename base::batch_type;
+    using alignment_checker = typename base::alignment_checker;
 
     using base::load;
+
+    template<typename Alignment>
+    static inline batch_type load(sample<SampleValueType>* input, Alignment) noexcept
+    {
+        return batch_alignment_select<batch_type, Alignment>::load(reinterpret_cast<SampleValueType*>(input));
+    }
+
+    template<typename Alignment>
+    static inline batch_type load(const sample<SampleValueType>* input, Alignment) noexcept
+    {
+        return batch_alignment_select<batch_type, Alignment>::load(reinterpret_cast<const SampleValueType*>(input));
+    }
+
     using base::store;
 
-    static inline batch_type load(sample<SampleValueType>* input) noexcept
+    template<typename Alignment>
+    static inline void store(const batch_type& input, sample<SampleValueType>* output, Alignment) noexcept
     {
-        return batch_type(reinterpret_cast<SampleValueType*>(input), xsimd::unaligned_mode());
-    }
-
-    static inline batch_type load(const sample<SampleValueType>* input) noexcept
-    {
-        return batch_type(reinterpret_cast<const SampleValueType*>(input), xsimd::unaligned_mode());
-    }
-
-    static inline void store(const batch_type& input, sample<SampleValueType>* output) noexcept
-    {
-        input.store_unaligned(reinterpret_cast<SampleValueType*>(output));
+        return batch_alignment_select<batch_type, Alignment>::store(input, reinterpret_cast<SampleValueType*>(output));
     }
 };
 
@@ -204,26 +215,31 @@ class batch_creator<
 
 public:
     using batch_type = typename base::batch_type;
+    using alignment_checker = batch_alignment_checker<network_sample<SampleValueType>, batch_type>;
 
     using base::load;
+
+    template<typename Alignment>
+    static inline batch_type load(network_sample<SampleValueType>* input, Alignment) noexcept
+    {
+        return batch_alignment_select<batch_type, Alignment>::load(
+            reinterpret_cast<network_sample_value_underlying_type_t<SampleValueType>*>(input));
+    }
+
+    template<typename Alignment>
+    static inline batch_type load(const network_sample<SampleValueType>* input, Alignment) noexcept
+    {
+        return batch_alignment_select<batch_type, Alignment>::load(
+            reinterpret_cast<const network_sample_value_underlying_type_t<SampleValueType>*>(input));
+    }
+
     using base::store;
 
-    static inline batch_type load(network_sample<SampleValueType>* input) noexcept
+    template<typename Alignment>
+    static inline void store(const batch_type& input, network_sample<SampleValueType>* output, Alignment) noexcept
     {
-        return batch_type(
-            reinterpret_cast<network_sample_value_underlying_type_t<SampleValueType>*>(input), xsimd::unaligned_mode());
-    }
-
-    static inline batch_type load(const network_sample<SampleValueType>* input) noexcept
-    {
-        return batch_type(
-            reinterpret_cast<const network_sample_value_underlying_type_t<SampleValueType>*>(input),
-            xsimd::unaligned_mode());
-    }
-
-    static inline void store(const batch_type& input, network_sample<SampleValueType>* output) noexcept
-    {
-        input.store_unaligned(reinterpret_cast<network_sample_value_underlying_type_t<SampleValueType>*>(output));
+        return batch_alignment_select<batch_type, Alignment>::store(
+            input, reinterpret_cast<network_sample_value_underlying_type_t<SampleValueType>*>(output));
     }
 };
 
