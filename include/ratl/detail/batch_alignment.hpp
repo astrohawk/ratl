@@ -24,57 +24,78 @@ namespace ratl
 {
 namespace detail
 {
-struct batch_aligned
-{
-};
+template<typename BatchType>
+static constexpr std::size_t batch_alignment = xsimd::simd_batch_traits<BatchType>::align;
 
-struct batch_unaligned
+struct batch_alignment_mode
 {
-};
+    struct aligned
+    {
+    };
 
-struct batch_unknown_alignment
-{
+    struct unaligned
+    {
+    };
+
+    struct unknown
+    {
+    };
 };
 
 template<typename SampleType, typename BatchType>
 class batch_alignment_checker
 {
-public:
-    template<typename Iterator>
-    using alignment_t = std::conditional_t<
-        std::is_same<Iterator, SampleType*>::value || std::is_same<Iterator, const SampleType*>::value,
-        batch_unknown_alignment,
-        batch_unaligned>;
-
-private:
-    template<typename Iterator>
-    static inline bool is_aligned(Iterator iterator) noexcept
+    template<typename Pointer>
+    static inline bool is_aligned(Pointer* ptr) noexcept
     {
-        return reinterpret_cast<std::uintptr_t>(iterator) % xsimd::simd_batch_traits<BatchType>::align == 0;
+        return reinterpret_cast<std::uintptr_t>(ptr) % batch_alignment<BatchType> == 0;
     }
 
 public:
+    template<typename Iterator>
+    using alignment_mode_t = std::conditional_t<
+        std::is_same<Iterator, SampleType*>::value || std::is_same<Iterator, const SampleType*>::value,
+        batch_alignment_mode::unknown,
+        batch_alignment_mode::unaligned>;
+
     template<typename Iterator, typename Fn>
-    static inline decltype(auto) unknown_alignment_dispatcher(Iterator iterator, Fn fn) noexcept(
-        noexcept(fn(batch_aligned())) || noexcept(fn(batch_unaligned())))
+    static inline decltype(auto) unknown_alignment_dispatcher(Iterator iterator, Fn&& fn) noexcept(
+    // clang-format off
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
+        noexcept(std::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned())) &&
+        noexcept(std::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned()))
+#else
+        noexcept(std::forward<Fn>(fn)(batch_alignment_mode::aligned())) &&
+        noexcept(std::forward<Fn>(fn)(batch_alignment_mode::unaligned()))
+#endif
+        // clang-format on
+    )
     {
-        static_assert(std::is_same<alignment_t<Iterator>, batch_unknown_alignment>::value, "");
+        static_assert(std::is_same<alignment_mode_t<Iterator>, batch_alignment_mode::unknown>::value, "");
         if (is_aligned(iterator))
         {
-            return fn(batch_aligned());
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
+            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned());
+#else
+            return std::forward<Fn>(fn)(batch_alignment_mode::aligned());
+#endif
         }
         else
         {
-            return fn(batch_unaligned());
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
+            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned());
+#else
+            return std::forward<Fn>(fn)(batch_alignment_mode::unaligned());
+#endif
         }
     }
 };
 
-template<typename BatchType, typename Alignment>
+template<typename BatchType, typename AlignmentMode>
 class batch_alignment_select;
 
 template<typename BatchType>
-class batch_alignment_select<BatchType, batch_aligned>
+class batch_alignment_select<BatchType, batch_alignment_mode::aligned>
 {
 public:
     template<typename Input>
@@ -91,7 +112,7 @@ public:
 };
 
 template<typename BatchType>
-class batch_alignment_select<BatchType, batch_unaligned>
+class batch_alignment_select<BatchType, batch_alignment_mode::unaligned>
 {
 public:
     template<typename Input>

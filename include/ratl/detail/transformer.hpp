@@ -70,33 +70,33 @@ public:
             first,
             last,
             result,
-            typename input_alignment_checker::template alignment_t<InputIterator>(),
-            typename output_alignment_checker::template alignment_t<OutputIterator>());
+            typename input_alignment_checker::template alignment_mode_t<InputIterator>(),
+            typename output_alignment_checker::template alignment_mode_t<OutputIterator>());
     }
 
 private:
     template<typename InputIterator, typename OutputIterator, typename OutputAlignment>
     inline OutputIterator transform_impl(
-        InputIterator first, InputIterator last, OutputIterator result, batch_unknown_alignment, OutputAlignment)
+        InputIterator first, InputIterator last, OutputIterator result, batch_alignment_mode::unknown, OutputAlignment)
         const noexcept
     {
         return input_alignment_checker::unknown_alignment_dispatcher(
             first,
-            [&](auto input_alignment)
+            [&](auto input_alignment) noexcept
             {
                 return transform_impl(first, last, result, input_alignment, OutputAlignment());
             });
     }
 
     template<typename InputIterator, typename OutputIterator, typename InputAlignment>
-    inline std::enable_if_t<!std::is_same<InputAlignment, batch_unknown_alignment>::value, OutputIterator>
+    inline std::enable_if_t<!std::is_same<InputAlignment, batch_alignment_mode::unknown>::value, OutputIterator>
     transform_impl(
-        InputIterator first, InputIterator last, OutputIterator result, InputAlignment, batch_unknown_alignment)
+        InputIterator first, InputIterator last, OutputIterator result, InputAlignment, batch_alignment_mode::unknown)
         const noexcept
     {
         return output_alignment_checker::unknown_alignment_dispatcher(
             result,
-            [&](auto output_alignment)
+            [&](auto output_alignment) noexcept
             {
                 return transform_impl(first, last, result, InputAlignment(), output_alignment);
             });
@@ -106,8 +106,8 @@ private:
     inline OutputIterator transform_impl(
         InputIterator first, InputIterator last, OutputIterator result, InputAlignment, OutputAlignment) const noexcept
     {
-        static_assert(!std::is_same<InputAlignment, batch_unknown_alignment>::value, "");
-        static_assert(!std::is_same<OutputAlignment, batch_unknown_alignment>::value, "");
+        static_assert(!std::is_same<InputAlignment, batch_alignment_mode::unknown>::value, "");
+        static_assert(!std::is_same<OutputAlignment, batch_alignment_mode::unknown>::value, "");
 
         auto distance = std::distance(first, last);
         auto remainder_distance = distance % batch_size;
