@@ -58,37 +58,45 @@ public:
         batch_alignment_mode::unknown,
         batch_alignment_mode::unaligned>;
 
+#    if defined(RATL_CPP_VERSION_HAS_CPP17)
     template<typename Iterator, typename Fn>
     static inline decltype(auto) unknown_alignment_dispatcher(Iterator iterator, Fn&& fn) noexcept(
-    // clang-format off
-#if defined(RATL_CPP_VERSION_HAS_CPP17)
+        // clang-format off
         noexcept(std::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned())) &&
         noexcept(std::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned()))
-#else
+        // clang-format on
+    )
+    {
+        static_assert(std::is_same<alignment_mode_t<Iterator>, batch_alignment_mode::unknown>::value);
+        if (is_aligned(iterator))
+        {
+            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned());
+        }
+        else
+        {
+            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned());
+        }
+    }
+#    else
+    template<typename Iterator, typename Fn>
+    static inline decltype(auto) unknown_alignment_dispatcher(Iterator iterator, Fn&& fn) noexcept(
+        // clang-format off
         noexcept(std::forward<Fn>(fn)(batch_alignment_mode::aligned())) &&
         noexcept(std::forward<Fn>(fn)(batch_alignment_mode::unaligned()))
-#endif
         // clang-format on
     )
     {
         static_assert(std::is_same<alignment_mode_t<Iterator>, batch_alignment_mode::unknown>::value, "");
         if (is_aligned(iterator))
         {
-#if defined(RATL_CPP_VERSION_HAS_CPP17)
-            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned());
-#else
             return std::forward<Fn>(fn)(batch_alignment_mode::aligned());
-#endif
         }
         else
         {
-#if defined(RATL_CPP_VERSION_HAS_CPP17)
-            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned());
-#else
             return std::forward<Fn>(fn)(batch_alignment_mode::unaligned());
-#endif
         }
     }
+#    endif
 };
 
 template<typename BatchType, typename AlignmentMode>
