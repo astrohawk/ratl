@@ -28,6 +28,12 @@ using PossibleSampleValueTypes = ::testing::Types<int16_t, int24_t, int32_t, flo
 
 using PossibleIntSampleValueTypes = ::testing::Types<int16_t, int24_t, int32_t>;
 
+template<typename SampleValueType>
+using PossibleSampleOuterTypes = ::testing::Types<
+    sample<SampleValueType>,
+    network_sample<SampleValueType>>;
+using PossibleSampleTypes = testing_types_combine_t<PossibleSampleOuterTypes, PossibleSampleValueTypes>;
+
 template<typename InputSampleValueType, typename OutputSampleValueType>
 struct SampleValueTypeCombination
 {
