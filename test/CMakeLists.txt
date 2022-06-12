@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2018-2021 Hamish Cook
+# Copyright (c) 2018-2022 Hamish Cook
 #
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -33,6 +33,7 @@ ratl_add_test(test_sample)
 ratl_add_test(test_iterators)
 ratl_add_test(test_round)
 ratl_add_test(test_convert)
+ratl_add_test(test_batch_creator)
 ratl_add_test(test_batch_convert)
 ratl_add_test(test_interleaved)
 ratl_add_test(test_noninterleaved)

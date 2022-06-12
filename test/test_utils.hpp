@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018-2021 Hamish Cook
+ * Copyright (c) 2018-2022 Hamish Cook
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -17,8 +17,8 @@
 // other includes
 #include <gtest/gtest.h>
 
-#define TEST_RATL_TYPICAL_CHANNELS 32
-#define TEST_RATL_TYPICAL_FRAMES 480
+#define TEST_RATL_TYPICAL_CHANNELS 31
+#define TEST_RATL_TYPICAL_FRAMES 479
 
 namespace ratl
 {
@@ -27,6 +27,12 @@ namespace test
 using PossibleSampleValueTypes = ::testing::Types<int16_t, int24_t, int32_t, float32_t>;
 
 using PossibleIntSampleValueTypes = ::testing::Types<int16_t, int24_t, int32_t>;
+
+template<typename SampleValueType>
+using PossibleSampleOuterTypes = ::testing::Types<
+    sample<SampleValueType>,
+    network_sample<SampleValueType>>;
+using PossibleSampleTypes = testing_types_combine_t<PossibleSampleOuterTypes, PossibleSampleValueTypes>;
 
 template<typename InputSampleValueType, typename OutputSampleValueType>
 struct SampleValueTypeCombination
