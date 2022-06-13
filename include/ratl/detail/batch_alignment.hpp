@@ -16,6 +16,9 @@
 #include <ratl/sample.hpp>
 
 // other includes
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
+#    include <functional>
+#endif
 #include <type_traits>
 
 #if defined(RATL_HAS_XSIMD)
@@ -45,8 +48,7 @@ struct batch_alignment_mode
 template<typename SampleType, typename BatchType>
 class batch_alignment_checker
 {
-    template<typename Pointer>
-    static inline bool is_aligned(Pointer* ptr) noexcept
+    static inline bool is_aligned(const SampleType* ptr) noexcept
     {
         return reinterpret_cast<std::uintptr_t>(ptr) % batch_alignment<BatchType> == 0;
     }
