@@ -45,8 +45,10 @@ struct is_sample : public detail::is_sample_impl<std::remove_cv_t<SampleType>>
 
 // is_sample_v
 
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleType>
-static constexpr bool is_sample_v = is_sample<SampleType>::value;
+inline constexpr bool is_sample_v = is_sample<SampleType>::value;
+#endif
 
 // sample_underlying_type
 
@@ -87,7 +89,7 @@ using sample_underlying_type_t = typename sample_underlying_type<SampleType>::ty
 template<typename SampleType, typename PointerType = SampleType*, typename ConstPointerType = const SampleType*>
 struct sample_traits
 {
-    static_assert(is_sample_v<SampleType>, "sample is not a valid sample type");
+    static_assert(is_sample<SampleType>::value, "sample is not a valid sample type");
 
     /*
      * sample and const_sample

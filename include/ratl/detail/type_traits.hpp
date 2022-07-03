@@ -53,8 +53,10 @@ struct is_complete<Tp, decltype(void(sizeof(Tp)))> : std::true_type
 
 // is_complete_v
 
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename Tp>
-static constexpr bool is_complete_v = is_complete<Tp>::value;
+inline constexpr bool is_complete_v = is_complete<Tp>::value;
+#endif
 
 } // namespace detail
 } // namespace ratl

@@ -53,8 +53,10 @@ struct is_valid_sample_value_type : public detail::is_valid_sample_value_type_im
 
 // is_valid_sample_value_type_v
 
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType>
-static constexpr bool is_valid_sample_value_type_v = is_valid_sample_value_type<SampleValueType>::value;
+inline constexpr bool is_valid_sample_value_type_v = is_valid_sample_value_type<SampleValueType>::value;
+#endif
 
 // network_sample_value_underlying_type
 
@@ -95,7 +97,7 @@ using network_sample_value_underlying_type_t = typename network_sample_value_und
 template<typename SampleValueType>
 struct network_sample_value_type
 {
-    static_assert(is_valid_sample_value_type_v<SampleValueType>, "sample_type is not a valid sample type");
+    static_assert(is_valid_sample_value_type<SampleValueType>::value, "sample_type is not a valid sample type");
 
     // opaque type
     struct type final

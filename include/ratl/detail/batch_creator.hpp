@@ -172,7 +172,7 @@ class batch_creator : public base_batch_creator<SampleType>
 // performance boost
 
 template<typename SampleType>
-class batch_creator<SampleType, std::enable_if_t<has_batch_type_v<sample_underlying_type_t<SampleType>>>> :
+class batch_creator<SampleType, std::enable_if_t<has_batch_type<sample_underlying_type_t<SampleType>>::value>> :
     public base_batch_creator<SampleType>
 {
     using base = typename batch_creator::base_batch_creator;
