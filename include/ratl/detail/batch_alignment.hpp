@@ -13,9 +13,6 @@
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/sample_iterator.hpp>
 #include <ratl/detail/utility.hpp>
-#include <ratl/detail/xsimd.hpp>
-#include <ratl/network_sample.hpp>
-#include <ratl/sample.hpp>
 
 // other includes
 #include <type_traits>

@@ -11,12 +11,11 @@
 // ratl includes
 #include <ratl/detail/batch_creator.hpp>
 #include <ratl/detail/blit_iterator.hpp>
-#include <ratl/detail/channel_iterator.hpp>
 #include <ratl/detail/config.hpp>
-#include <ratl/detail/frame_iterator.hpp>
 #include <ratl/detail/interleaved_iterator.hpp>
 #include <ratl/detail/noninterleaved_iterator.hpp>
 #include <ratl/detail/sample_converter.hpp>
+#include <ratl/detail/sample_iterator.hpp>
 #include <ratl/detail/utility.hpp>
 
 // other includes

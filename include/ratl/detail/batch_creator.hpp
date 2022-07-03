@@ -10,7 +10,8 @@
 
 // ratl includes
 #include <ratl/detail/batch_alignment.hpp>
-#include <ratl/detail/batch_traits.hpp>
+#include <ratl/detail/batch_value_traits.hpp>
+#include <ratl/detail/cast.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/sample_iterator.hpp>
 #include <ratl/detail/xsimd.hpp>
