@@ -12,7 +12,7 @@
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/operator_arrow_proxy.hpp>
 #include <ratl/detail/sample_traits.hpp>
-#include <ratl/frame_span.hpp>
+#include <ratl/channel_span.hpp>
 
 // other includes
 #include <type_traits>
