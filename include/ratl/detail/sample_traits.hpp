@@ -74,7 +74,7 @@ struct sample_traits
 };
 
 template<typename AllocatorTraits>
-using sample_traits_from_traits_t = sample_traits<
+using sample_traits_from_alloc_traits_t = sample_traits<
     typename AllocatorTraits::value_type,
     typename AllocatorTraits::pointer,
     typename AllocatorTraits::const_pointer>;
@@ -84,22 +84,6 @@ using const_sample_traits_t = sample_traits<
     typename SampleTraits::const_sample_type,
     typename SampleTraits::const_pointer,
     typename SampleTraits::const_pointer>;
-
-// sample_pointer_select
-
-template<typename SampleType, typename PointerTraits>
-struct sample_pointer_select :
-    std::conditional<
-        std::is_const<SampleType>::value,
-        typename PointerTraits::const_pointer,
-        typename PointerTraits::pointer>
-{
-};
-
-// sample_pointer_select_t
-
-template<typename SampleType, typename PointerTraits>
-using sample_pointer_select_t = typename sample_pointer_select<SampleType, PointerTraits>::type;
 
 } // namespace detail
 } // namespace ratl

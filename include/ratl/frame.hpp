@@ -37,7 +37,7 @@ public:
 
 private:
     using alloc_traits = std::allocator_traits<allocator_type>;
-    using sample_traits = detail::sample_traits_from_traits_t<alloc_traits>;
+    using sample_traits = detail::sample_traits_from_alloc_traits_t<alloc_traits>;
     using const_sample_traits = detail::const_sample_traits_t<sample_traits>;
 
     using data_impl_type = sample_span<SampleType, sample_traits, std::true_type, detail::frame_iterator>;
