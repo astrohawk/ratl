@@ -11,14 +11,13 @@
 // ratl includes
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/sample_iterator.hpp>
+#include <ratl/detail/utility.hpp>
 #include <ratl/detail/xsimd.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
 
 // other includes
-#if defined(RATL_CPP_VERSION_HAS_CPP17)
-#    include <functional>
-#endif
 #include <type_traits>
 
 #if defined(RATL_HAS_XSIMD)
@@ -40,13 +39,13 @@ struct batch_alignment_mode
     {
     };
 
-    struct unknown
+    struct noncontiguous
     {
     };
 };
 
 template<typename SampleType, typename BatchType>
-class batch_alignment_checker
+class batch_alignment_dispatcher
 {
     static inline bool is_aligned(const SampleType* ptr) noexcept
     {
@@ -54,87 +53,46 @@ class batch_alignment_checker
     }
 
 public:
-    template<typename Iterator>
-    using alignment_mode_t = std::conditional_t<
-        std::is_same<Iterator, SampleType*>::value || std::is_same<Iterator, const SampleType*>::value,
-        batch_alignment_mode::unknown,
-        batch_alignment_mode::unaligned>;
-
-#    if defined(RATL_CPP_VERSION_HAS_CPP17)
-    template<typename Iterator, typename Fn>
-    static inline decltype(auto) unknown_alignment_dispatcher(Iterator iterator, Fn&& fn) noexcept(
+    template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits, typename Fn>
+    static inline decltype(auto)
+    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type> iterator, Fn&& fn) noexcept(
         // clang-format off
-        noexcept(std::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned())) &&
-        noexcept(std::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned()))
+        noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned())) &&
+        noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned()))
         // clang-format on
     )
     {
-        static_assert(std::is_same<alignment_mode_t<Iterator>, batch_alignment_mode::unknown>::value);
-        if (is_aligned(iterator))
+        if (is_aligned(iterator.base()))
         {
-            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned());
+            return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::aligned());
         }
         else
         {
-            return std::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned());
+            return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::unaligned());
         }
     }
-#    else
-    template<typename Iterator, typename Fn>
-    static inline decltype(auto) unknown_alignment_dispatcher(Iterator iterator, Fn&& fn) noexcept(
+
+    template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits, typename Fn>
+    static inline decltype(auto)
+    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type> iterator, Fn&& fn) noexcept(
         // clang-format off
-        noexcept(std::forward<Fn>(fn)(batch_alignment_mode::aligned())) &&
-        noexcept(std::forward<Fn>(fn)(batch_alignment_mode::unaligned()))
+        noexcept(dispatch(
+            sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(iterator.base()),
+            std::forward<Fn>(fn))) &&
+        noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous()))
         // clang-format on
     )
     {
-        static_assert(std::is_same<alignment_mode_t<Iterator>, batch_alignment_mode::unknown>::value, "");
-        if (is_aligned(iterator))
+        if (iterator.stride() == 1)
         {
-            return std::forward<Fn>(fn)(batch_alignment_mode::aligned());
+            return dispatch(
+                sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(iterator.base()),
+                std::forward<Fn>(fn));
         }
         else
         {
-            return std::forward<Fn>(fn)(batch_alignment_mode::unaligned());
+            return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous());
         }
-    }
-#    endif
-};
-
-template<typename BatchType, typename AlignmentMode>
-class batch_alignment_select;
-
-template<typename BatchType>
-class batch_alignment_select<BatchType, batch_alignment_mode::aligned>
-{
-public:
-    template<typename Input>
-    static inline BatchType load(Input* input) noexcept
-    {
-        return BatchType(input, xsimd::aligned_mode());
-    }
-
-    template<typename Output>
-    static inline void store(const BatchType& input, Output* output) noexcept
-    {
-        input.store_aligned(output);
-    }
-};
-
-template<typename BatchType>
-class batch_alignment_select<BatchType, batch_alignment_mode::unaligned>
-{
-public:
-    template<typename Input>
-    static inline BatchType load(Input* input) noexcept
-    {
-        return BatchType(input, xsimd::unaligned_mode());
-    }
-
-    template<typename Output>
-    static inline void store(const BatchType& input, Output* output) noexcept
-    {
-        input.store_unaligned(output);
     }
 };
 

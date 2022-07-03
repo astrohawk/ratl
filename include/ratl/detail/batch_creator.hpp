@@ -12,6 +12,7 @@
 #include <ratl/detail/batch_alignment.hpp>
 #include <ratl/detail/batch_traits.hpp>
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/sample_iterator.hpp>
 #include <ratl/detail/xsimd.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
@@ -70,49 +71,50 @@ class base_batch_creator
 
 public:
     using batch_type = typename sample_converter::batch_type;
-    using alignment_checker = batch_alignment_checker<SampleType, batch_type>;
+    using alignment_dispatcher = batch_alignment_dispatcher<SampleType, batch_type>;
 
-    template<typename Iterator, typename AlignmentMode>
-    static inline batch_type load(Iterator input, AlignmentMode) noexcept
+    template<typename SampleIterator, typename AlignmentMode>
+    static inline batch_type load(SampleIterator input, AlignmentMode) noexcept
     {
         return load_impl(input, std::make_index_sequence<batch_size>(), std::make_index_sequence<0>());
     }
 
-    template<typename Iterator, typename AlignmentMode>
-    static inline batch_type load(Iterator input, std::size_t size, AlignmentMode) noexcept
+    template<typename SampleIterator, typename AlignmentMode>
+    static inline batch_type load(SampleIterator input, std::size_t size, AlignmentMode) noexcept
     {
         return partial_load(input, size, std::make_index_sequence<batch_size>());
     }
 
-    template<typename Iterator, typename AlignmentMode>
-    static inline void store(const batch_type& input, Iterator output, AlignmentMode) noexcept
+    template<typename SampleIterator, typename AlignmentMode>
+    static inline void store(const batch_type& input, SampleIterator output, AlignmentMode) noexcept
     {
         store_impl(input, output, std::make_index_sequence<batch_size>());
     }
 
-    template<typename Iterator, typename AlignmentMode>
-    static inline void store(const batch_type& input, Iterator output, std::size_t size, AlignmentMode) noexcept
+    template<typename SampleIterator, typename AlignmentMode>
+    static inline void store(const batch_type& input, SampleIterator output, std::size_t size, AlignmentMode) noexcept
     {
         partial_store(input, output, size, std::make_index_sequence<batch_size>());
     }
 
 private:
-    template<typename Iterator, std::size_t... I>
-    static inline batch_type partial_load(Iterator input, std::size_t size, std::index_sequence<I...>) noexcept
+    template<typename SampleIterator, std::size_t... I>
+    static inline batch_type partial_load(SampleIterator input, std::size_t size, std::index_sequence<I...>) noexcept
     {
-        using partial_load_impl_fn = batch_type (*)(Iterator);
-        static constexpr partial_load_impl_fn partial_load_impl_fns[] = {&partial_load_impl<Iterator, I>...};
+        using partial_load_impl_fn = batch_type (*)(SampleIterator);
+        static constexpr partial_load_impl_fn partial_load_impl_fns[] = {&partial_load_impl<SampleIterator, I>...};
         return (*partial_load_impl_fns[size])(input);
     }
 
-    template<typename Iterator, std::size_t Size>
-    static inline batch_type partial_load_impl(Iterator input) noexcept
+    template<typename SampleIterator, std::size_t Size>
+    static inline batch_type partial_load_impl(SampleIterator input) noexcept
     {
         return load_impl(input, std::make_index_sequence<Size>(), std::make_index_sequence<batch_size - Size>());
     }
 
-    template<typename Iterator, std::size_t... I, std::size_t... J>
-    static inline batch_type load_impl(Iterator input, std::index_sequence<I...>, std::index_sequence<J...>) noexcept
+    template<typename SampleIterator, std::size_t... I, std::size_t... J>
+    static inline batch_type load_impl(
+        SampleIterator input, std::index_sequence<I...>, std::index_sequence<J...>) noexcept
     {
         static_assert(sizeof...(I) + sizeof...(J) == batch_size, "");
         (void)input; // stops gcc from complaining due to input not being used when I is 0
@@ -124,23 +126,23 @@ private:
         return {};
     }
 
-    template<typename Iterator, std::size_t... I>
+    template<typename SampleIterator, std::size_t... I>
     static inline void partial_store(
-        const batch_type& input, Iterator output, std::size_t size, std::index_sequence<I...>) noexcept
+        const batch_type& input, SampleIterator output, std::size_t size, std::index_sequence<I...>) noexcept
     {
-        using partial_store_impl_fn = void (*)(const batch_type&, Iterator);
-        static constexpr partial_store_impl_fn partial_store_impl_fns[] = {&partial_store_impl<Iterator, I>...};
+        using partial_store_impl_fn = void (*)(const batch_type&, SampleIterator);
+        static constexpr partial_store_impl_fn partial_store_impl_fns[] = {&partial_store_impl<SampleIterator, I>...};
         return (*partial_store_impl_fns[size])(input, output);
     }
 
-    template<typename Iterator, std::size_t Size>
-    static inline void partial_store_impl(const batch_type& input, Iterator output) noexcept
+    template<typename SampleIterator, std::size_t Size>
+    static inline void partial_store_impl(const batch_type& input, SampleIterator output) noexcept
     {
         store_impl(input, output, std::make_index_sequence<Size>());
     }
 
-    template<typename Iterator, std::size_t... I>
-    static inline void store_impl(const batch_type& input, Iterator output, std::index_sequence<I...>) noexcept
+    template<typename SampleIterator, std::size_t... I>
+    static inline void store_impl(const batch_type& input, SampleIterator output, std::index_sequence<I...>) noexcept
     {
         (void)output; // stops gcc from complaining due to output not being used when I is 0
         alignas(batch_alignment<batch_type>) typename batch_type::value_type buffer[batch_size];
@@ -153,85 +155,60 @@ private:
 #    endif
     }
 
-    template<std::size_t I, typename Iterator>
-    static inline void store_element(const typename batch_type::value_type* buffer, Iterator output) noexcept
+    template<std::size_t I, typename SampleIterator>
+    static inline void store_element(const typename batch_type::value_type* buffer, SampleIterator output) noexcept
     {
         output[I].get() = sample_converter::convert_output(buffer[I]);
     }
 };
 
-// The load and store overloads for the specific sample types technically rely on undefined
-// behaviour when performing the reinterpret_cast but this is a risk we are currently willing to take in order to get
-// the corresponding performance boost
-
-template<typename SampleType, typename SampleValueUnderlyingType>
-class contiguous_batch_creator : public base_batch_creator<SampleType>
-{
-    using base = typename contiguous_batch_creator::base_batch_creator;
-
-public:
-    using batch_type = typename base::batch_type;
-
-    using base::load;
-
-    template<typename AlignmentMode>
-    static inline batch_type load(SampleType* input, AlignmentMode) noexcept
-    {
-        return batch_alignment_select<batch_type, AlignmentMode>::load(
-            reinterpret_cast<SampleValueUnderlyingType*>(input));
-    }
-
-    template<typename AlignmentMode>
-    static inline batch_type load(const SampleType* input, AlignmentMode) noexcept
-    {
-        return batch_alignment_select<batch_type, AlignmentMode>::load(
-            reinterpret_cast<const SampleValueUnderlyingType*>(input));
-    }
-
-    using base::store;
-
-    template<typename AlignmentMode>
-    static inline void store(const batch_type& input, SampleType* output, AlignmentMode) noexcept
-    {
-        return batch_alignment_select<batch_type, AlignmentMode>::store(
-            input, reinterpret_cast<SampleValueUnderlyingType*>(output));
-    }
-};
-
 template<typename SampleType, typename = void>
-struct batch_creator : public base_batch_creator<SampleType>
+class batch_creator : public base_batch_creator<SampleType>
 {
 };
 
-template<typename SampleValueType>
-class batch_creator<sample<SampleValueType>, std::enable_if_t<has_batch_type_v<SampleValueType>>> :
-    public contiguous_batch_creator<sample<SampleValueType>, SampleValueType>
+// The load and store overloads for the specific sample types technically rely on undefined behaviour when performing
+// the reinterpret_cast but this is a risk we are currently willing to take in order to get the corresponding
+// performance boost
+
+template<typename SampleType>
+class batch_creator<SampleType, std::enable_if_t<has_batch_type_v<sample_underlying_type_t<SampleType>>>> :
+    public base_batch_creator<SampleType>
 {
-    using base = typename batch_creator::contiguous_batch_creator;
+    using base = typename batch_creator::base_batch_creator;
 
 public:
     using batch_type = typename base::batch_type;
-    using alignment_checker = typename base::alignment_checker;
+
+    template<typename SampleIterator>
+    static inline batch_type load(SampleIterator input, batch_alignment_mode::aligned) noexcept
+    {
+        return batch_type(
+            reinterpret_cast<sample_iterator_underlying_type_t<SampleIterator>*>(input.base()), xsimd::aligned_mode());
+    }
+
+    template<typename SampleIterator>
+    static inline batch_type load(SampleIterator input, batch_alignment_mode::unaligned) noexcept
+    {
+        return batch_type(
+            reinterpret_cast<sample_iterator_underlying_type_t<SampleIterator>*>(input.base()),
+            xsimd::unaligned_mode());
+    }
 
     using base::load;
-    using base::store;
-};
 
-template<typename SampleValueType>
-class batch_creator<
-    network_sample<SampleValueType>,
-    std::enable_if_t<has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>> :
-    public contiguous_batch_creator<
-        network_sample<SampleValueType>,
-        network_sample_value_underlying_type_t<SampleValueType>>
-{
-    using base = typename batch_creator::contiguous_batch_creator;
+    template<typename SampleIterator>
+    static inline void store(const batch_type& input, SampleIterator output, batch_alignment_mode::aligned) noexcept
+    {
+        input.store_aligned(reinterpret_cast<sample_iterator_underlying_type_t<SampleIterator>*>(output.base()));
+    }
 
-public:
-    using batch_type = typename base::batch_type;
-    using alignment_checker = typename base::alignment_checker;
+    template<typename SampleIterator>
+    static inline void store(const batch_type& input, SampleIterator output, batch_alignment_mode::unaligned) noexcept
+    {
+        input.store_unaligned(reinterpret_cast<sample_iterator_underlying_type_t<SampleIterator>*>(output.base()));
+    }
 
-    using base::load;
     using base::store;
 };
 

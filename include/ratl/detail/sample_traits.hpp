@@ -48,6 +48,40 @@ struct is_sample : public detail::is_sample_impl<std::remove_cv_t<SampleType>>
 template<typename SampleType>
 static constexpr bool is_sample_v = is_sample<SampleType>::value;
 
+// sample_underlying_type
+
+template<typename SampleType>
+struct sample_underlying_type;
+
+template<typename SampleValueType>
+struct sample_underlying_type<sample<SampleValueType>>
+{
+    using type = SampleValueType;
+};
+
+template<typename SampleValueType>
+struct sample_underlying_type<const sample<SampleValueType>>
+{
+    using type = const typename sample_underlying_type<sample<SampleValueType>>::type;
+};
+
+template<typename SampleValueType>
+struct sample_underlying_type<network_sample<SampleValueType>>
+{
+    using type = network_sample_value_underlying_type_t<SampleValueType>;
+};
+
+template<typename SampleValueType>
+struct sample_underlying_type<const network_sample<SampleValueType>>
+{
+    using type = const typename sample_underlying_type<network_sample<SampleValueType>>::type;
+};
+
+// sample_underlying_type_t
+
+template<typename SampleType>
+using sample_underlying_type_t = typename sample_underlying_type<SampleType>::type;
+
 // sample_traits
 
 template<typename SampleType, typename PointerType = SampleType*, typename ConstPointerType = const SampleType*>
