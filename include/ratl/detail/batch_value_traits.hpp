@@ -34,8 +34,10 @@ struct has_batch_type : is_complete<xsimd::batch<SampleValueType, batch_size>>
 
 // has_batch_type_v
 
+#if defined(RATL_CPP_VERSION_HAS_CPP17)
 template<typename SampleValueType>
-static constexpr bool has_batch_type_v = has_batch_type<SampleValueType>::value;
+inline constexpr bool has_batch_type_v = has_batch_type<SampleValueType>::value;
+#endif
 
 // batch_sample_value_type
 
@@ -43,13 +45,13 @@ template<typename SampleValueType, typename = void>
 struct batch_sample_value_type;
 
 template<typename SampleValueType>
-struct batch_sample_value_type<SampleValueType, std::enable_if_t<has_batch_type_v<SampleValueType>>>
+struct batch_sample_value_type<SampleValueType, std::enable_if_t<has_batch_type<SampleValueType>::value>>
 {
     using type = xsimd::batch<SampleValueType, batch_size>;
 };
 
 template<typename SampleValueType>
-struct batch_sample_value_type<SampleValueType, std::enable_if_t<!has_batch_type_v<SampleValueType>>>
+struct batch_sample_value_type<SampleValueType, std::enable_if_t<!has_batch_type<SampleValueType>::value>>
 {
     using type = xsimd::batch<std::int32_t, batch_size>;
 };
@@ -71,7 +73,7 @@ struct batch_network_sample_value_type;
 template<typename SampleValueType>
 struct batch_network_sample_value_type<
     SampleValueType,
-    std::enable_if_t<has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>>
+    std::enable_if_t<has_batch_type<network_sample_value_underlying_type_t<SampleValueType>>::value>>
 {
     using type = xsimd::batch<network_sample_value_underlying_type_t<SampleValueType>, batch_size>;
 };
@@ -79,7 +81,7 @@ struct batch_network_sample_value_type<
 template<typename SampleValueType>
 struct batch_network_sample_value_type<
     SampleValueType,
-    std::enable_if_t<!has_batch_type_v<network_sample_value_underlying_type_t<SampleValueType>>>>
+    std::enable_if_t<!has_batch_type<network_sample_value_underlying_type_t<SampleValueType>>::value>>
 {
     using type = xsimd::batch<std::uint32_t, batch_size>;
 };

@@ -57,6 +57,7 @@ set(RATL_HEADERS
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_sample_fix.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_traits.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_value_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/blit_iterator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/cast.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/channel_iterator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/config.hpp
@@ -79,6 +80,7 @@ set(RATL_HEADERS
         ${RATL_INCLUDE_DIR}/ratl/detail/sample_value_traits.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/transformer.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/type_traits.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/utility.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/xsimd.hpp
         ${RATL_INCLUDE_DIR}/ratl/allocator.hpp
         ${RATL_INCLUDE_DIR}/ratl/channel.hpp

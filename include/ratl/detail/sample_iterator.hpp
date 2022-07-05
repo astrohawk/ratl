@@ -358,6 +358,42 @@ public:
     }
 };
 
+// sample_iterator_underlying_type
+
+template<typename SampleIterator>
+struct sample_iterator_underlying_type;
+
+template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits, typename IteratorContiguous>
+struct sample_iterator_underlying_type<
+    sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, IteratorContiguous>>
+{
+    using type = sample_underlying_type_t<IteratorSampleType>;
+};
+
+// sample_iterator_underlying_type_t
+
+template<typename SampleIterator>
+using sample_iterator_underlying_type_t = typename sample_iterator_underlying_type<SampleIterator>::type;
+
+// make_sample_iterator
+
+template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits>
+sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type> make_sample_iterator(
+    typename IteratorSampleTraits::pointer data,
+    sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type> iterator)
+{
+    return sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type>(
+        data, iterator.stride());
+}
+
+template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits>
+sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type> make_sample_iterator(
+    typename IteratorSampleTraits::pointer data,
+    sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>)
+{
+    return sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(data);
+}
+
 } // namespace detail
 } // namespace ratl
 
