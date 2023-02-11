@@ -25,14 +25,14 @@ namespace detail
 // batch_fix_negative_samples
 
 template<typename SampleValueType>
-inline std::enable_if_t<has_batch_type_v<SampleValueType>, batch_sample_value_type_t<SampleValueType>>
+inline std::enable_if_t<has_batch_type<SampleValueType>::value, batch_sample_value_type_t<SampleValueType>>
 batch_fix_negative_samples(const batch_sample_value_type_t<SampleValueType>& input) noexcept
 {
     return input;
 }
 
 template<typename SampleValueType>
-inline std::enable_if_t<!has_batch_type_v<SampleValueType>, batch_sample_value_type_t<SampleValueType>>
+inline std::enable_if_t<!has_batch_type<SampleValueType>::value, batch_sample_value_type_t<SampleValueType>>
 batch_fix_negative_samples(const batch_sample_value_type_t<SampleValueType>& input) noexcept
 {
     static constexpr std::size_t shift =

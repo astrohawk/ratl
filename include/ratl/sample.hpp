@@ -22,7 +22,7 @@ template<typename SampleValueType>
 class sample final
 {
     static_assert(
-        detail::is_valid_sample_value_type_v<SampleValueType>, "SampleValueType is not a valid sample value type");
+        detail::is_valid_sample_value_type<SampleValueType>::value, "SampleValueType is not a valid sample value type");
 
 public:
     using sample_value_type = SampleValueType;

@@ -18,13 +18,24 @@ namespace ratl
 namespace test
 {
 template<class SampleType>
-class BatchCreatorSamplePointerTest : public ::testing::Test
+class BatchCreatorSampleContiguousTest : public ::testing::Test
 {
+    struct test_tag
+    {
+    };
+
 protected:
     using sample_type = SampleType;
     using test_batch_creator = detail::batch_creator<sample_type>;
     using sample_converter = detail::batch_creator_sample_converter<sample_type>;
     using batch_type = typename test_batch_creator::batch_type;
+    using input_iterator = detail::sample_iterator<
+        test_tag,
+        typename detail::sample_traits<sample_type>::const_sample_type,
+        detail::const_sample_traits_t<detail::sample_traits<sample_type>>,
+        std::true_type>;
+    using output_iterator =
+        detail::sample_iterator<test_tag, sample_type, detail::sample_traits<sample_type>, std::true_type>;
 
     static constexpr std::size_t batch_size = detail::batch_size;
     static constexpr std::size_t batch_alignment = detail::batch_alignment<batch_type>;
@@ -75,14 +86,14 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(BatchCreatorSamplePointerTest, PossibleSampleTypes, );
+TYPED_TEST_SUITE(BatchCreatorSampleContiguousTest, PossibleSampleTypes, );
 
-TYPED_TEST(BatchCreatorSamplePointerTest, AlignedPointerLoad)
+TYPED_TEST(BatchCreatorSampleContiguousTest, AlignedPointerLoad)
 {
     alignas(TestFixture::batch_alignment) auto input_array = TestFixture::generate_input_array();
 
-    auto output_batch =
-        TestFixture::test_batch_creator::load(input_array.data(), detail::batch_alignment_mode::aligned());
+    auto output_batch = TestFixture::test_batch_creator::load(
+        typename TestFixture::input_iterator(input_array.data()), detail::batch_alignment_mode::aligned());
 
     auto output_array = TestFixture::to_array(output_batch);
     for (std::size_t i = 0; i < TestFixture::batch_size; ++i)
@@ -91,13 +102,16 @@ TYPED_TEST(BatchCreatorSamplePointerTest, AlignedPointerLoad)
     }
 }
 
-TYPED_TEST(BatchCreatorSamplePointerTest, AlignedPointerStore)
+TYPED_TEST(BatchCreatorSampleContiguousTest, AlignedPointerStore)
 {
     auto input_array = TestFixture::generate_input_array();
     auto input_batch = TestFixture::to_batch(input_array);
 
     alignas(TestFixture::batch_alignment) auto output_array = TestFixture::generate_output_array();
-    TestFixture::test_batch_creator::store(input_batch, output_array.data(), detail::batch_alignment_mode::aligned());
+    TestFixture::test_batch_creator::store(
+        input_batch,
+        typename TestFixture::output_iterator(output_array.data()),
+        detail::batch_alignment_mode::aligned());
 
     for (std::size_t i = 0; i < TestFixture::batch_size; ++i)
     {
@@ -105,12 +119,12 @@ TYPED_TEST(BatchCreatorSamplePointerTest, AlignedPointerStore)
     }
 }
 
-TYPED_TEST(BatchCreatorSamplePointerTest, UnalignedPointerLoad)
+TYPED_TEST(BatchCreatorSampleContiguousTest, UnalignedPointerLoad)
 {
     alignas(TestFixture::batch_alignment) auto input_array = TestFixture::generate_input_array();
 
-    auto output_batch =
-        TestFixture::test_batch_creator::load(input_array.data() + 1, detail::batch_alignment_mode::unaligned());
+    auto output_batch = TestFixture::test_batch_creator::load(
+        typename TestFixture::input_iterator(input_array.data() + 1), detail::batch_alignment_mode::unaligned());
 
     auto output_array = TestFixture::to_array(output_batch);
     for (std::size_t i = 0; i < TestFixture::batch_size; ++i)
@@ -119,14 +133,16 @@ TYPED_TEST(BatchCreatorSamplePointerTest, UnalignedPointerLoad)
     }
 }
 
-TYPED_TEST(BatchCreatorSamplePointerTest, UnalignedPointerStore)
+TYPED_TEST(BatchCreatorSampleContiguousTest, UnalignedPointerStore)
 {
     auto input_array = TestFixture::generate_input_array();
     auto input_batch = TestFixture::to_batch(input_array);
 
     alignas(TestFixture::batch_alignment) auto output_array = TestFixture::generate_output_array();
     TestFixture::test_batch_creator::store(
-        input_batch, output_array.data() + 1, detail::batch_alignment_mode::unaligned());
+        input_batch,
+        typename TestFixture::output_iterator(output_array.data() + 1),
+        detail::batch_alignment_mode::unaligned());
 
     for (std::size_t i = 0; i < TestFixture::batch_size; ++i)
     {
@@ -134,14 +150,14 @@ TYPED_TEST(BatchCreatorSamplePointerTest, UnalignedPointerStore)
     }
 }
 
-TYPED_TEST(BatchCreatorSamplePointerTest, PartialAlignedPointerLoad)
+TYPED_TEST(BatchCreatorSampleContiguousTest, PartialAlignedPointerLoad)
 {
     alignas(TestFixture::batch_alignment) auto input_array = TestFixture::generate_input_array();
 
     for (std::size_t i = 1; i < TestFixture::batch_size; ++i)
     {
-        auto output_batch =
-            TestFixture::test_batch_creator::load(input_array.data(), i, detail::batch_alignment_mode::aligned());
+        auto output_batch = TestFixture::test_batch_creator::load(
+            typename TestFixture::input_iterator(input_array.data()), i, detail::batch_alignment_mode::aligned());
 
         auto output_array = TestFixture::to_array(output_batch);
         for (std::size_t j = 0; j < i; ++j)
@@ -151,7 +167,7 @@ TYPED_TEST(BatchCreatorSamplePointerTest, PartialAlignedPointerLoad)
     }
 }
 
-TYPED_TEST(BatchCreatorSamplePointerTest, PartialAlignedPointerStore)
+TYPED_TEST(BatchCreatorSampleContiguousTest, PartialAlignedPointerStore)
 {
     auto input_array = TestFixture::generate_input_array();
     auto input_batch = TestFixture::to_batch(input_array);
@@ -160,7 +176,10 @@ TYPED_TEST(BatchCreatorSamplePointerTest, PartialAlignedPointerStore)
     {
         alignas(TestFixture::batch_alignment) auto output_array = TestFixture::generate_output_array();
         TestFixture::test_batch_creator::store(
-            input_batch, output_array.data(), i, detail::batch_alignment_mode::aligned());
+            input_batch,
+            typename TestFixture::output_iterator(output_array.data()),
+            i,
+            detail::batch_alignment_mode::aligned());
 
         for (std::size_t j = 0; j < i; ++j)
         {
@@ -169,14 +188,14 @@ TYPED_TEST(BatchCreatorSamplePointerTest, PartialAlignedPointerStore)
     }
 }
 
-TYPED_TEST(BatchCreatorSamplePointerTest, PartialUnalignedPointerLoad)
+TYPED_TEST(BatchCreatorSampleContiguousTest, PartialUnalignedPointerLoad)
 {
     alignas(TestFixture::batch_alignment) auto input_array = TestFixture::generate_input_array();
 
     for (std::size_t i = 1; i < TestFixture::batch_size; ++i)
     {
-        auto output_batch =
-            TestFixture::test_batch_creator::load(input_array.data() + 1, i, detail::batch_alignment_mode::unaligned());
+        auto output_batch = TestFixture::test_batch_creator::load(
+            typename TestFixture::input_iterator(input_array.data() + 1), i, detail::batch_alignment_mode::unaligned());
 
         auto output_array = TestFixture::to_array(output_batch);
         for (std::size_t j = 0; j < i; ++j)
@@ -186,7 +205,7 @@ TYPED_TEST(BatchCreatorSamplePointerTest, PartialUnalignedPointerLoad)
     }
 }
 
-TYPED_TEST(BatchCreatorSamplePointerTest, PartialUnalignedPointerStore)
+TYPED_TEST(BatchCreatorSampleContiguousTest, PartialUnalignedPointerStore)
 {
     auto input_array = TestFixture::generate_input_array();
     auto input_batch = TestFixture::to_batch(input_array);
@@ -195,7 +214,10 @@ TYPED_TEST(BatchCreatorSamplePointerTest, PartialUnalignedPointerStore)
     {
         alignas(TestFixture::batch_alignment) auto output_array = TestFixture::generate_output_array();
         TestFixture::test_batch_creator::store(
-            input_batch, output_array.data() + 1, i, detail::batch_alignment_mode::unaligned());
+            input_batch,
+            typename TestFixture::output_iterator(output_array.data() + 1),
+            i,
+            detail::batch_alignment_mode::unaligned());
 
         for (std::size_t j = 0; j < i; ++j)
         {
@@ -205,7 +227,7 @@ TYPED_TEST(BatchCreatorSamplePointerTest, PartialUnalignedPointerStore)
 }
 
 template<class SampleType>
-class BatchCreatorSampleIteratorTest : public ::testing::Test
+class BatchCreatorSampleNoncontiguousTest : public ::testing::Test
 {
 protected:
     using sample_type = SampleType;
@@ -264,14 +286,14 @@ protected:
     }
 };
 
-TYPED_TEST_SUITE(BatchCreatorSampleIteratorTest, PossibleSampleTypes, );
+TYPED_TEST_SUITE(BatchCreatorSampleNoncontiguousTest, PossibleSampleTypes, );
 
-TYPED_TEST(BatchCreatorSampleIteratorTest, IteratorLoad)
+TYPED_TEST(BatchCreatorSampleNoncontiguousTest, IteratorLoad)
 {
     auto input_interleaved = TestFixture::generate_input_interleaved();
 
     auto output_batch = TestFixture::test_batch_creator::load(
-        input_interleaved.channel(TestFixture::test_channel).begin(), detail::batch_alignment_mode::unknown());
+        input_interleaved.channel(TestFixture::test_channel).begin(), detail::batch_alignment_mode::noncontiguous());
 
     auto output_interleaved = TestFixture::to_interleaved(output_batch);
     for (std::size_t i = 0; i < TestFixture::batch_size; ++i)
@@ -282,7 +304,7 @@ TYPED_TEST(BatchCreatorSampleIteratorTest, IteratorLoad)
     }
 }
 
-TYPED_TEST(BatchCreatorSampleIteratorTest, IteratorStore)
+TYPED_TEST(BatchCreatorSampleNoncontiguousTest, IteratorStore)
 {
     auto input_interleaved = TestFixture::generate_input_interleaved();
     auto input_batch = TestFixture::to_batch(input_interleaved);
@@ -291,7 +313,7 @@ TYPED_TEST(BatchCreatorSampleIteratorTest, IteratorStore)
     TestFixture::test_batch_creator::store(
         input_batch,
         output_interleaved.channel(TestFixture::test_channel).begin(),
-        detail::batch_alignment_mode::unknown());
+        detail::batch_alignment_mode::noncontiguous());
 
     for (std::size_t i = 0; i < TestFixture::batch_size; ++i)
     {
@@ -301,14 +323,16 @@ TYPED_TEST(BatchCreatorSampleIteratorTest, IteratorStore)
     }
 }
 
-TYPED_TEST(BatchCreatorSampleIteratorTest, PartialIteratorLoad)
+TYPED_TEST(BatchCreatorSampleNoncontiguousTest, PartialIteratorLoad)
 {
     auto input_interleaved = TestFixture::generate_input_interleaved();
 
     for (std::size_t i = 1; i < TestFixture::batch_size; ++i)
     {
         auto output_batch = TestFixture::test_batch_creator::load(
-            input_interleaved.channel(TestFixture::test_channel).begin(), i, detail::batch_alignment_mode::unknown());
+            input_interleaved.channel(TestFixture::test_channel).begin(),
+            i,
+            detail::batch_alignment_mode::noncontiguous());
 
         auto output_interleaved = TestFixture::to_interleaved(output_batch);
         for (std::size_t j = 0; j < i; ++j)
@@ -320,7 +344,7 @@ TYPED_TEST(BatchCreatorSampleIteratorTest, PartialIteratorLoad)
     }
 }
 
-TYPED_TEST(BatchCreatorSampleIteratorTest, PartialIteratorStore)
+TYPED_TEST(BatchCreatorSampleNoncontiguousTest, PartialIteratorStore)
 {
     auto input_interleaved = TestFixture::generate_input_interleaved();
     auto input_batch = TestFixture::to_batch(input_interleaved);
@@ -332,7 +356,7 @@ TYPED_TEST(BatchCreatorSampleIteratorTest, PartialIteratorStore)
             input_batch,
             output_interleaved.channel(TestFixture::test_channel).begin(),
             i,
-            detail::batch_alignment_mode::unknown());
+            detail::batch_alignment_mode::noncontiguous());
 
         for (std::size_t j = 0; j < i; ++j)
         {
