@@ -103,9 +103,11 @@ inline constexpr int24_t::operator int32_t() const noexcept
 #    pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #    pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
-    return static_cast<int32_t>(
-        (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
-        (static_cast<uint32_t>(static_cast<int32_t>(static_cast<int8_t>(storage_[2]))) << 16));
+    return (static_cast<int32_t>(
+                (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
+                (static_cast<uint32_t>(storage_[2]) << 16))
+            << 8) >>
+           8;
 #if defined(RATL_CPP_COMPILER_GCC)
 #    pragma GCC diagnostic pop
 #endif

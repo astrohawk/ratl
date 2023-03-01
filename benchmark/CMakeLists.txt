@@ -15,6 +15,12 @@ target_link_libraries(bench_float_to_int
         ratl::ratl
         benchmark::benchmark_main)
 
+add_executable(bench_int24
+        ${CMAKE_CURRENT_LIST_DIR}/bench_int24.cpp)
+target_link_libraries(bench_int24
+        ratl::ratl
+        benchmark::benchmark_main)
+
 add_executable(bench_rand
         ${CMAKE_CURRENT_LIST_DIR}/bench_rand.cpp)
 target_link_libraries(bench_rand
