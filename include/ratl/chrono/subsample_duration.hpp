@@ -159,13 +159,26 @@ private:
     static subsample_duration make_subsample_duration(
         const std::chrono::duration<Rep, Period>& duration, std::size_t sample_rate)
     {
+        static_assert(
+            (Period::num & std::numeric_limits<std::uint32_t>::max()) == Period::num,
+            "overflow risk as duration period ratio numerator is too large");
+        static_assert(
+            (Period::den & std::numeric_limits<std::uint32_t>::max()) == Period::den,
+            "overflow risk as duration period ratio denominator is too large");
+
         using unscaled_sample_fraction_rep = std::uint64_t;
 
         static constexpr auto sample_scaler_num = static_cast<samples_rep>(Period::num);
         static constexpr auto sample_scaler_den = static_cast<samples_rep>(Period::den);
 
+        static constexpr auto unscaled_sample_fraction_num = static_cast<unscaled_sample_fraction_rep>(Period::num);
+        static constexpr auto unscaled_sample_fraction_den = static_cast<unscaled_sample_fraction_rep>(Period::den);
+        static constexpr auto unscaled_sample_fraction_max = static_cast<unscaled_sample_fraction_rep>(
+            std::numeric_limits<subsample_duration::sample_fraction_rep>::max());
+
         auto duration_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
-        auto duration_subseconds_remainder = duration - std::chrono::duration<Rep, Period>(duration_seconds);
+        auto duration_subseconds_remainder =
+            duration - std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(duration_seconds);
         auto sample_count_seconds =
             static_cast<samples_rep>(duration_seconds.count()) * static_cast<samples_rep>(sample_rate);
         auto sample_count_subseconds_remainder_unscaled =
@@ -181,10 +194,8 @@ private:
             static_cast<unscaled_sample_fraction_rep>(
                 (sample_count_subseconds_remainder * sample_scaler_den) / sample_scaler_num);
         auto sample_fraction = static_cast<sample_fraction_rep>(
-            (sample_fraction_unscaled *
-             static_cast<unscaled_sample_fraction_rep>(std::numeric_limits<sample_fraction_rep>::max()) *
-             static_cast<unscaled_sample_fraction_rep>(Period::num)) /
-            static_cast<unscaled_sample_fraction_rep>(Period::den));
+            ((sample_fraction_unscaled * unscaled_sample_fraction_max) / unscaled_sample_fraction_den) *
+            unscaled_sample_fraction_num);
 
         return {sample_count, sample_fraction, sample_rate};
     }
@@ -341,11 +352,6 @@ inline bool operator<=(const subsample_duration& a, const subsample_duration& b)
 inline bool operator>=(const subsample_duration& a, const subsample_duration& b)
 {
     return !(a < b);
-}
-
-inline sample_duration sample_duration_cast(const subsample_duration& duration)
-{
-    return {duration.sample_count(), duration.sample_rate()};
 }
 
 } // namespace chrono

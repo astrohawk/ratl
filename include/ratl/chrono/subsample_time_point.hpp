@@ -22,22 +22,24 @@ namespace ratl
 {
 namespace chrono
 {
+template<typename Clock>
 class subsample_time_point
 {
 public:
+    using clock = Clock;
     using duration = subsample_duration;
 
     inline subsample_time_point() = default;
 
     inline explicit subsample_time_point(const duration& duration) : duration_{duration} {}
 
-    template<typename Clock, typename Duration>
+    template<typename Duration>
     inline subsample_time_point(const std::chrono::time_point<Clock, Duration>& time_point, std::size_t sample_rate) :
         duration_(time_point.time_since_epoch(), sample_rate)
     {
     }
 
-    inline subsample_time_point(const sample_time_point& sample_time_point) :
+    inline subsample_time_point(const sample_time_point<Clock>& sample_time_point) :
         duration_(sample_time_point.time_since_epoch())
     {
     }
@@ -89,89 +91,100 @@ private:
     duration duration_;
 };
 
-inline subsample_time_point operator+(const subsample_time_point& a, const subsample_duration& b)
+template<typename Clock>
+inline subsample_time_point<Clock> operator+(const subsample_time_point<Clock>& a, const subsample_duration& b)
 {
-    return subsample_time_point(a.time_since_epoch() + b);
+    return subsample_time_point<Clock>(a.time_since_epoch() + b);
 }
 
-inline subsample_time_point operator+(const subsample_duration& a, const subsample_time_point& b)
+template<typename Clock>
+inline subsample_time_point<Clock> operator+(const subsample_duration& a, const subsample_time_point<Clock>& b)
 {
-    return subsample_time_point(b.time_since_epoch() + a);
+    return subsample_time_point<Clock>(b.time_since_epoch() + a);
 }
 
-inline subsample_time_point operator+(const sample_time_point& a, const subsample_duration& b)
+template<typename Clock>
+inline subsample_time_point<Clock> operator+(const sample_time_point<Clock>& a, const subsample_duration& b)
 {
-    return subsample_time_point(a.time_since_epoch() + b);
+    return subsample_time_point<Clock>(a.time_since_epoch() + b);
 }
 
-inline subsample_time_point operator+(const subsample_duration& a, const sample_time_point& b)
+template<typename Clock>
+inline subsample_time_point<Clock> operator+(const subsample_duration& a, const sample_time_point<Clock>& b)
 {
-    return subsample_time_point(b.time_since_epoch() + a);
+    return subsample_time_point<Clock>(b.time_since_epoch() + a);
 }
 
-inline subsample_duration operator-(const subsample_time_point& a, const subsample_time_point& b)
-{
-    return a.time_since_epoch() - b.time_since_epoch();
-}
-
-inline subsample_duration operator-(const subsample_time_point& a, const sample_time_point& b)
-{
-    return a.time_since_epoch() - b.time_since_epoch();
-}
-
-inline subsample_duration operator-(const sample_time_point& a, const subsample_time_point& b)
+template<typename Clock>
+inline subsample_duration operator-(const subsample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
 {
     return a.time_since_epoch() - b.time_since_epoch();
 }
 
-inline subsample_time_point operator-(const subsample_time_point& a, const subsample_duration& b)
+template<typename Clock>
+inline subsample_duration operator-(const subsample_time_point<Clock>& a, const sample_time_point<Clock>& b)
+{
+    return a.time_since_epoch() - b.time_since_epoch();
+}
+
+template<typename Clock>
+inline subsample_duration operator-(const sample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
+{
+    return a.time_since_epoch() - b.time_since_epoch();
+}
+
+template<typename Clock>
+inline subsample_time_point<Clock> operator-(const subsample_time_point<Clock>& a, const subsample_duration& b)
 {
     return subsample_time_point(a.time_since_epoch() - b);
 }
 
-inline subsample_time_point operator-(const subsample_time_point& a, const sample_duration& b)
+template<typename Clock>
+inline subsample_time_point<Clock> operator-(const subsample_time_point<Clock>& a, const sample_duration& b)
 {
     return subsample_time_point(a.time_since_epoch() - b);
 }
 
-inline subsample_time_point operator-(const sample_time_point& a, const subsample_duration& b)
+template<typename Clock>
+inline subsample_time_point<Clock> operator-(const sample_time_point<Clock>& a, const subsample_duration& b)
 {
     return subsample_time_point(a.time_since_epoch() - b);
 }
 
-inline bool operator==(const subsample_time_point& a, const subsample_time_point& b)
+template<typename Clock>
+inline bool operator==(const subsample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
 {
     return a.time_since_epoch() == b.time_since_epoch();
 }
 
-inline bool operator!=(const subsample_time_point& a, const subsample_time_point& b)
+template<typename Clock>
+inline bool operator!=(const subsample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
 {
     return a.time_since_epoch() != b.time_since_epoch();
 }
 
-inline bool operator<(const subsample_time_point& a, const subsample_time_point& b)
+template<typename Clock>
+inline bool operator<(const subsample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
 {
     return a.time_since_epoch() < b.time_since_epoch();
 }
 
-inline bool operator>(const subsample_time_point& a, const subsample_time_point& b)
+template<typename Clock>
+inline bool operator>(const subsample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
 {
     return a.time_since_epoch() > b.time_since_epoch();
 }
 
-inline bool operator<=(const subsample_time_point& a, const subsample_time_point& b)
+template<typename Clock>
+inline bool operator<=(const subsample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
 {
     return a.time_since_epoch() <= b.time_since_epoch();
 }
 
-inline bool operator>=(const subsample_time_point& a, const subsample_time_point& b)
+template<typename Clock>
+inline bool operator>=(const subsample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
 {
     return a.time_since_epoch() >= b.time_since_epoch();
-}
-
-inline sample_time_point sample_time_point_cast(const subsample_time_point& time_point)
-{
-    return sample_time_point(sample_duration_cast(time_point.time_since_epoch()));
 }
 
 } // namespace chrono

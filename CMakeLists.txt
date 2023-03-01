@@ -46,6 +46,14 @@ add_subdirectory(third_party)
 
 set(RATL_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(RATL_HEADERS
+        ${RATL_INCLUDE_DIR}/ratl/chrono/duration_cast.hpp
+        ${RATL_INCLUDE_DIR}/ratl/chrono/forward_delay_locked_loop.hpp
+        ${RATL_INCLUDE_DIR}/ratl/chrono/reverse_delay_locked_loop.hpp
+        ${RATL_INCLUDE_DIR}/ratl/chrono/sample_duration.hpp
+        ${RATL_INCLUDE_DIR}/ratl/chrono/sample_time_point.hpp
+        ${RATL_INCLUDE_DIR}/ratl/chrono/subsample_duration.hpp
+        ${RATL_INCLUDE_DIR}/ratl/chrono/subsample_time_point.hpp
+        ${RATL_INCLUDE_DIR}/ratl/chrono/time_point_cast.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_cast.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_creator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/batch_dither_generator.hpp
@@ -61,6 +69,7 @@ set(RATL_HEADERS
         ${RATL_INCLUDE_DIR}/ratl/detail/cast.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/channel_iterator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/config.hpp
+        ${RATL_INCLUDE_DIR}/ratl/detail/constants.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/convert_traits.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/dither_generator.hpp
         ${RATL_INCLUDE_DIR}/ratl/detail/endianness.hpp

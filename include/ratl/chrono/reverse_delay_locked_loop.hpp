@@ -11,19 +11,42 @@
 // ratl includes
 #include <ratl/chrono/subsample_time_point.hpp>
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/constants.hpp>
 
 // other includes
 #include <chrono>
 #include <cmath>
 #include <stdexcept>
 #include <tuple>
+//#include <iostream>
 
 namespace ratl
 {
 namespace chrono
 {
+
+//namespace detail
+//{
+//double constexpr sqrt_newton_raphson(double x, double curr, double prev)
+//{
+//    return curr == prev ? curr : sqrt_newton_raphson(x, 0.5 * (curr + x / curr), curr);
+//}
+//} // namespace detail
+//
+///*
+// * Constexpr version of the square root
+// * Return value:
+// *	- For a finite and non-negative value of "x", returns an approximation for the square root of "x"
+// *  - Otherwise, returns NaN
+// */
+//double constexpr sqrt(double x)
+//{
+//    return x >= 0 && x < std::numeric_limits<double>::infinity() ? detail::sqrt_newton_raphson(x, x, 0)
+//                                                                 : std::numeric_limits<double>::quiet_NaN();
+//}
+
 // This is based off of the approach laid out in https://kokkinizita.linuxaudio.org/papers/usingdll.pdf
-template<typename Clock>
+template<typename Clock, typename SampleClock>
 class reverse_delay_locked_loop
 {
 public:
@@ -38,9 +61,9 @@ public:
     {
     }
 
-    std::tuple<subsample_time_point, subsample_time_point> get_projected_time(
+    std::tuple<subsample_time_point<SampleClock>, subsample_time_point<SampleClock>> get_projected_time(
         const clock_time_point& current_clock_time,
-        const sample_time_point& current_sample_time,
+        const sample_time_point<SampleClock>& current_sample_time,
         const clock_time_point& projection_start_clock_time,
         const clock_time_point& projection_end_clock_time)
     {
@@ -49,7 +72,7 @@ public:
             throw std::invalid_argument{"projection end clock time is before projection start clock time"};
         }
 
-        if (projection_end_subsample_time_ == subsample_time_point{})
+        if (projection_end_subsample_time_ == subsample_time_point<SampleClock>{})
         {
             auto projection_start_subsample_time =
                 current_sample_time +
@@ -73,7 +96,7 @@ public:
                 "projection clock time is not equal to the clock time of the end of the previous projection"};
         }
 
-        if (projection_end_clock_time == projection_start_clock_time)
+        if (projection_end_clock_time == previous_projection_end_clock_time_)
         {
             return {projection_end_subsample_time_, projection_end_subsample_time_};
         }
@@ -86,7 +109,7 @@ public:
 
         auto projection_start_subsample_time = projection_end_subsample_time_;
         auto projection_clock_duration =
-            static_cast<double>((projection_end_clock_time - projection_start_clock_time).count());
+            static_cast<double>((projection_end_clock_time - previous_projection_end_clock_time_).count());
         auto error_multiplier = projection_clock_duration * sample_duration_error;
         auto sample_duration_per_clock_delta = filter_coefficients_.get_c() * error_multiplier;
         sample_duration_per_clock_ += sample_duration_per_clock_delta;
@@ -127,32 +150,27 @@ private:
     class filter_coefficients
     {
     public:
-        inline explicit filter_coefficients()
+        inline double get_b() const noexcept
         {
-            auto omega = 2 * M_PI * Bandwidth * static_cast<double>(clock_duration::period::num) /
-                         static_cast<double>(clock_duration::period::den);
-            b_ = std::sqrt(2) * omega;
-            c_ = omega * omega;
+            return B;
         }
 
-        inline double get_b() const
+        inline double get_c() const noexcept
         {
-            return b_;
-        }
-
-        inline double get_c() const
-        {
-            return c_;
+            return C;
         }
 
     private:
         static constexpr double Bandwidth = 0.1;
-        double b_{};
-        double c_{};
+        static constexpr double Omega = ratl::detail::constants::Tau * Bandwidth *
+                                        static_cast<double>(clock_duration::period::num) /
+                                        static_cast<double>(clock_duration::period::den);
+        static constexpr double B = ratl::detail::constants::Sqrt2 * Omega;
+        static constexpr double C = Omega * Omega;
     };
 
     const filter_coefficients filter_coefficients_;
-    subsample_time_point projection_end_subsample_time_{};
+    subsample_time_point<SampleClock> projection_end_subsample_time_{};
     clock_time_point previous_projection_end_clock_time_{};
     double sample_duration_per_clock_;
 };

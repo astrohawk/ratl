@@ -21,9 +21,11 @@ namespace ratl
 {
 namespace chrono
 {
+template<typename Clock>
 class sample_time_point
 {
 public:
+    using clock = Clock;
     using duration = sample_duration;
 
     inline sample_time_point() = default;
@@ -51,52 +53,62 @@ private:
     duration duration_;
 };
 
-inline sample_time_point operator+(const sample_time_point& a, const sample_duration& b)
+template<typename Clock>
+inline sample_time_point<Clock> operator+(const sample_time_point<Clock>& a, const sample_duration& b)
 {
-    return sample_time_point(a.time_since_epoch() + b);
+    return sample_time_point<Clock>(a.time_since_epoch() + b);
 }
 
-inline sample_time_point operator+(const sample_duration& a, const sample_time_point& b)
+template<typename Clock>
+inline sample_time_point<Clock> operator+(const sample_duration& a, const sample_time_point<Clock>& b)
 {
-    return sample_time_point(b.time_since_epoch() + a);
+    return sample_time_point<Clock>(b.time_since_epoch() + a);
 }
 
-inline sample_time_point operator-(const sample_time_point& a, const sample_duration& b)
+template<typename Clock>
+inline sample_time_point<Clock> operator-(const sample_time_point<Clock>& a, const sample_duration& b)
 {
-    return sample_time_point(a.time_since_epoch() - b);
+    return sample_time_point<Clock>(a.time_since_epoch() - b);
 }
 
-inline sample_duration operator-(const sample_time_point& a, const sample_time_point& b)
+template<typename Clock>
+inline sample_duration operator-(const sample_time_point<Clock>& a, const sample_time_point<Clock>& b)
 {
     return a.time_since_epoch() - b.time_since_epoch();
 }
 
-inline bool operator==(const sample_time_point& a, const sample_time_point& b)
+template<typename Clock>
+inline bool operator==(const sample_time_point<Clock>& a, const sample_time_point<Clock>& b)
 {
     return a.time_since_epoch() == b.time_since_epoch();
 }
 
-inline bool operator!=(const sample_time_point& a, const sample_time_point& b)
+template<typename Clock>
+inline bool operator!=(const sample_time_point<Clock>& a, const sample_time_point<Clock>& b)
 {
     return a.time_since_epoch() != b.time_since_epoch();
 }
 
-inline bool operator<(const sample_time_point& a, const sample_time_point& b)
+template<typename Clock>
+inline bool operator<(const sample_time_point<Clock>& a, const sample_time_point<Clock>& b)
 {
     return a.time_since_epoch() < b.time_since_epoch();
 }
 
-inline bool operator>(const sample_time_point& a, const sample_time_point& b)
+template<typename Clock>
+inline bool operator>(const sample_time_point<Clock>& a, const sample_time_point<Clock>& b)
 {
     return a.time_since_epoch() > b.time_since_epoch();
 }
 
-inline bool operator<=(const sample_time_point& a, const sample_time_point& b)
+template<typename Clock>
+inline bool operator<=(const sample_time_point<Clock>& a, const sample_time_point<Clock>& b)
 {
     return a.time_since_epoch() <= b.time_since_epoch();
 }
 
-inline bool operator>=(const sample_time_point& a, const sample_time_point& b)
+template<typename Clock>
+inline bool operator>=(const sample_time_point<Clock>& a, const sample_time_point<Clock>& b)
 {
     return a.time_since_epoch() >= b.time_since_epoch();
 }

@@ -9,11 +9,13 @@
 #define _ratl_chrono_
 
 // ratl includes
+#include <ratl/chrono/duration_cast.hpp>
 #include <ratl/chrono/forward_delay_locked_loop.hpp>
 #include <ratl/chrono/reverse_delay_locked_loop.hpp>
 #include <ratl/chrono/sample_duration.hpp>
 #include <ratl/chrono/sample_time_point.hpp>
 #include <ratl/chrono/subsample_duration.hpp>
 #include <ratl/chrono/subsample_time_point.hpp>
+#include <ratl/chrono/time_point_cast.hpp>
 
 #endif // _ratl_chrono_

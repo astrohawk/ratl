@@ -158,4 +158,13 @@
 #    endif
 #endif
 
+// unreachable
+// RATL_UNREACHABLE
+
+#if defined(RATL_CPP_COMPILER_CLANG) || defined(RATL_CPP_COMPILER_GCC)
+#    define RATL_UNREACHABLE __builtin_unreachable()
+#else
+#    define RATL_UNREACHABLE
+#endif
+
 #endif // _ratl_detail_config_

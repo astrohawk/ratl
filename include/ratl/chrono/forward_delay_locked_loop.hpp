@@ -11,19 +11,21 @@
 // ratl includes
 #include <ratl/chrono/sample_time_point.hpp>
 #include <ratl/detail/config.hpp>
+#include <ratl/detail/constants.hpp>
 
 // other includes
 #include <chrono>
 #include <cmath>
 #include <stdexcept>
 #include <tuple>
+//#include <iostream>
 
 namespace ratl
 {
 namespace chrono
 {
 // This is based off of the approach laid out in https://kokkinizita.linuxaudio.org/papers/usingdll.pdf
-template<typename Clock>
+template<typename Clock, typename SampleClock>
 class forward_delay_locked_loop
 {
 public:
@@ -40,9 +42,9 @@ public:
 
     std::tuple<clock_time_point, clock_time_point> get_projected_time(
         const clock_time_point& current_clock_time,
-        const sample_time_point& current_sample_time,
-        const sample_time_point& projection_start_sample_time,
-        const sample_time_point& projection_end_sample_time)
+        const sample_time_point<SampleClock>& current_sample_time,
+        const sample_time_point<SampleClock>& projection_start_sample_time,
+        const sample_time_point<SampleClock>& projection_end_sample_time)
     {
         if (projection_end_sample_time < projection_start_sample_time)
         {
@@ -71,7 +73,7 @@ public:
                 "projection sample time is not equal to the sample time of the end of the previous projection"};
         }
 
-        if (projection_end_sample_time == projection_start_sample_time)
+        if (projection_end_sample_time == previous_projection_end_sample_time_)
         {
             return {projection_end_clock_time_, projection_end_clock_time_};
         }
@@ -84,7 +86,7 @@ public:
 
         auto projection_start_clock_time = projection_end_clock_time_;
         auto projection_sample_duration =
-            static_cast<double>((projection_end_sample_time - projection_start_sample_time).sample_count());
+            static_cast<double>((projection_end_sample_time - previous_projection_end_sample_time_).sample_count());
         auto error_multiplier = projection_sample_duration * clock_duration_error;
         auto clock_duration_per_sample_delta = filter_coefficients_.get_c() * error_multiplier;
         clock_duration_per_sample_ += clock_duration_per_sample_delta;
@@ -127,17 +129,17 @@ private:
     public:
         inline explicit filter_coefficients(std::size_t sample_rate)
         {
-            auto omega = 2 * M_PI * Bandwidth / static_cast<double>(sample_rate);
-            b_ = std::sqrt(2) * omega;
+            auto omega = ratl::detail::constants::Tau * Bandwidth / static_cast<double>(sample_rate);
+            b_ = ratl::detail::constants::Sqrt2 * omega;
             c_ = omega * omega;
         }
 
-        inline double get_b() const
+        inline double get_b() const noexcept
         {
             return b_;
         }
 
-        inline double get_c() const
+        inline double get_c() const noexcept
         {
             return c_;
         }
@@ -150,7 +152,7 @@ private:
 
     const filter_coefficients filter_coefficients_;
     clock_time_point projection_end_clock_time_{};
-    sample_time_point previous_projection_end_sample_time_{};
+    sample_time_point<SampleClock> previous_projection_end_sample_time_{};
     double clock_duration_per_sample_;
 };
 
