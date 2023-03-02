@@ -27,67 +27,78 @@ static constexpr std::size_t batch_size = std::min(XSIMD_BATCH_INT32_SIZE, XSIMD
 
 // has_batch_type
 
-template<typename SampleValueType>
-struct has_batch_type : is_complete<xsimd::batch<SampleValueType, batch_size>>
+template<typename SampleValueType, std::size_t BatchSize = batch_size>
+struct has_batch_type : is_complete<xsimd::batch<SampleValueType, BatchSize>>
 {
 };
 
 // has_batch_type_v
 
-#if defined(RATL_CPP_VERSION_HAS_CPP17)
-template<typename SampleValueType>
-inline constexpr bool has_batch_type_v = has_batch_type<SampleValueType>::value;
-#endif
+#    if defined(RATL_CPP_VERSION_HAS_CPP17)
+template<typename SampleValueType, std::size_t BatchSize = batch_size>
+inline constexpr bool has_batch_type_v = has_batch_type<SampleValueType, BatchSize>::value;
+#    endif
 
 // batch_sample_value_type
 
-template<typename SampleValueType, typename = void>
+template<typename SampleValueType, std::size_t BatchSize, typename = void>
 struct batch_sample_value_type;
 
-template<typename SampleValueType>
-struct batch_sample_value_type<SampleValueType, std::enable_if_t<has_batch_type<SampleValueType>::value>>
+template<typename SampleValueType, std::size_t BatchSize>
+struct batch_sample_value_type<
+    SampleValueType,
+    BatchSize,
+    std::enable_if_t<has_batch_type<SampleValueType, BatchSize>::value>>
 {
-    using type = xsimd::batch<SampleValueType, batch_size>;
+    using type = xsimd::batch<SampleValueType, BatchSize>;
 };
 
-template<typename SampleValueType>
-struct batch_sample_value_type<SampleValueType, std::enable_if_t<!has_batch_type<SampleValueType>::value>>
+template<typename SampleValueType, std::size_t BatchSize>
+struct batch_sample_value_type<
+    SampleValueType,
+    BatchSize,
+    std::enable_if_t<
+        !has_batch_type<SampleValueType, BatchSize>::value && has_batch_type<std::int32_t, BatchSize>::value>>
 {
-    using type = xsimd::batch<std::int32_t, batch_size>;
+    using type = xsimd::batch<std::int32_t, BatchSize>;
 };
 
-template<>
-struct batch_sample_value_type<float32_t>
+template<std::size_t BatchSize>
+struct batch_sample_value_type<float32_t, BatchSize, std::enable_if_t<has_batch_type<float, BatchSize>::value>>
 {
-    using type = xsimd::batch<float, batch_size>;
+    using type = xsimd::batch<float, BatchSize>;
 };
 
-template<typename SampleValueType>
-using batch_sample_value_type_t = typename batch_sample_value_type<SampleValueType>::type;
+template<typename SampleValueType, std::size_t BatchSize = batch_size>
+using batch_sample_value_type_t = typename batch_sample_value_type<SampleValueType, BatchSize>::type;
 
 // batch_network_sample_value_type
 
-template<typename SampleValueType, typename = void>
+template<typename SampleValueType, std::size_t BatchSize, typename = void>
 struct batch_network_sample_value_type;
 
-template<typename SampleValueType>
+template<typename SampleValueType, std::size_t BatchSize>
 struct batch_network_sample_value_type<
     SampleValueType,
-    std::enable_if_t<has_batch_type<network_sample_value_underlying_type_t<SampleValueType>>::value>>
+    BatchSize,
+    std::enable_if_t<has_batch_type<network_sample_value_underlying_type_t<SampleValueType>, BatchSize>::value>>
 {
-    using type = xsimd::batch<network_sample_value_underlying_type_t<SampleValueType>, batch_size>;
+    using type = xsimd::batch<network_sample_value_underlying_type_t<SampleValueType>, BatchSize>;
 };
 
-template<typename SampleValueType>
+template<typename SampleValueType, std::size_t BatchSize>
 struct batch_network_sample_value_type<
     SampleValueType,
-    std::enable_if_t<!has_batch_type<network_sample_value_underlying_type_t<SampleValueType>>::value>>
+    BatchSize,
+    std::enable_if_t<
+        !has_batch_type<network_sample_value_underlying_type_t<SampleValueType>, BatchSize>::value &&
+        has_batch_type<std::uint32_t, BatchSize>::value>>
 {
-    using type = xsimd::batch<std::uint32_t, batch_size>;
+    using type = xsimd::batch<std::uint32_t, BatchSize>;
 };
 
-template<typename SampleValueType>
-using batch_network_sample_value_type_t = typename batch_network_sample_value_type<SampleValueType>::type;
+template<typename SampleValueType, std::size_t BatchSize = batch_size>
+using batch_network_sample_value_type_t = typename batch_network_sample_value_type<SampleValueType, BatchSize>::type;
 
 } // namespace detail
 } // namespace ratl
