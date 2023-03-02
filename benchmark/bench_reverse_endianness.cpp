@@ -58,7 +58,7 @@ static void benchReverseEndianness(benchmark::State& state)
     std::array<NetworkSampleType, 1000> output;
     for (auto _ : state)
     {
-        std::transform(
+        auto output_end = std::transform(
             input.begin(),
             input.end(),
             output.begin(),
@@ -66,6 +66,7 @@ static void benchReverseEndianness(benchmark::State& state)
             {
                 return detail::reverse_endianness(in);
             });
+        benchmark::DoNotOptimize(output_end);
     }
 }
 BENCHMARK(benchReverseEndianness);
@@ -80,7 +81,7 @@ static void benchReverseEndiannessTest(benchmark::State& state)
     std::array<NetworkSampleType, 1000> output;
     for (auto _ : state)
     {
-        std::transform(
+        auto output_end = std::transform(
             input.begin(),
             input.end(),
             output.begin(),
@@ -88,6 +89,7 @@ static void benchReverseEndiannessTest(benchmark::State& state)
             {
                 return reverseEndiannessTest(in);
             });
+        benchmark::DoNotOptimize(output_end);
     }
 }
 BENCHMARK(benchReverseEndiannessTest);

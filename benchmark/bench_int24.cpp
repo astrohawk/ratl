@@ -44,7 +44,7 @@ static void benchInt24ToInt32(benchmark::State& state)
     std::array<int32_t, 1000000> output;
     for (auto _ : state)
     {
-        auto dummy = std::transform(
+        auto output_end = std::transform(
             input.begin(),
             input.end(),
             output.begin(),
@@ -52,7 +52,7 @@ static void benchInt24ToInt32(benchmark::State& state)
             {
                 return Converter::convert(in);
             });
-        benchmark::DoNotOptimize(dummy);
+        benchmark::DoNotOptimize(output_end);
     }
 }
 
