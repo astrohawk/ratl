@@ -96,13 +96,13 @@ struct CurrentBatchLoader
     static batch_type load(batch_type, full_load, const int24_t* input, std::size_t) noexcept
     {
         return detail::batch_creator<sample<int24_t>, bench_batch_size>::load(
-            reinterpret_cast<const sample<int24_t>*>(input), detail::batch_alignment_mode::unaligned{});
+            reinterpret_cast<const sample<int24_t>*>(input), detail::batch_alignment_mode::unalignable{});
     }
 
     static batch_type load(batch_type, partial_load, const int24_t* input, std::size_t size) noexcept
     {
         return detail::batch_creator<sample<int24_t>, bench_batch_size>::load(
-            reinterpret_cast<const sample<int24_t>*>(input), size, detail::batch_alignment_mode::unaligned{});
+            reinterpret_cast<const sample<int24_t>*>(input), size, detail::batch_alignment_mode::unalignable{});
     }
 };
 BENCHMARK_TEMPLATE(benchInt24BatchLoad, CurrentBatchLoader);
