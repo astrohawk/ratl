@@ -66,6 +66,7 @@ struct base_batch_reference_sample_converter_impl<sample<int16_t>, sample<int32_
 template<typename DitherGenerator>
 struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
+private:
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x007FFF80);
     static constexpr int16_t sample_out_max = sample_limits<int16_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x80);
@@ -73,7 +74,12 @@ struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_
     static constexpr std::size_t pre_dither_shift =
         DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
     static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
+#    if defined(RATL_CPP_VERSION_HAS_CPP17)
+    inline static const batch_sample_value_type_t<int24_t> batch_max =
+        batch_sample_value_type_t<int24_t>(sample_out_max);
+#    endif
 
+public:
     static inline batch_sample_value_type_t<int24_t> round(const batch_sample_value_type_t<int24_t>& input)
     {
         // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
@@ -84,10 +90,12 @@ struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int16_
     static inline batch_sample_value_type_t<int16_t> batch_convert(
         const batch_sample_value_type_t<int24_t>& input, DitherGenerator& dither_gen) noexcept
     {
-        static const batch_sample_value_type_t<int24_t> max(sample_out_max);
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
+        static const batch_sample_value_type_t<int24_t> batch_max(sample_out_max);
+#    endif
         auto cmp = input >= sample_in_max;
         auto temp = ((round(input) << pre_dither_shift) + dither_gen.generate_batch_int16()) >> post_dither_shift;
-        return batch_sample_cast<int16_t>(xsimd::select(cmp, max, temp));
+        return batch_sample_cast<int16_t>(xsimd::select(cmp, batch_max, temp));
     }
 };
 
@@ -125,13 +133,19 @@ struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int32_
 template<typename DitherGenerator>
 struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
+private:
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFF8000);
     static constexpr int16_t sample_out_max = sample_limits<int16_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x8000);
     static constexpr std::size_t total_shift = 16;
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
     static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
+#    if defined(RATL_CPP_VERSION_HAS_CPP17)
+    inline static const batch_sample_value_type_t<int32_t> batch_max =
+        batch_sample_value_type_t<int32_t>(sample_out_max);
+#    endif
 
+public:
     static inline batch_sample_value_type_t<int32_t> round(const batch_sample_value_type_t<int32_t>& input)
     {
         // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
@@ -142,10 +156,12 @@ struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int16_
     static inline batch_sample_value_type_t<int16_t> batch_convert(
         const batch_sample_value_type_t<int32_t>& input, DitherGenerator& dither_gen) noexcept
     {
-        static const batch_sample_value_type_t<int32_t> max(sample_out_max);
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
+        static const batch_sample_value_type_t<int32_t> batch_max(sample_out_max);
+#    endif
         auto cmp = input >= sample_in_max;
         auto temp = ((round(input) >> pre_dither_shift) + dither_gen.generate_batch_int16()) >> post_dither_shift;
-        return batch_sample_cast<int16_t>(xsimd::select(cmp, max, temp));
+        return batch_sample_cast<int16_t>(xsimd::select(cmp, batch_max, temp));
     }
 };
 
@@ -173,10 +189,16 @@ constexpr std::size_t
 template<typename DitherGenerator>
 struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int24_t>, DitherGenerator>
 {
+private:
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFFFF80);
     static constexpr int24_t sample_out_max = sample_limits<int24_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x80);
+#    if defined(RATL_CPP_VERSION_HAS_CPP17)
+    inline static const batch_sample_value_type_t<int32_t> batch_max =
+        batch_sample_value_type_t<int32_t>(sample_out_max);
+#    endif
 
+public:
     static inline batch_sample_value_type_t<int32_t> round(const batch_sample_value_type_t<int32_t>& input)
     {
         // input >> 31 results in 0 if sample is positive or 0, and -1 if sample is negative
@@ -187,10 +209,12 @@ struct base_batch_reference_sample_converter_impl<sample<int32_t>, sample<int24_
     static inline batch_sample_value_type_t<int24_t> batch_convert(
         const batch_sample_value_type_t<int32_t>& input, DitherGenerator&) noexcept
     {
-        static const batch_sample_value_type_t<int32_t> max(sample_out_max);
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
+        static const batch_sample_value_type_t<int32_t> batch_max(sample_out_max);
+#    endif
         auto cmp = input >= sample_in_max;
         auto temp = round(input) >> 8;
-        return batch_sample_cast<int24_t>(xsimd::select(cmp, max, temp));
+        return batch_sample_cast<int24_t>(xsimd::select(cmp, batch_max, temp));
     }
 };
 
@@ -213,8 +237,10 @@ struct base_batch_reference_sample_converter_impl<
     DitherGenerator,
     std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
+private:
     static constexpr float32_t scaler = symmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
+public:
     static inline batch_sample_value_type_t<float32_t> batch_convert(
         const batch_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
     {
@@ -247,16 +273,24 @@ private:
     static constexpr SampleValueType sample_out_min = sample_limits<SampleValueType>::min();
     static constexpr float32_t scaler =
         symmetric_float_convert_traits<SampleValueType>::float_to_int_scaler - DitherGenerator::float32_max;
+#    if defined(RATL_CPP_VERSION_HAS_CPP17)
+    inline static const batch_sample_value_type_t<int32_t> batch_min =
+        batch_sample_value_type_t<int32_t>(sample_out_min);
+    inline static const batch_sample_value_type_t<int32_t> batch_max =
+        batch_sample_value_type_t<int32_t>(sample_out_max);
+#    endif
 
 public:
     static inline batch_sample_value_type_t<SampleValueType> batch_convert(
         batch_sample_value_type_t<float32_t> input, DitherGenerator& dither_gen) noexcept
     {
-        static const batch_sample_value_type_t<int32_t> min(sample_out_min);
-        static const batch_sample_value_type_t<int32_t> max(sample_out_max);
-        auto out = batch_round_float32_to_int32((input * scaler) + dither_gen.generate_batch_float32());
-        out = xsimd::select(xsimd::bool_cast(input >= sample_in_max), max, out);
-        out = xsimd::select(xsimd::bool_cast(input <= sample_in_min), min, out);
+#    if !defined(RATL_CPP_VERSION_HAS_CPP17)
+        static const batch_sample_value_type_t<int32_t> batch_min(sample_out_min);
+        static const batch_sample_value_type_t<int32_t> batch_max(sample_out_max);
+#    endif
+        auto out = batch_round<int32_t>((input * scaler) + dither_gen.generate_batch_float32());
+        out = xsimd::select(xsimd::bool_cast(input >= sample_in_max), batch_max, out);
+        out = xsimd::select(xsimd::bool_cast(input <= sample_in_min), batch_min, out);
         return batch_sample_cast<SampleValueType>(out);
     }
 };

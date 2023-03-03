@@ -65,11 +65,13 @@ struct base_batch_fast_sample_converter_impl<sample<int16_t>, sample<int32_t>, D
 template<typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
+private:
     static constexpr std::size_t total_shift = 8;
     static constexpr std::size_t pre_dither_shift =
         DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
     static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
 
+public:
     static inline batch_sample_value_type_t<int16_t> batch_convert(
         const batch_sample_value_type_t<int24_t>& input, DitherGenerator& dither_gen) noexcept
     {
@@ -103,10 +105,12 @@ struct base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int32_t>, D
 template<typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
+private:
     static constexpr std::size_t total_shift = 16;
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
     static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 
+public:
     static inline batch_sample_value_type_t<int16_t> batch_convert(
         const batch_sample_value_type_t<int32_t>& input, DitherGenerator& dither_gen) noexcept
     {
@@ -144,8 +148,10 @@ struct base_batch_fast_sample_converter_impl<
     DitherGenerator,
     std::enable_if_t<sample_limits<SampleValueType>::is_integer>>
 {
+private:
     static constexpr float32_t scaler = asymmetric_float_convert_traits<SampleValueType>::int_to_float_scaler;
 
+public:
     static inline batch_sample_value_type_t<float32_t> batch_convert(
         const batch_sample_value_type_t<SampleValueType>& input, DitherGenerator&) noexcept
     {
@@ -178,7 +184,7 @@ public:
         batch_sample_value_type_t<float32_t> input, DitherGenerator& dither_gen) noexcept
     {
         return batch_sample_cast<SampleValueType>(
-            batch_round_float32_to_int32((input * scaler) + dither_gen.generate_batch_float32()));
+            batch_round<int32_t>((input * scaler) + dither_gen.generate_batch_float32()));
     }
 };
 
