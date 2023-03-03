@@ -41,7 +41,7 @@ inline constexpr bool has_batch_type_v = has_batch_type<SampleValueType, BatchSi
 
 // batch_sample_value_type
 
-template<typename SampleValueType, std::size_t BatchSize, typename = void>
+template<typename SampleValueType, std::size_t BatchSize = batch_size, typename = void>
 struct batch_sample_value_type;
 
 template<typename SampleValueType, std::size_t BatchSize>
@@ -74,7 +74,7 @@ using batch_sample_value_type_t = typename batch_sample_value_type<SampleValueTy
 
 // batch_network_sample_value_type
 
-template<typename SampleValueType, std::size_t BatchSize, typename = void>
+template<typename SampleValueType, std::size_t BatchSize = batch_size, typename = void>
 struct batch_network_sample_value_type;
 
 template<typename SampleValueType, std::size_t BatchSize>
