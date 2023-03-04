@@ -44,3 +44,12 @@ add_executable(bench_transform
 target_link_libraries(bench_transform
         ratl::ratl
         benchmark::benchmark_main)
+
+if (TARGET PortAudio)
+    add_executable(bench_transform_portaudio
+            ${CMAKE_CURRENT_LIST_DIR}/bench_transform_portaudio.cpp)
+    target_link_libraries(bench_transform_portaudio
+            ratl::ratl
+            PortAudio
+            benchmark::benchmark_main)
+endif ()

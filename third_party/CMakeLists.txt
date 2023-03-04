@@ -32,3 +32,8 @@ option(RATL_XSIMD_SOURCE "Build xsimd from source located in this dir" OFF)
 if (RATL_XSIMD_SOURCE)
     add_subdirectory(xsimd)
 endif ()
+
+option(RATL_PORTAUDIO_SOURCE "Build PortAudio from source located in this dir" OFF)
+if (RATL_PORTAUDIO_SOURCE)
+    add_subdirectory(portaudio)
+endif ()
