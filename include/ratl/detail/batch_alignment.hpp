@@ -39,11 +39,49 @@ struct batch_alignment_mode
     struct noncontiguous
     {
     };
+
+    struct unalignable
+    {
+    };
+};
+
+template<typename SampleType, typename BatchType, typename = void>
+class batch_alignment_dispatcher
+{
+    static_assert(
+        std::is_same<sample_underlying_type_t<SampleType>, int24_t>::value ||
+            std::is_same<sample_underlying_type_t<SampleType>, uint24_t>::value,
+        "");
+
+public:
+    template<
+        typename IteratorTag,
+        typename IteratorSampleType,
+        typename IteratorSampleTraits,
+        typename IteratorContiguous,
+        typename Fn>
+    static inline decltype(auto)
+    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, IteratorContiguous>, Fn&& fn) noexcept(
+        // clang-format off
+        noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::unalignable()))
+        // clang-format on
+    )
+    {
+        return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::unalignable());
+    }
 };
 
 template<typename SampleType, typename BatchType>
-class batch_alignment_dispatcher
+class batch_alignment_dispatcher<
+    SampleType,
+    BatchType,
+    std::enable_if_t<is_native_batch_type<SampleType, BatchType>::value>>
 {
+    static_assert(
+        !std::is_same<sample_underlying_type_t<SampleType>, int24_t>::value &&
+            !std::is_same<sample_underlying_type_t<SampleType>, uint24_t>::value,
+        "");
+
     static inline bool is_aligned(const SampleType* ptr) noexcept
     {
         return reinterpret_cast<std::uintptr_t>(ptr) % batch_alignment<BatchType> == 0;
@@ -71,25 +109,13 @@ public:
 
     template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits, typename Fn>
     static inline decltype(auto)
-    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type> iterator, Fn&& fn) noexcept(
+    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type>, Fn&& fn) noexcept(
         // clang-format off
-        noexcept(dispatch(
-            sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(iterator.base()),
-            std::forward<Fn>(fn))) &&
         noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous()))
         // clang-format on
     )
     {
-        if (iterator.stride() == 1)
-        {
-            return dispatch(
-                sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(iterator.base()),
-                std::forward<Fn>(fn));
-        }
-        else
-        {
-            return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous());
-        }
+        return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous());
     }
 };
 

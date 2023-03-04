@@ -13,6 +13,7 @@
 
 // ratl includes
 #include <ratl/detail/batch_value_traits.hpp>
+#include <ratl/detail/sample_traits.hpp>
 #include <ratl/network_sample.hpp>
 #include <ratl/sample.hpp>
 
@@ -24,23 +25,30 @@ namespace detail
 {
 // batch_sample_type
 
-template<typename SampleType>
+template<typename SampleType, std::size_t BatchSize = batch_size>
 struct batch_sample_type;
 
-template<typename SampleValueType>
-struct batch_sample_type<sample<SampleValueType>>
+template<typename SampleValueType, std::size_t BatchSize>
+struct batch_sample_type<sample<SampleValueType>, BatchSize>
 {
-    using type = batch_sample_value_type_t<SampleValueType>;
+    using type = batch_sample_value_type_t<SampleValueType, BatchSize>;
 };
 
-template<typename SampleValueType>
-struct batch_sample_type<network_sample<SampleValueType>>
+template<typename SampleValueType, std::size_t BatchSize>
+struct batch_sample_type<network_sample<SampleValueType>, BatchSize>
 {
-    using type = batch_network_sample_value_type_t<SampleValueType>;
+    using type = batch_network_sample_value_type_t<SampleValueType, BatchSize>;
 };
 
-template<typename SampleType>
-using batch_sample_type_t = typename batch_sample_type<SampleType>::type;
+template<typename SampleType, std::size_t BatchSize = batch_size>
+using batch_sample_type_t = typename batch_sample_type<SampleType, BatchSize>::type;
+
+// is_native_batch_type
+
+template<typename SampleType, typename BatchType>
+struct is_native_batch_type : std::is_same<sample_underlying_type_t<SampleType>, typename BatchType::value_type>
+{
+};
 
 } // namespace detail
 } // namespace ratl

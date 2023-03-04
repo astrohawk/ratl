@@ -57,7 +57,7 @@ static void benchFloatToInt(benchmark::State& state)
     auto output = std::array<int32_t, 1000>{};
     for (auto _ : state)
     {
-        benchmark::DoNotOptimize(std::transform(
+        auto output_end = std::transform(
             input.begin(),
             input.end(),
             output.begin(),
@@ -72,7 +72,8 @@ static void benchFloatToInt(benchmark::State& state)
                     return sample_limits<int32_t>::min();
                 }
                 return Converter::template convert<detail::symmetric_float_convert_traits<int32_t>>(sample);
-            }));
+            });
+        benchmark::DoNotOptimize(output_end);
     }
 }
 
@@ -83,14 +84,15 @@ static void benchAsymmetricFloatToInt(benchmark::State& state)
     auto output = std::array<int32_t, 1000>{};
     for (auto _ : state)
     {
-        benchmark::DoNotOptimize(std::transform(
+        auto output_end = std::transform(
             input.begin(),
             input.end(),
             output.begin(),
             [](float32_t sample)
             {
                 return Converter::template convert<detail::asymmetric_float_convert_traits<int32_t>>(sample);
-            }));
+            });
+        benchmark::DoNotOptimize(output_end);
     }
 }
 

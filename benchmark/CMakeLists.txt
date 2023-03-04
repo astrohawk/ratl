@@ -9,6 +9,12 @@ if (NOT TARGET benchmark::benchmark_main)
     message(FATAL_ERROR "Benchmarking enabled but unable to find benchmark::benchmark_main target")
 endif ()
 
+add_executable(bench_batch_int24
+        ${CMAKE_CURRENT_LIST_DIR}/bench_batch_int24.cpp)
+target_link_libraries(bench_batch_int24
+        ratl::ratl
+        benchmark::benchmark_main)
+
 add_executable(bench_float_to_int
         ${CMAKE_CURRENT_LIST_DIR}/bench_float_to_int.cpp)
 target_link_libraries(bench_float_to_int
@@ -38,3 +44,12 @@ add_executable(bench_transform
 target_link_libraries(bench_transform
         ratl::ratl
         benchmark::benchmark_main)
+
+if (TARGET PortAudio)
+    add_executable(bench_transform_portaudio
+            ${CMAKE_CURRENT_LIST_DIR}/bench_transform_portaudio.cpp)
+    target_link_libraries(bench_transform_portaudio
+            ratl::ratl
+            PortAudio
+            benchmark::benchmark_main)
+endif ()

@@ -51,7 +51,7 @@ void benchTransform(benchmark::State& state)
     dither_generator dither_gen;
     for (auto _ : state)
     {
-        reference_transform(input.cbegin(), input.cend(), output.begin(), dither_gen);
+        reference_transform(input.begin(), input.end(), output.begin(), dither_gen);
     }
 }
 
