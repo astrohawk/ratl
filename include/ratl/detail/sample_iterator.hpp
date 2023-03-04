@@ -11,6 +11,7 @@
 // ratl includes
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/sample_traits.hpp>
+#include <ratl/detail/utility.hpp>
 #include <ratl/sample.hpp>
 
 // other includes
@@ -446,6 +447,96 @@ sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true
 {
     return sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(data);
 }
+
+struct sample_iterator_contiguous_dispatcher
+{
+    template<
+        typename IteratorTag,
+        typename InputSampleType,
+        typename InputSampleTraits,
+        typename OutputSampleIterator,
+        typename Fn>
+    static inline OutputSampleIterator dispatch(
+        sample_iterator<IteratorTag, InputSampleType, InputSampleTraits, std::true_type> first,
+        sample_iterator<IteratorTag, InputSampleType, InputSampleTraits, std::true_type> last,
+        OutputSampleIterator result,
+        Fn&& fn) noexcept
+    {
+        return dispatch_impl(first, last, result, std::forward<Fn>(fn));
+    }
+
+    template<
+        typename IteratorTag,
+        typename InputSampleType,
+        typename InputSampleTraits,
+        typename OutputSampleIterator,
+        typename Fn>
+    static inline OutputSampleIterator dispatch(
+        sample_iterator<IteratorTag, InputSampleType, InputSampleTraits, std::false_type> first,
+        sample_iterator<IteratorTag, InputSampleType, InputSampleTraits, std::false_type> last,
+        OutputSampleIterator result,
+        Fn&& fn) noexcept
+    {
+        using contiguous_input_interator =
+            sample_iterator<IteratorTag, InputSampleType, InputSampleTraits, std::true_type>;
+        if (first.stride() == 1)
+        {
+            return dispatch_impl(
+                contiguous_input_interator(first.base()),
+                contiguous_input_interator(last.base()),
+                result,
+                std::forward<Fn>(fn));
+        }
+        else
+        {
+            return dispatch_impl(first, last, result, std::forward<Fn>(fn));
+        }
+    }
+
+private:
+    template<
+        typename IteratorTag,
+        typename InputIterator,
+        typename OutputSampleType,
+        typename OutputSampleTraits,
+        typename Fn>
+    static inline sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::true_type> dispatch_impl(
+        InputIterator first,
+        InputIterator last,
+        sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::true_type> result,
+        Fn&& fn) noexcept
+    {
+        return detail::invoke(std::forward<Fn>(fn), first, last, result);
+    }
+
+    template<
+        typename IteratorTag,
+        typename InputIterator,
+        typename OutputSampleType,
+        typename OutputSampleTraits,
+        typename Fn>
+    static inline sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::false_type> dispatch_impl(
+        InputIterator first,
+        InputIterator last,
+        sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::false_type> result,
+        Fn&& fn) noexcept
+    {
+        using contiguous_output_interator =
+            sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::true_type>;
+        using noncontiguous_output_interator =
+            sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::true_type>;
+        if (result.stride() == 1)
+        {
+            return noncontiguous_output_interator(
+                detail::invoke(std::forward<Fn>(fn), first, last, contiguous_output_interator(result.base())).base(),
+                1);
+        }
+        else
+        {
+            return detail::invoke(std::forward<Fn>(fn), first, last, result);
+        }
+    }
+};
 
 } // namespace detail
 } // namespace ratl

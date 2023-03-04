@@ -54,14 +54,7 @@ struct transformer_pointer_dispatcher
         OutputSampleIterator result,
         Fn&& fn) noexcept
     {
-        if (first.stride() == 1)
-        {
-            return dispatch_impl(first.base(), last.base(), result, std::forward<Fn>(fn));
-        }
-        else
-        {
-            return dispatch_impl(first, last, result, std::forward<Fn>(fn));
-        }
+        return dispatch_impl(first, last, result, std::forward<Fn>(fn));
     }
 
 private:
@@ -92,14 +85,7 @@ private:
         sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::false_type> result,
         Fn&& fn) noexcept
     {
-        if (result.stride() == 1)
-        {
-            return make_sample_iterator(detail::invoke(std::forward<Fn>(fn), first, last, result.base()), result);
-        }
-        else
-        {
-            return detail::invoke(std::forward<Fn>(fn), first, last, result);
-        }
+        return detail::invoke(std::forward<Fn>(fn), first, last, result);
     }
 };
 
@@ -111,7 +97,7 @@ template<
     typename InputSampleType,
     typename OutputSampleType,
     typename DitherGenerator>
-class basic_transformer_impl
+class basic_transformer_impl_inner
 {
     using input_batch_creator = batch_creator<InputSampleType>;
     using output_batch_creator = batch_creator<OutputSampleType>;
@@ -128,7 +114,7 @@ class basic_transformer_impl
     static_assert(batch_size == output_batch_type::size, "Input and output batch size are not equal");
 
 public:
-    explicit basic_transformer_impl(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
+    explicit basic_transformer_impl_inner(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
 
     template<typename InputSampleIterator, typename OutputSampleIterator>
     inline OutputSampleIterator transform(
@@ -142,44 +128,55 @@ public:
                     result,
                     [&](auto output_alignment) noexcept
                     {
-                        return transform_impl(first, last, result, input_alignment, output_alignment);
+                        auto distance = std::distance(first, last);
+                        auto remainder_distance = distance % batch_size;
+                        auto full_batch_distance = distance - remainder_distance;
+                        auto full_batch_last = first + full_batch_distance;
+                        for (; first != full_batch_last; first += batch_size, result += batch_size)
+                        {
+                            auto input = input_batch_creator::load(first, input_alignment);
+                            auto output = convert(input, sample_converter_);
+                            output_batch_creator::store(output, result, output_alignment);
+                        }
+                        if (remainder_distance > 0)
+                        {
+                            auto input = input_batch_creator::load(first, remainder_distance, input_alignment);
+                            auto output = convert(input, sample_converter_);
+                            output_batch_creator::store(output, result, remainder_distance, output_alignment);
+                            result += remainder_distance;
+                        }
+                        return result;
                     });
             });
     }
 
-private:
     template<
-        typename InputSampleIterator,
-        typename OutputSampleIterator,
-        typename InputAlignment,
-        typename OutputAlignment>
-    inline OutputSampleIterator transform_impl(
-        InputSampleIterator first,
-        InputSampleIterator last,
-        OutputSampleIterator result,
-        InputAlignment,
-        OutputAlignment) const noexcept
+        typename InputIteratorTag,
+        typename InputIteratorSampleType,
+        typename InputIteratorSampleTraits,
+        typename OutputIteratorTag,
+        typename OutputIteratorSampleType,
+        typename OutputIteratorSampleTraits>
+    inline std::enable_if_t<
+        std::is_same<InputSampleType, OutputSampleType>::value,
+        sample_iterator<OutputIteratorTag, OutputIteratorSampleType, OutputIteratorSampleTraits, std::true_type>>
+    transform(
+        sample_iterator<InputIteratorTag, InputIteratorSampleType, InputIteratorSampleTraits, std::true_type> first,
+        sample_iterator<InputIteratorTag, InputIteratorSampleType, InputIteratorSampleTraits, std::true_type> last,
+        sample_iterator<OutputIteratorTag, OutputIteratorSampleType, OutputIteratorSampleTraits, std::true_type> result)
+        const noexcept
     {
-        auto distance = std::distance(first, last);
-        auto remainder_distance = distance % batch_size;
-        auto full_batch_distance = distance - remainder_distance;
-        auto full_batch_last = first + full_batch_distance;
-        for (; first != full_batch_last; first += batch_size, result += batch_size)
-        {
-            auto input = input_batch_creator::load(first, InputAlignment());
-            auto output = convert(input, sample_converter_);
-            output_batch_creator::store(output, result, OutputAlignment());
-        }
-        if (remainder_distance > 0)
-        {
-            auto input = input_batch_creator::load(first, remainder_distance, InputAlignment());
-            auto output = convert(input, sample_converter_);
-            output_batch_creator::store(output, result, remainder_distance, OutputAlignment());
-            result += remainder_distance;
-        }
-        return result;
+        return transformer_pointer_dispatcher::dispatch(
+            first,
+            last,
+            result,
+            [](auto first, auto last, auto result) noexcept
+            {
+                return std::copy(first, last, result);
+            });
     }
 
+private:
     sample_converter sample_converter_;
 };
 
@@ -191,12 +188,12 @@ template<
     typename InputSampleType,
     typename OutputSampleType,
     typename DitherGenerator>
-class basic_transformer_impl
+class basic_transformer_impl_inner
 {
     using sample_converter = SampleConverter<InputSampleType, OutputSampleType, DitherGenerator>;
 
 public:
-    explicit basic_transformer_impl(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
+    explicit basic_transformer_impl_inner(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
 
     template<typename InputIterator, typename OutputIterator>
     inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
@@ -207,8 +204,23 @@ public:
             result,
             [this](auto first, auto last, auto result) noexcept
             {
-                return std::transform(first, last, result, sample_converter_);
+                return this->transform_impl(first, last, result);
             });
+    }
+
+private:
+    template<typename InputSampleIterator, typename OutputSampleIterator>
+    inline std::enable_if_t<!std::is_same<InputSampleType, OutputSampleType>::value, OutputSampleIterator>
+    transform_impl(InputSampleIterator first, InputSampleIterator last, OutputSampleIterator result) const noexcept
+    {
+        return std::transform(first, last, result, sample_converter_);
+    }
+
+    template<typename InputSampleIterator, typename OutputSampleIterator>
+    inline std::enable_if_t<std::is_same<InputSampleType, OutputSampleType>::value, OutputSampleIterator>
+    transform_impl(InputSampleIterator first, InputSampleIterator last, OutputSampleIterator result) const noexcept
+    {
+        return std::copy(first, last, result);
     }
 
     sample_converter sample_converter_;
@@ -216,24 +228,35 @@ public:
 
 #endif
 
-template<template<typename, typename, typename> class SampleConverter, typename SampleType, typename DitherGenerator>
-struct basic_transformer_impl<SampleConverter, SampleType, SampleType, DitherGenerator>
+template<
+    template<typename, typename, typename>
+    class SampleConverter,
+    typename InputSampleType,
+    typename OutputSampleType,
+    typename DitherGenerator>
+class basic_transformer_impl
 {
-    explicit basic_transformer_impl(DitherGenerator&) {}
+    using transformer =
+        basic_transformer_impl_inner<SampleConverter, InputSampleType, OutputSampleType, DitherGenerator>;
 
-    template<typename InputSampleIterator, typename OutputSampleIterator>
-    inline OutputSampleIterator transform(
-        InputSampleIterator first, InputSampleIterator last, OutputSampleIterator result) const noexcept
+public:
+    explicit basic_transformer_impl(DitherGenerator& dither_gen) : transformer_(dither_gen) {}
+
+    template<typename InputIterator, typename OutputIterator>
+    inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
     {
-        return transformer_pointer_dispatcher::dispatch(
+        return sample_iterator_contiguous_dispatcher::dispatch(
             first,
             last,
             result,
-            [](auto first, auto last, auto result) noexcept
+            [this](auto first, auto last, auto result) noexcept
             {
-                return std::copy(first, last, result);
+                return transformer_.transform(first, last, result);
             });
     }
+
+private:
+    transformer transformer_;
 };
 
 // basic_transformer class

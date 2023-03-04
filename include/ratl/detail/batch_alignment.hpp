@@ -54,20 +54,14 @@ class batch_alignment_dispatcher
         "");
 
 public:
-    template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits, typename Fn>
+    template<
+        typename IteratorTag,
+        typename IteratorSampleType,
+        typename IteratorSampleTraits,
+        typename IteratorContiguous,
+        typename Fn>
     static inline decltype(auto)
-    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>, Fn&& fn) noexcept(
-        // clang-format off
-        noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::unalignable()))
-        // clang-format on
-    )
-    {
-        return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::unalignable());
-    }
-
-    template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits, typename Fn>
-    static inline decltype(auto)
-    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type>, Fn&& fn) noexcept(
+    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, IteratorContiguous>, Fn&& fn) noexcept(
         // clang-format off
         noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::unalignable()))
         // clang-format on
@@ -115,25 +109,13 @@ public:
 
     template<typename IteratorTag, typename IteratorSampleType, typename IteratorSampleTraits, typename Fn>
     static inline decltype(auto)
-    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type> iterator, Fn&& fn) noexcept(
+    dispatch(sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::false_type>, Fn&& fn) noexcept(
         // clang-format off
-        noexcept(dispatch(
-            sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(iterator.base()),
-            std::forward<Fn>(fn))) &&
         noexcept(detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous()))
         // clang-format on
     )
     {
-        if (iterator.stride() == 1)
-        {
-            return dispatch(
-                sample_iterator<IteratorTag, IteratorSampleType, IteratorSampleTraits, std::true_type>(iterator.base()),
-                std::forward<Fn>(fn));
-        }
-        else
-        {
-            return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous());
-        }
+        return detail::invoke(std::forward<Fn>(fn), batch_alignment_mode::noncontiguous());
     }
 };
 
