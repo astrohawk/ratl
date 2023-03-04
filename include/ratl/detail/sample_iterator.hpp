@@ -56,7 +56,34 @@ public:
 
     sample_iterator(const sample_iterator& other) noexcept = default;
 
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    sample_iterator(const sample_iterator<Tag, ArgSampleType, ArgSampleTraits, std::false_type>& other) noexcept :
+        data_(other.base()), stride_(other.stride())
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+    }
+
     sample_iterator& operator=(const sample_iterator& other) noexcept = default;
+
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    sample_iterator& operator=(
+        const sample_iterator<Tag, ArgSampleType, ArgSampleTraits, std::false_type>& other) noexcept
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+        data_ = other.base();
+        stride_ = other.stride();
+        return *this;
+    }
 
     inline size_type stride() const noexcept
     {
@@ -230,7 +257,33 @@ public:
 
     sample_iterator(const sample_iterator& other) noexcept = default;
 
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    sample_iterator(const sample_iterator<Tag, ArgSampleType, ArgSampleTraits, std::true_type>& other) noexcept :
+        data_(other.base())
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+    }
+
     sample_iterator& operator=(const sample_iterator& other) noexcept = default;
+
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    sample_iterator& operator=(
+        const sample_iterator<Tag, ArgSampleType, ArgSampleTraits, std::true_type>& other) noexcept
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+        data_ = other.base();
+        return *this;
+    }
 
     inline size_type stride() const noexcept
     {

@@ -9,10 +9,10 @@
 #define _ratl_detail_noninterleaved_iterator_
 
 // ratl includes
+#include <ratl/channel_span.hpp>
 #include <ratl/detail/config.hpp>
 #include <ratl/detail/operator_arrow_proxy.hpp>
 #include <ratl/detail/sample_traits.hpp>
-#include <ratl/channel_span.hpp>
 
 // other includes
 #include <type_traits>
@@ -56,7 +56,33 @@ public:
 
     noninterleaved_iterator(const noninterleaved_iterator& other) noexcept = default;
 
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    noninterleaved_iterator(const noninterleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept :
+        data_(other.base()), frames_(other.frames())
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+    }
+
     noninterleaved_iterator& operator=(const noninterleaved_iterator& other) noexcept = default;
+
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    noninterleaved_iterator& operator=(const noninterleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+        data_ = other.base();
+        frames_ = other.frames();
+        return *this;
+    }
 
     inline size_type frames() const noexcept
     {

@@ -55,7 +55,33 @@ public:
 
     interleaved_iterator(const interleaved_iterator& other) noexcept = default;
 
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    interleaved_iterator(const interleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept :
+        data_(other.base()), channels_(other.channels())
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+    }
+
     interleaved_iterator& operator=(const interleaved_iterator& other) noexcept = default;
+
+    template<
+        typename ArgSampleType,
+        typename ArgSampleTraits,
+        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+    interleaved_iterator& operator=(const interleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept
+    {
+        static_assert(
+            std::is_same<typename ArgSampleTraits::sample_type, ArgSampleType>::value,
+            "sample_type in SampleTraits must be the same type as SampleType");
+        data_ = other.base();
+        channels_ = other.channels();
+        return *this;
+    }
 
     inline size_type channels() const noexcept
     {
