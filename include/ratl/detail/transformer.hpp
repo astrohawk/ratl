@@ -97,7 +97,7 @@ template<
     typename InputSampleType,
     typename OutputSampleType,
     typename DitherGenerator>
-class basic_transformer_impl_inner
+class batch_transformer
 {
     using input_batch_creator = batch_creator<InputSampleType>;
     using output_batch_creator = batch_creator<OutputSampleType>;
@@ -114,7 +114,7 @@ class basic_transformer_impl_inner
     static_assert(batch_size == output_batch_type::size, "Input and output batch size are not equal");
 
 public:
-    explicit basic_transformer_impl_inner(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
+    explicit batch_transformer(DitherGenerator& dither_gen) : sample_converter_(dither_gen) {}
 
     template<typename InputSampleIterator, typename OutputSampleIterator>
     inline OutputSampleIterator transform(
@@ -150,6 +150,51 @@ public:
             });
     }
 
+private:
+    sample_converter sample_converter_;
+};
+
+template<
+    template<typename, typename, typename>
+    class SampleConverter,
+    typename InputSampleType,
+    typename OutputSampleType,
+    typename DitherGenerator>
+class basic_transformer_impl_inner
+{
+    using transformer = batch_transformer<SampleConverter, InputSampleType, OutputSampleType, DitherGenerator>;
+
+public:
+    explicit basic_transformer_impl_inner(DitherGenerator& dither_gen) : transformer_(dither_gen) {}
+
+    template<typename InputIterator, typename OutputIterator>
+    inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
+    {
+        return transformer_.transform(first, last, result);
+    }
+
+private:
+    transformer transformer_;
+};
+
+template<template<typename, typename, typename> class SampleConverter, typename SampleType, typename DitherGenerator>
+class basic_transformer_impl_inner<SampleConverter, SampleType, SampleType, DitherGenerator>
+{
+    using transformer = batch_transformer<SampleConverter, SampleType, SampleType, DitherGenerator>;
+
+public:
+    explicit basic_transformer_impl_inner(DitherGenerator& dither_gen) : transformer_(dither_gen) {}
+
+    template<typename InputIterator, typename OutputIterator>
+    inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
+    {
+        return transformer_.transform(first, last, result);
+    }
+
+    // Overload for cases that are just memcopies
+    // Catches all cases where the input and output sample iterators are contiguous
+    // In cases where either (or both) of the sample iterators are not contiguous it is faster to just use batch
+    // transform to copy samples from the input to the output
     template<
         typename InputIteratorTag,
         typename InputIteratorSampleType,
@@ -157,9 +202,7 @@ public:
         typename OutputIteratorTag,
         typename OutputIteratorSampleType,
         typename OutputIteratorSampleTraits>
-    inline std::enable_if_t<
-        std::is_same<InputSampleType, OutputSampleType>::value,
-        sample_iterator<OutputIteratorTag, OutputIteratorSampleType, OutputIteratorSampleTraits, std::true_type>>
+    inline sample_iterator<OutputIteratorTag, OutputIteratorSampleType, OutputIteratorSampleTraits, std::true_type>
     transform(
         sample_iterator<InputIteratorTag, InputIteratorSampleType, InputIteratorSampleTraits, std::true_type> first,
         sample_iterator<InputIteratorTag, InputIteratorSampleType, InputIteratorSampleTraits, std::true_type> last,
@@ -172,12 +215,14 @@ public:
             result,
             [](auto first, auto last, auto result) noexcept
             {
+                static_assert(std::is_pointer<decltype(first)>::value, "");
+                static_assert(std::is_pointer<decltype(result)>::value, "");
                 return std::copy(first, last, result);
             });
     }
 
 private:
-    sample_converter sample_converter_;
+    transformer transformer_;
 };
 
 #else
@@ -204,30 +249,41 @@ public:
             result,
             [this](auto first, auto last, auto result) noexcept
             {
-                return this->transform_impl(first, last, result);
+                return std::transform(first, last, result, sample_converter_);
             });
     }
 
 private:
-    template<typename InputSampleIterator, typename OutputSampleIterator>
-    inline std::enable_if_t<!std::is_same<InputSampleType, OutputSampleType>::value, OutputSampleIterator>
-    transform_impl(InputSampleIterator first, InputSampleIterator last, OutputSampleIterator result) const noexcept
-    {
-        return std::transform(first, last, result, sample_converter_);
-    }
-
-    template<typename InputSampleIterator, typename OutputSampleIterator>
-    inline std::enable_if_t<std::is_same<InputSampleType, OutputSampleType>::value, OutputSampleIterator>
-    transform_impl(InputSampleIterator first, InputSampleIterator last, OutputSampleIterator result) const noexcept
-    {
-        return std::copy(first, last, result);
-    }
-
     sample_converter sample_converter_;
+};
+
+template<template<typename, typename, typename> class SampleConverter, typename SampleType, typename DitherGenerator>
+class basic_transformer_impl_inner<SampleConverter, SampleType, SampleType, DitherGenerator>
+{
+public:
+    explicit basic_transformer_impl_inner(DitherGenerator&) {}
+
+    template<typename InputIterator, typename OutputIterator>
+    inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result) const noexcept
+    {
+        return transformer_pointer_dispatcher::dispatch(
+            first,
+            last,
+            result,
+            [](auto first, auto last, auto result) noexcept
+            {
+                return std::copy(first, last, result);
+            });
+    }
 };
 
 #endif
 
+// This class only exists to convert all non-contiguous sample iterators that have stride of 1 to contiguous sample
+// iterators
+// Subsequent classes can instantiate different logic if the sample iterator is contiguous and it's nice to be able to
+// use any optimisations that come from that (e.g. convert sample iterators to pointers so that we can use memcpy or
+// fast SIMD vector load) in all cases that are possible
 template<
     template<typename, typename, typename>
     class SampleConverter,

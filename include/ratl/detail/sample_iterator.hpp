@@ -524,7 +524,7 @@ private:
         using contiguous_output_interator =
             sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::true_type>;
         using noncontiguous_output_interator =
-            sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::true_type>;
+            sample_iterator<IteratorTag, OutputSampleType, OutputSampleTraits, std::false_type>;
         if (result.stride() == 1)
         {
             return noncontiguous_output_interator(

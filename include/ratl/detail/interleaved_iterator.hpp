@@ -58,7 +58,7 @@ public:
     template<
         typename ArgSampleType,
         typename ArgSampleTraits,
-        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+        typename std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value, int> = 0>
     interleaved_iterator(const interleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept :
         data_(other.base()), channels_(other.channels())
     {
@@ -72,7 +72,7 @@ public:
     template<
         typename ArgSampleType,
         typename ArgSampleTraits,
-        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+        typename std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value, int> = 0>
     interleaved_iterator& operator=(const interleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept
     {
         static_assert(

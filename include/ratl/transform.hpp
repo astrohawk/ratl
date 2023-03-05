@@ -18,14 +18,6 @@
 
 namespace ratl
 {
-// transform
-
-template<typename InputIterator, typename OutputIterator, typename Transformer>
-inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result, Transformer transformer)
-{
-    return transformer(first, last, result);
-}
-
 namespace detail
 {
 template<template<typename, typename, typename> class Transformer, typename InputIterator, typename OutputIterator>
@@ -33,7 +25,7 @@ inline OutputIterator transform_impl(
     InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
 {
     using transformer = Transformer<InputIterator, OutputIterator, dither_generator>;
-    return ratl::transform(first, last, result, transformer(dither_gen));
+    return transformer(dither_gen)(first, last, result);
 }
 
 template<template<typename, typename, typename> class Transformer, typename InputIterator, typename OutputIterator>
@@ -42,56 +34,36 @@ inline OutputIterator transform_impl(InputIterator first, InputIterator last, Ou
     using transformer_dither_generator = batch_null_dither_generator;
     using transformer = Transformer<InputIterator, OutputIterator, transformer_dither_generator>;
     transformer_dither_generator dither_gen;
-    return ratl::transform(first, last, result, transformer(dither_gen));
+    return transformer(dither_gen)(first, last, result);
 }
 } // namespace detail
 
 // transform
 
-template<typename InputIterator, typename OutputIterator>
-inline OutputIterator transform(
-    InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
+template<typename InputIterator, typename OutputIterator, typename... Args>
+inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result, Args&&... args)
 {
     return detail::transform_impl<detail::default_transformer, InputIterator, OutputIterator>(
-        first, last, result, dither_gen);
-}
-
-template<typename InputIterator, typename OutputIterator>
-inline OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result)
-{
-    return detail::transform_impl<detail::default_transformer, InputIterator, OutputIterator>(first, last, result);
+        first, last, result, std::forward<Args>(args)...);
 }
 
 // reference_transform
 
-template<typename InputIterator, typename OutputIterator>
+template<typename InputIterator, typename OutputIterator, typename... Args>
 inline OutputIterator reference_transform(
-    InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
+    InputIterator first, InputIterator last, OutputIterator result, Args&&... args)
 {
     return detail::transform_impl<detail::reference_transformer, InputIterator, OutputIterator>(
-        first, last, result, dither_gen);
-}
-
-template<typename InputIterator, typename OutputIterator>
-inline OutputIterator reference_transform(InputIterator first, InputIterator last, OutputIterator result)
-{
-    return detail::transform_impl<detail::reference_transformer, InputIterator, OutputIterator>(first, last, result);
+        first, last, result, std::forward<Args>(args)...);
 }
 
 // fast_transform
 
-template<typename InputIterator, typename OutputIterator>
-inline OutputIterator fast_transform(
-    InputIterator first, InputIterator last, OutputIterator result, dither_generator& dither_gen)
+template<typename InputIterator, typename OutputIterator, typename... Args>
+inline OutputIterator fast_transform(InputIterator first, InputIterator last, OutputIterator result, Args&&... args)
 {
     return detail::transform_impl<detail::fast_transformer, InputIterator, OutputIterator>(
-        first, last, result, dither_gen);
-}
-
-template<typename InputIterator, typename OutputIterator>
-inline OutputIterator fast_transform(InputIterator first, InputIterator last, OutputIterator result)
-{
-    return detail::transform_impl<detail::fast_transformer, InputIterator, OutputIterator>(first, last, result);
+        first, last, result, std::forward<Args>(args)...);
 }
 
 } // namespace ratl

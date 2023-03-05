@@ -59,7 +59,7 @@ public:
     template<
         typename ArgSampleType,
         typename ArgSampleTraits,
-        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+        typename std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value, int> = 0>
     noninterleaved_iterator(const noninterleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept :
         data_(other.base()), frames_(other.frames())
     {
@@ -73,7 +73,7 @@ public:
     template<
         typename ArgSampleType,
         typename ArgSampleTraits,
-        typename = std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value>>
+        typename std::enable_if_t<std::is_same<const_sample_traits_t<ArgSampleTraits>, SampleTraits>::value, int> = 0>
     noninterleaved_iterator& operator=(const noninterleaved_iterator<ArgSampleType, ArgSampleTraits>& other) noexcept
     {
         static_assert(
