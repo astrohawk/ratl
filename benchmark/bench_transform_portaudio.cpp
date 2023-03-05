@@ -61,8 +61,7 @@ struct RatlTransformer
     template<typename InputType, typename OutputType>
     static void __attribute__((noinline)) transform(InputType& input, OutputType& output)
     {
-//        dither_generator dither_gen;
-        fast_transform(input.begin(), input.end(), output.begin());
+        ratl::transform(input.begin(), input.end(), output.begin());
     }
 };
 
