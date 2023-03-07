@@ -109,7 +109,7 @@ public:
         static_assert(
             std::is_same<
                 std::remove_cv_t<std::remove_reference_t<decltype(input)>>,
-                batch_network_sample_value_type_t<int16_t, 8>>::value,
+                batch_network_sample_value_type_t<int16_t, 4>>::value,
             "");
         return xsimd::bitwise_cast<xsimd::batch<std::uint32_t, 4>>(
             xsimd::batch<std::uint8_t, 16>(vrev16q_u8(xsimd::bitwise_cast<xsimd::batch<std::uint8_t, 16>>(input))));
