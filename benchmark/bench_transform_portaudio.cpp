@@ -59,7 +59,7 @@ void benchTransform(benchmark::State& state)
 struct RatlTransformer
 {
     template<typename InputType, typename OutputType>
-    static void __attribute__((noinline)) transform(InputType& input, OutputType& output)
+    static void transform(InputType& input, OutputType& output)
     {
         ratl::transform(input.begin(), input.end(), output.begin());
     }
@@ -110,30 +110,39 @@ private:
 
 public:
     template<typename InputSampleType, typename OutputSampleType>
-    static void __attribute__((noinline))
-    transform(basic_interleaved<InputSampleType>& input, basic_interleaved<OutputSampleType>& output)
+    static void transform(basic_interleaved<InputSampleType>& input, basic_interleaved<OutputSampleType>& output)
     {
         PaUtilTriangularDitherGenerator dither_gen;
         PaUtil_InitializeTriangularDitherState(&dither_gen);
 
         auto& converter = select_converter<InputSampleType, OutputSampleType>();
-        converter((void*)output.data(), 1, (void*)input.data(), 1, input.samples(), &dither_gen);
+        converter(
+            (void*)output.data(),
+            (signed int)1,
+            (void*)input.data(),
+            (signed int)1,
+            (unsigned int)input.samples(),
+            &dither_gen);
     }
 
     template<typename InputSampleType, typename OutputSampleType>
-    static void __attribute__((noinline))
-    transform(basic_noninterleaved<InputSampleType>& input, basic_noninterleaved<OutputSampleType>& output)
+    static void transform(basic_noninterleaved<InputSampleType>& input, basic_noninterleaved<OutputSampleType>& output)
     {
         PaUtilTriangularDitherGenerator dither_gen;
         PaUtil_InitializeTriangularDitherState(&dither_gen);
 
         auto& converter = select_converter<InputSampleType, OutputSampleType>();
-        converter((void*)output.data(), 1, (void*)input.data(), 1, input.samples(), &dither_gen);
+        converter(
+            (void*)output.data(),
+            (signed int)1,
+            (void*)input.data(),
+            (signed int)1,
+            (unsigned int)input.samples(),
+            &dither_gen);
     }
 
     template<typename InputSampleType, typename OutputSampleType>
-    static void __attribute__((noinline))
-    transform(basic_interleaved<InputSampleType>& input, basic_noninterleaved<OutputSampleType>& output)
+    static void transform(basic_interleaved<InputSampleType>& input, basic_noninterleaved<OutputSampleType>& output)
     {
         PaUtilTriangularDitherGenerator dither_gen;
         PaUtil_InitializeTriangularDitherState(&dither_gen);
@@ -143,17 +152,16 @@ public:
         {
             converter(
                 (void*)output.channel(channel).data(),
-                1,
+                (signed int)1,
                 (void*)input.channel(channel).data(),
-                input.channels(),
-                input.frames(),
+                (signed int)input.channels(),
+                (unsigned int)input.frames(),
                 &dither_gen);
         }
     }
 
     template<typename InputSampleType, typename OutputSampleType>
-    static void __attribute__((noinline))
-    transform(basic_noninterleaved<InputSampleType>& input, basic_interleaved<OutputSampleType>& output)
+    static void transform(basic_noninterleaved<InputSampleType>& input, basic_interleaved<OutputSampleType>& output)
     {
         PaUtilTriangularDitherGenerator dither_gen;
         PaUtil_InitializeTriangularDitherState(&dither_gen);
@@ -163,10 +171,10 @@ public:
         {
             converter(
                 (void*)output.channel(channel).data(),
-                output.channels(),
+                (signed int)output.channels(),
                 (void*)input.channel(channel).data(),
-                1,
-                input.frames(),
+                (signed int)1,
+                (unsigned int)input.frames(),
                 &dither_gen);
         }
     }
