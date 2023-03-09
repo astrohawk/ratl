@@ -40,6 +40,8 @@ if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
             set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-microsoft-enum-value -Wno-language-extension-token")
         endif ()
     endif ()
+
+    option(BUILD_SHARED_LIBS "Build using shared libraries" OFF)
 endif ()
 
 add_subdirectory(third_party)
