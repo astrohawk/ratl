@@ -6,38 +6,14 @@
  */
 
 // ratl includes
-#include <ratl/ratl.hpp>
+#include "bench_utils.hpp"
 
 // other includes
-#include <benchmark/benchmark.h>
-#include <chrono>
 #include <pa_converters.h>
 #include <pa_dither.h>
-#include <random>
 
 namespace ratl
 {
-template<typename InputType>
-InputType generateRandomInput(std::size_t num_channels, std::size_t num_frames)
-{
-    std::random_device random_device;
-    std::default_random_engine random_engine(random_device());
-    std::uniform_real_distribution<float32_t> uniform_dist(-0.8f, 0.8f);
-
-    interleaved<float32_t> float_container(num_channels, num_frames);
-    for (auto frame : float_container)
-    {
-        for (auto& input : frame)
-        {
-            input = sample<float32_t>(uniform_dist(random_engine));
-        }
-    }
-
-    InputType input(num_channels, num_frames);
-    transform(float_container.begin(), float_container.end(), input.begin());
-    return input;
-}
-
 template<typename Transformer, typename InputSampleType, typename OutputSampleType>
 void benchTransform(benchmark::State& state)
 {
@@ -47,7 +23,7 @@ void benchTransform(benchmark::State& state)
     static constexpr std::size_t num_channels = 32;
     static constexpr std::size_t num_frames = 480;
 
-    auto input = generateRandomInput<input_type>(num_channels, num_frames);
+    auto input = utils::generateRandomInput<input_type>(num_channels, num_frames);
     auto output = output_type(num_channels, num_frames);
 
     for (auto _ : state)
