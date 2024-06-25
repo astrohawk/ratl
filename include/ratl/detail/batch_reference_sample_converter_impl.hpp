@@ -19,6 +19,7 @@
 #include <ratl/sample_limits.hpp>
 
 // other includes
+#include <climits>
 #include <cmath>
 #include <type_traits>
 
@@ -49,7 +50,7 @@ struct base_batch_reference_sample_converter_impl<sample<int16_t>, sample<int24_
     static inline batch_sample_value_type_t<int24_t> batch_convert(
         const batch_sample_value_type_t<int16_t>& input, DitherGenerator&) noexcept
     {
-        return batch_sample_cast<int24_t>(input) << 8;
+        return batch_sample_cast<int24_t>(input) << CHAR_BIT;
     }
 };
 
@@ -59,7 +60,7 @@ struct base_batch_reference_sample_converter_impl<sample<int16_t>, sample<int32_
     static inline batch_sample_value_type_t<int32_t> batch_convert(
         const batch_sample_value_type_t<int16_t>& input, DitherGenerator&) noexcept
     {
-        return batch_sample_cast<int32_t>(input) << 16;
+        return batch_sample_cast<int32_t>(input) << (CHAR_BIT * 2);
     }
 };
 
@@ -70,7 +71,7 @@ private:
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x007FFF80);
     static constexpr int16_t sample_out_max = sample_limits<int16_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x80);
-    static constexpr std::size_t total_shift = 8;
+    static constexpr std::size_t total_shift = CHAR_BIT;
     static constexpr std::size_t pre_dither_shift =
         DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
     static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
@@ -126,7 +127,7 @@ struct base_batch_reference_sample_converter_impl<sample<int24_t>, sample<int32_
     static inline batch_sample_value_type_t<int32_t> batch_convert(
         const batch_sample_value_type_t<int24_t>& input, DitherGenerator&) noexcept
     {
-        return batch_sample_cast<int24_t>(input << 8);
+        return batch_sample_cast<int24_t>(input << CHAR_BIT);
     }
 };
 
@@ -137,7 +138,7 @@ private:
     static constexpr int32_t sample_in_max = static_cast<int32_t>(0x7FFF8000);
     static constexpr int16_t sample_out_max = sample_limits<int16_t>::max();
     static constexpr int32_t rounding = static_cast<int32_t>(0x8000);
-    static constexpr std::size_t total_shift = 16;
+    static constexpr std::size_t total_shift = CHAR_BIT * 2;
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
     static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 #    if defined(RATL_CPP_VERSION_HAS_CPP17)
@@ -213,7 +214,7 @@ public:
         static const batch_sample_value_type_t<int32_t> batch_max(sample_out_max);
 #    endif
         auto cmp = input >= sample_in_max;
-        auto temp = round(input) >> 8;
+        auto temp = round(input) >> CHAR_BIT;
         return batch_sample_cast<int24_t>(xsimd::select(cmp, batch_max, temp));
     }
 };

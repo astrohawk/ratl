@@ -16,6 +16,7 @@
 #include <ratl/detail/config.hpp>
 
 // other includes
+#include <climits>
 #include <type_traits>
 
 #if defined(RATL_HAS_XSIMD)
@@ -119,7 +120,7 @@ public:
     template<class BatchNetworkSampleValueType>
     static inline BatchNetworkSampleValueType reverse(const BatchNetworkSampleValueType& input) noexcept
     {
-        return ((input & 0xff00) >> 8) | ((input & 0x00ff) << 8);
+        return ((input & 0xff00) >> CHAR_BIT) | ((input & 0x00ff) << CHAR_BIT);
     }
 };
 
@@ -216,14 +217,14 @@ public:
                 batch_network_sample_value_type_t<int24_t, 4>>::value,
             "");
         return xsimd::bitwise_cast<xsimd::batch<std::uint32_t, 4>>(xsimd::batch<std::uint8_t, 16>(
-            vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<std::uint8_t, 16>>(input << 8))));
+            vrev32q_u8(xsimd::bitwise_cast<xsimd::batch<std::uint8_t, 16>>(input << CHAR_BIT))));
     }
 #    endif
 
     template<class BatchNetworkSampleValueType>
     static inline BatchNetworkSampleValueType reverse(const BatchNetworkSampleValueType& input) noexcept
     {
-        return ((input & 0xff0000) >> 16) | (input & 0x00ff00) | ((input & 0x0000ff) << 16);
+        return ((input & 0xff0000) >> (CHAR_BIT * 2)) | (input & 0x00ff00) | ((input & 0x0000ff) << (CHAR_BIT * 2));
     }
 };
 
@@ -329,8 +330,8 @@ public:
     template<class BatchNetworkSampleValueType>
     static inline BatchNetworkSampleValueType reverse(const BatchNetworkSampleValueType& input) noexcept
     {
-        return ((input & 0xff000000) >> 24) | ((input & 0x00ff0000) >> 8) | ((input & 0x0000ff00) << 8) |
-               ((input & 0x000000ff) << 24);
+        return ((input & 0xff000000) >> (CHAR_BIT * 3)) | ((input & 0x00ff0000) >> CHAR_BIT) | ((input & 0x0000ff00) << CHAR_BIT) |
+               ((input & 0x000000ff) << (CHAR_BIT * 3));
     }
 };
 
