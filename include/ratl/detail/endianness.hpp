@@ -13,6 +13,7 @@
 #include <ratl/detail/config.hpp>
 
 // other includes
+#include <climits>
 #include <type_traits>
 
 namespace ratl
@@ -41,7 +42,10 @@ inline uint32_t reverse_endianness(uint32_t input) noexcept
 
 inline uint24_t reverse_endianness(uint24_t input) noexcept
 {
-    return narrowing_cast<uint24_t>(reverse_endianness(static_cast<uint32_t>(input) << 8));
+    // can use value_cast here as
+    // 1. guaranteed that top byte is empty given the shift by 1 byte before reverse_endianness
+    // 2. can't use sample_value_narrowing_cast on non-sample-value type
+    return value_cast<uint24_t>(reverse_endianness(static_cast<uint32_t>(input) << CHAR_BIT));
 }
 
 // host_to_network

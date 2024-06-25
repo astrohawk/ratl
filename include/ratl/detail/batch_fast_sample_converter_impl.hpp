@@ -18,6 +18,7 @@
 #include <ratl/detail/fast_sample_converter_impl.hpp>
 
 // other includes
+#include <climits>
 #include <cmath>
 #include <type_traits>
 
@@ -48,7 +49,7 @@ struct base_batch_fast_sample_converter_impl<sample<int16_t>, sample<int24_t>, D
     static inline batch_sample_value_type_t<int24_t> batch_convert(
         const batch_sample_value_type_t<int16_t>& input, DitherGenerator&) noexcept
     {
-        return batch_sample_cast<int24_t>(input) << 8;
+        return batch_sample_cast<int24_t>(input) << CHAR_BIT;
     }
 };
 
@@ -58,7 +59,7 @@ struct base_batch_fast_sample_converter_impl<sample<int16_t>, sample<int32_t>, D
     static inline batch_sample_value_type_t<int32_t> batch_convert(
         const batch_sample_value_type_t<int16_t>& input, DitherGenerator&) noexcept
     {
-        return batch_sample_cast<int32_t>(input) << 16;
+        return batch_sample_cast<int32_t>(input) << (CHAR_BIT * 2);
     }
 };
 
@@ -66,7 +67,7 @@ template<typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int16_t>, DitherGenerator>
 {
 private:
-    static constexpr std::size_t total_shift = 8;
+    static constexpr std::size_t total_shift = CHAR_BIT;
     static constexpr std::size_t pre_dither_shift =
         DitherGenerator::int16_bits > 0 ? DitherGenerator::int16_bits - total_shift : 0;
     static constexpr std::size_t post_dither_shift = total_shift + pre_dither_shift;
@@ -98,7 +99,7 @@ struct base_batch_fast_sample_converter_impl<sample<int24_t>, sample<int32_t>, D
     static inline batch_sample_value_type_t<int32_t> batch_convert(
         const batch_sample_value_type_t<int24_t>& input, DitherGenerator&) noexcept
     {
-        return batch_sample_cast<int24_t>(input << 8);
+        return batch_sample_cast<int24_t>(input << CHAR_BIT);
     }
 };
 
@@ -106,7 +107,7 @@ template<typename DitherGenerator>
 struct base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int16_t>, DitherGenerator>
 {
 private:
-    static constexpr std::size_t total_shift = 16;
+    static constexpr std::size_t total_shift = CHAR_BIT * 2;
     static constexpr std::size_t pre_dither_shift = total_shift - DitherGenerator::int16_bits;
     static constexpr std::size_t post_dither_shift = total_shift - pre_dither_shift;
 
@@ -137,7 +138,7 @@ struct base_batch_fast_sample_converter_impl<sample<int32_t>, sample<int24_t>, D
     static inline batch_sample_value_type_t<int24_t> batch_convert(
         const batch_sample_value_type_t<int32_t>& input, DitherGenerator&) noexcept
     {
-        return batch_sample_cast<int24_t>(input >> 8);
+        return batch_sample_cast<int24_t>(input >> CHAR_BIT);
     }
 };
 

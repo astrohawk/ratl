@@ -12,6 +12,7 @@
 #include <ratl/detail/config.hpp>
 
 // other includes
+#include <climits>
 #include <cstdint>
 #include <cstring>
 #include <limits>
@@ -63,8 +64,8 @@ inline constexpr int24_t::int24_t(const Tp& other) noexcept : storage_{}
 #endif
     {
         storage_[0] = static_cast<uint8_t>(other);
-        storage_[1] = static_cast<uint8_t>(other >> 8);
-        storage_[2] = static_cast<uint8_t>(other >> 16);
+        storage_[1] = static_cast<uint8_t>(other >> CHAR_BIT);
+        storage_[2] = static_cast<uint8_t>(other >> (CHAR_BIT * 2));
     }
 #if defined(RATL_USE_INT24_MEMCPY_CONVERT)
     else
@@ -84,8 +85,8 @@ inline constexpr int24_t& int24_t::operator=(const Tp& other) noexcept
 #endif
     {
         storage_[0] = static_cast<uint8_t>(other);
-        storage_[1] = static_cast<uint8_t>(other >> 8);
-        storage_[2] = static_cast<uint8_t>(other >> 16);
+        storage_[1] = static_cast<uint8_t>(other >> CHAR_BIT);
+        storage_[2] = static_cast<uint8_t>(other >> (CHAR_BIT * 2));
     }
 #if defined(RATL_USE_INT24_MEMCPY_CONVERT)
     else
@@ -104,10 +105,10 @@ inline constexpr int24_t::operator int32_t() const noexcept
 #    pragma GCC diagnostic ignored "-Warray-bounds"
 #endif
     return (static_cast<int32_t>(
-                (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << 8) |
-                (static_cast<uint32_t>(storage_[2]) << 16))
-            << 8) >>
-           8;
+                (static_cast<uint32_t>(storage_[0])) | (static_cast<uint32_t>(storage_[1]) << CHAR_BIT) |
+                (static_cast<uint32_t>(storage_[2]) << (CHAR_BIT * 2)))
+            << CHAR_BIT) >>
+           CHAR_BIT;
 #if defined(RATL_CPP_COMPILER_GCC)
 #    pragma GCC diagnostic pop
 #endif

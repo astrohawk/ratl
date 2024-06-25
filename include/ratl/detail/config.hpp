@@ -154,7 +154,7 @@
 #    if defined(RATL_CPP_VERSION_HAS_CPP20)
 #        define RATL_USE_INT24_MEMCPY_CONVERT
 #    else
-#        define RATL_USE_INT24_MEMCPY_NARROWING_CAST
+#        define RATL_USE_INT24_MEMCPY_UNDERLYING_CAST
 #    endif
 #endif
 

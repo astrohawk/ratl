@@ -42,60 +42,26 @@ bit_cast(const InputType& input) noexcept
 #endif
 }
 
-// narrowing_cast
+// value_cast
 
-template<typename OutputType>
-struct narrowing_cast_impl;
+template<typename InputType, typename OutputType>
+struct value_cast_impl;
 
-template<>
-struct narrowing_cast_impl<int16_t>
+template<typename Type>
+struct value_cast_impl<Type, Type>
 {
-    static inline int16_t cast(int16_t input) noexcept
+    static inline Type cast(Type input) noexcept
     {
         return input;
-    }
-
-    static inline int16_t cast(int24_t input) noexcept
-    {
-        return static_cast<int16_t>(input);
-    }
-
-    static inline int16_t cast(int32_t input) noexcept
-    {
-        return static_cast<int16_t>(input);
     }
 };
 
 template<>
-struct narrowing_cast_impl<uint16_t>
+struct value_cast_impl<int32_t, int24_t>
 {
-    static inline uint16_t cast(uint16_t input) noexcept
-    {
-        return input;
-    }
-
-    static inline uint16_t cast(uint24_t input) noexcept
-    {
-        return static_cast<uint16_t>(input);
-    }
-
-    static inline uint16_t cast(uint32_t input) noexcept
-    {
-        return static_cast<uint16_t>(input);
-    }
-};
-
-template<>
-struct narrowing_cast_impl<int24_t>
-{
-    static inline int24_t cast(int24_t input) noexcept
-    {
-        return input;
-    }
-
     static inline int24_t cast(int32_t input) noexcept
     {
-#if defined(RATL_USE_INT24_MEMCPY_NARROWING_CAST)
+#if defined(RATL_USE_INT24_MEMCPY_UNDERLYING_CAST)
         // memcpy is required instead of just casting input to output as msvc is very bad at optimising the constexpr
         // int24_t operator=(int32_t). This is solved in C++20 as we can use `if (std::is_constant_evaluated())` to do
         // the constexpr shifting if in a constexpr context and use memcpy otherwise.
@@ -109,16 +75,11 @@ struct narrowing_cast_impl<int24_t>
 };
 
 template<>
-struct narrowing_cast_impl<uint24_t>
+struct value_cast_impl<uint32_t, uint24_t>
 {
-    static inline uint24_t cast(uint24_t input) noexcept
-    {
-        return input;
-    }
-
     static inline uint24_t cast(uint32_t input) noexcept
     {
-#if defined(RATL_USE_INT24_MEMCPY_NARROWING_CAST)
+#if defined(RATL_USE_INT24_MEMCPY_UNDERLYING_CAST)
         // memcpy is required instead of just casting input to output as msvc is very bad at optimising the constexpr
         // int24_t operator=(int32_t). This is solved in C++20 as we can use `if (std::is_constant_evaluated())` to do
         // the constexpr shifting if in a constexpr context and use memcpy otherwise.
@@ -132,37 +93,113 @@ struct narrowing_cast_impl<uint24_t>
 };
 
 template<>
-struct narrowing_cast_impl<int32_t>
+struct value_cast_impl<int16_t, int24_t>
 {
-    static inline int32_t cast(int32_t input) noexcept
+    static inline int24_t cast(int32_t input) noexcept
+    {
+        return value_cast_impl<int32_t, int24_t>::cast(input);
+    }
+};
+
+template<>
+struct value_cast_impl<int16_t, int32_t>
+{
+    static inline int32_t cast(int16_t input) noexcept
     {
         return input;
     }
 };
 
 template<>
-struct narrowing_cast_impl<uint32_t>
+struct value_cast_impl<uint16_t, uint24_t>
 {
-    static inline uint32_t cast(uint32_t input) noexcept
+    static inline uint24_t cast(uint16_t input) noexcept
+    {
+        return value_cast_impl<uint32_t, uint24_t>::cast(input);
+    }
+};
+
+template<>
+struct value_cast_impl<uint16_t, uint32_t>
+{
+    static inline uint32_t cast(uint16_t input) noexcept
     {
         return input;
     }
 };
 
 template<>
-struct narrowing_cast_impl<float32_t>
+struct value_cast_impl<int24_t, int16_t>
 {
-    static inline float32_t cast(float32_t input) noexcept
+    static inline int16_t cast(int24_t input) noexcept
+    {
+        return static_cast<int16_t>(input);
+    }
+};
+
+template<>
+struct value_cast_impl<int24_t, int32_t>
+{
+    static inline int32_t cast(int24_t input) noexcept
     {
         return input;
+    }
+};
+
+template<>
+struct value_cast_impl<uint24_t, uint16_t>
+{
+    static inline uint16_t cast(uint24_t input) noexcept
+    {
+        return static_cast<uint16_t>(input);
+    }
+};
+
+template<>
+struct value_cast_impl<uint24_t, uint32_t>
+{
+    static inline uint32_t cast(uint24_t input) noexcept
+    {
+        return input;
+    }
+};
+
+template<>
+struct value_cast_impl<int32_t, int16_t>
+{
+    static inline int16_t cast(int32_t input) noexcept
+    {
+        return static_cast<int16_t>(input);
+    }
+};
+
+template<>
+struct value_cast_impl<uint32_t, uint16_t>
+{
+    static inline uint16_t cast(uint32_t input) noexcept
+    {
+        return static_cast<uint16_t>(input);
     }
 };
 
 template<typename OutputType, typename InputType>
-inline OutputType narrowing_cast(InputType input) noexcept
+inline OutputType value_cast(InputType input) noexcept
 {
-    auto output = narrowing_cast_impl<OutputType>::cast(input);
-    assert(static_cast<InputType>(output) == input);
+    return value_cast_impl<InputType, OutputType>::cast(input);
+}
+
+// sample_value_narrowing_cast
+
+template<typename OutputSampleValueType, typename InputSampleValueType>
+inline std::enable_if_t<
+    detail::is_valid_sample_value_type<OutputSampleValueType>::value &&
+        detail::is_valid_sample_value_type<InputSampleValueType>::value &&
+        (sizeof(InputSampleValueType) >= sizeof(OutputSampleValueType)),
+    OutputSampleValueType>
+sample_value_narrowing_cast(InputSampleValueType input) noexcept
+{
+    auto output = value_cast<OutputSampleValueType>(input);
+    assert(static_cast<InputSampleValueType>(output) == input);
     return output;
 }
 

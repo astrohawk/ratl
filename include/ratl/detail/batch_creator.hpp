@@ -35,15 +35,16 @@ class batch_creator_sample_converter<sample<SampleValueType>, BatchSize>
 {
 public:
     using batch_type = batch_sample_value_type_t<SampleValueType, BatchSize>;
+    using batch_value_type = typename batch_type::value_type;
 
-    static inline typename batch_type::value_type convert_input(SampleValueType input)
+    static inline batch_value_type convert_input(SampleValueType input)
     {
         return input;
     }
 
-    static inline SampleValueType convert_output(typename batch_type::value_type input)
+    static inline SampleValueType convert_output(batch_value_type input)
     {
-        return narrowing_cast<SampleValueType>(input);
+        return sample_value_narrowing_cast<SampleValueType>(input);
     }
 };
 
@@ -52,16 +53,18 @@ class batch_creator_sample_converter<network_sample<SampleValueType>, BatchSize>
 {
 public:
     using batch_type = batch_network_sample_value_type_t<SampleValueType, BatchSize>;
+    using batch_value_type = typename batch_type::value_type;
 
-    static inline typename batch_type::value_type convert_input(network_sample_value_type_t<SampleValueType> input)
+    static inline batch_value_type convert_input(network_sample_value_type_t<SampleValueType> input)
     {
         return network_to_network_underlying_cast<SampleValueType>(input);
     }
 
-    static inline network_sample_value_type_t<SampleValueType> convert_output(typename batch_type::value_type input)
+    static inline network_sample_value_type_t<SampleValueType> convert_output(batch_value_type input)
     {
+        // using value_cast instead of sample_value_narrowing_cast as can't narrowing cast a network-byte-order value
         return network_underlying_to_network_cast<SampleValueType>(
-            narrowing_cast<network_sample_value_underlying_type_t<SampleValueType>>(input));
+            value_cast<network_sample_value_underlying_type_t<SampleValueType>>(input));
     }
 };
 
