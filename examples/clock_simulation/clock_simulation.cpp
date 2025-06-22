@@ -13,40 +13,31 @@
 
 namespace py = pybind11;
 
-class DummySampleClock
-{
-};
-
-using ForwardDelayLockedLoop =
-    ratl::chrono::forward_delay_locked_loop<std::chrono::high_resolution_clock, DummySampleClock>;
+using ClockMapper = ratl::chrono::clock_mapper<std::chrono::high_resolution_clock, std::chrono::high_resolution_clock>;
 
 PYBIND11_MODULE(clock_simulation, m)
 {
-    py::class_<ForwardDelayLockedLoop>(m, "ForwardDelayLockedLoop")
-        .def(py::init<std::size_t>())
+    py::class_<ClockMapper>(m, "ClockMapper")
+        .def(py::init<>())
         .def(
             "get_projected_time",
-            [](ForwardDelayLockedLoop& forward_dll,
-               std::uint64_t current_clock_time,
-               std::int64_t current_sample_time,
-               std::int64_t projection_start_sample_time,
-               std::int64_t projection_end_sample_time)
+            [](ClockMapper& clock_mapper,
+               std::int64_t projection_start_source_time,
+               std::int64_t projection_end_source_time,
+               std::uint64_t current_source_time,
+               std::int64_t current_dest_time)
             {
-                auto myResult = forward_dll.get_projected_time(
+                auto myResult = clock_mapper.get_projected_time(
                     std::chrono::high_resolution_clock::time_point{
-                        std::chrono::high_resolution_clock::time_point::duration{current_clock_time}},
-                    ratl::chrono::sample_time_point<DummySampleClock>{
-                        ratl::chrono::sample_time_point<DummySampleClock>::duration{
-                            current_sample_time, forward_dll.get_nominal_sample_rate()}},
-                    ratl::chrono::sample_time_point<DummySampleClock>{
-                        ratl::chrono::sample_time_point<DummySampleClock>::duration{
-                            projection_start_sample_time, forward_dll.get_nominal_sample_rate()}},
-                    ratl::chrono::sample_time_point<DummySampleClock>{
-                        ratl::chrono::sample_time_point<DummySampleClock>::duration{
-                            projection_end_sample_time, forward_dll.get_nominal_sample_rate()}});
-                return std::tuple<std::uint64_t, std::uint64_t, double>{
-                    std::get<0>(myResult).time_since_epoch().count(),
-                    std::get<1>(myResult).time_since_epoch().count(),
-                    forward_dll.get_estimated_sample_rate()};
-            });
+                        std::chrono::high_resolution_clock::time_point::duration{projection_start_source_time}},
+                    std::chrono::high_resolution_clock::time_point{
+                        std::chrono::high_resolution_clock::time_point::duration{projection_end_source_time}},
+                    std::chrono::high_resolution_clock::time_point{
+                        std::chrono::high_resolution_clock::time_point::duration{current_source_time}},
+                    std::chrono::high_resolution_clock::time_point{
+                        std::chrono::high_resolution_clock::time_point::duration{current_dest_time}});
+                return std::tuple<std::uint64_t, std::uint64_t>{
+                    std::get<0>(myResult).time_since_epoch().count(), std::get<1>(myResult).time_since_epoch().count()};
+            })
+        .def("get_estimated_dest_ticks_per_source_ticks", &ClockMapper::get_estimated_dest_ticks_per_source_ticks);
 }

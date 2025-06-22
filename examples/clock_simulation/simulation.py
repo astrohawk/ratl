@@ -7,10 +7,10 @@ from ClockDriftModel import ClockDriftModel
 
 print(sys.argv[1])
 sys.path.insert(0, sys.argv[1])
-from clock_simulation import ForwardDelayLockedLoop
+from clock_simulation import ClockMapper
 
 
-def simulate_batch_with_interrupt(dll, nominal_sample_rate):
+def simulate_batch_with_interrupt(clock_mapper, nominal_sample_rate):
     simulation_duration_s = 100
     samples_per_batch = 480
 
@@ -18,96 +18,93 @@ def simulate_batch_with_interrupt(dll, nominal_sample_rate):
     clock_drift_range_ppb = (-1000, 3000)
     clock_drift_jitter_ns = 100
 
-    interrupt_local_time_base_delay_ns = 1e7
-    interrupt_local_time_jitter_range_ns = (-1e5, 1e7)
+    interrupt_duration_base_ns = 1e7
+    interrupt_duration_jitter_range_ns = (-1e5, 1e7)
 
-    initial_sample_time = int(1e12)
-    initial_local_time = int(1e14)
+    initial_source_time_samples = int(1e12)
+    initial_dest_time_ns = int(1e14)
 
-    clock_drift_duration_ns = ((simulation_duration_s * 1e9) + interrupt_local_time_base_delay_ns +
-                               interrupt_local_time_jitter_range_ns[1]) * 1.2
+    clock_drift_duration_ns = ((simulation_duration_s * 1e9) + interrupt_duration_base_ns +
+                               interrupt_duration_jitter_range_ns[1]) * 1.2
     clock_drift_num_points = max(int(clock_drift_duration_ns / clock_drift_point_interval_ns), 2)
     clock_drift_model = ClockDriftModel(duration_ns=clock_drift_duration_ns, num_points=clock_drift_num_points,
                                         drift_range_ppb=clock_drift_range_ppb, jitter_ns=clock_drift_jitter_ns)
 
-    local_times_s = []
-    sample_times = []
-    projected_local_time_durations_per_sample = []
-    projected_local_time_errors = []
-    actual_sample_rates = []
-    estimated_sample_rates = []
+    source_time_s_history = []
+    actual_dest_ticks_per_source_ticks_history = []
+    estimated_dest_ticks_per_source_ticks_history = []
+    projected_dest_ticks_per_source_ticks_history = []
+    projected_dest_time_error_ns_history = []
 
     nominal_sample_period_ns = 1e9 / nominal_sample_rate
+    initial_source_time_ns = int(math.floor(initial_source_time_samples) * nominal_sample_period_ns)
     num_batches = int((simulation_duration_s * 1e9) / (samples_per_batch * nominal_sample_period_ns))
     for batch_num in range(num_batches):
-        interrupt_local_time_jitter_ns = np.random.triangular(interrupt_local_time_jitter_range_ns[0], 0,
-                                                              interrupt_local_time_jitter_range_ns[1])
-        interrupt_local_time_delay_ns = interrupt_local_time_base_delay_ns + interrupt_local_time_jitter_ns
+        interrupt_duration_jitter_ns = int(np.random.triangular(interrupt_duration_jitter_range_ns[0], 0,
+                                                                interrupt_duration_jitter_range_ns[1]))
+        interrupt_duration_ns = int(interrupt_duration_base_ns + interrupt_duration_jitter_ns)
 
-        batch_sample_time_begin = batch_num * samples_per_batch
-        batch_sample_time_end = batch_sample_time_begin + samples_per_batch
-        batch_sample_time_now = batch_sample_time_end + (interrupt_local_time_delay_ns / nominal_sample_period_ns)
+        batch_source_time_begin_samples = batch_num * samples_per_batch
+        batch_source_time_end_samples = batch_source_time_begin_samples + samples_per_batch
+        batch_source_time_now_samples = batch_source_time_end_samples + (
+                    interrupt_duration_ns / nominal_sample_period_ns)
 
-        batch_local_time_begin = clock_drift_model.to_other_clock(batch_sample_time_begin * nominal_sample_period_ns)
-        batch_local_time_end = clock_drift_model.to_other_clock(batch_sample_time_end * nominal_sample_period_ns)
-        batch_local_time_now = clock_drift_model.to_other_clock(batch_sample_time_now * nominal_sample_period_ns)
+        batch_source_time_begin_ns = int(math.floor(batch_source_time_begin_samples) * nominal_sample_period_ns)
+        batch_source_time_end_ns = int(math.floor(batch_source_time_end_samples) * nominal_sample_period_ns)
+        batch_source_time_now_ns = int(math.floor(batch_source_time_now_samples) * nominal_sample_period_ns)
 
-        sample_time_begin = int(initial_sample_time + batch_sample_time_begin)
-        sample_time_end = int(initial_sample_time + batch_sample_time_end)
-        sample_time_now = int(initial_sample_time + batch_sample_time_now)
+        batch_dest_time_begin_ns = int(
+            clock_drift_model.to_other_clock(batch_source_time_begin_samples * nominal_sample_period_ns))
+        batch_dest_time_end_ns = int(
+            clock_drift_model.to_other_clock(batch_source_time_end_samples * nominal_sample_period_ns))
+        batch_dest_time_now_ns = int(
+            clock_drift_model.to_other_clock(batch_source_time_now_samples * nominal_sample_period_ns))
 
-        local_time_begin = int(initial_local_time + batch_local_time_begin)
-        local_time_end = int(initial_local_time + batch_local_time_end)
-        local_time_now = int(initial_local_time + batch_local_time_now)
+        source_time_begin_ns = int(initial_source_time_ns + batch_source_time_begin_ns)
+        source_time_end_ns = int(initial_source_time_ns + batch_source_time_end_ns)
+        source_time_now_ns = int(initial_source_time_ns + batch_source_time_now_ns)
 
-        projected_local_time_begin, projected_local_time_end, estimated_sample_rate = dll.get_projected_time(
-            local_time_now, sample_time_now, sample_time_begin, sample_time_end
+        dest_time_begin_ns = int(initial_dest_time_ns + batch_dest_time_begin_ns)
+        dest_time_end_ns = int(initial_dest_time_ns + batch_dest_time_end_ns)
+        dest_time_now_ns = int(initial_dest_time_ns + batch_dest_time_now_ns)
+
+        projected_dest_time_begin_ns, projected_dest_time_end_ns = clock_mapper.get_projected_time(
+            source_time_begin_ns, source_time_end_ns, source_time_now_ns, dest_time_now_ns
         )
 
-        local_time_s = local_time_begin / 1e9
-        sample_time = sample_time_begin
-        projected_local_time_duration_per_sample = ((projected_local_time_end - projected_local_time_begin) / (
-                sample_time_end - sample_time_begin)) / nominal_sample_period_ns
-        projected_local_time_error = (local_time_end - projected_local_time_end) / nominal_sample_period_ns
-        actual_sample_rate = 1e9 / (clock_drift_model.drift_multiplier(
-            local_time_begin - initial_local_time) * nominal_sample_period_ns)
+        source_time_s = batch_source_time_begin_ns / 1e9
+        actual_dest_ticks_per_source_ticks = clock_drift_model.drift_multiplier(
+            dest_time_begin_ns - initial_dest_time_ns)
+        estimated_dest_ticks_per_source_ticks = clock_mapper.get_estimated_dest_ticks_per_source_ticks()
+        projected_dest_ticks_per_source_ticks = ((projected_dest_time_end_ns - projected_dest_time_begin_ns) / (
+                source_time_end_ns - source_time_begin_ns))
+        projected_dest_time_error_ns = projected_dest_time_end_ns - dest_time_end_ns
 
-        local_times_s.append(local_time_s)
-        sample_times.append(sample_time)
-        projected_local_time_durations_per_sample.append(projected_local_time_duration_per_sample)
-        projected_local_time_errors.append(projected_local_time_error)
-        actual_sample_rates.append(actual_sample_rate)
-        estimated_sample_rates.append(estimated_sample_rate)
-
-    abs_max_projected_local_time_error = max([math.ceil(abs(x) * 1.1) for x in projected_local_time_errors] + [1])
+        source_time_s_history.append(source_time_s)
+        actual_dest_ticks_per_source_ticks_history.append(actual_dest_ticks_per_source_ticks)
+        estimated_dest_ticks_per_source_ticks_history.append(estimated_dest_ticks_per_source_ticks)
+        projected_dest_ticks_per_source_ticks_history.append(projected_dest_ticks_per_source_ticks)
+        projected_dest_time_error_ns_history.append(projected_dest_time_error_ns)
 
     # Plot results
-    plt.figure(figsize=(18, 5))
+    plt.figure(figsize=(12, 5))
 
-    ax = plt.subplot(1, 3, 1)
-    plt.title("Projected Local Time Duration")
-    plt.plot(local_times_s, projected_local_time_durations_per_sample)
+    ax = plt.subplot(1, 2, 1)
+    plt.title("Dest Ns per Source Ns")
+    plt.plot(source_time_s_history, actual_dest_ticks_per_source_ticks_history, label="Actual", zorder=1)
+    plt.plot(source_time_s_history, estimated_dest_ticks_per_source_ticks_history, label="Estimated", zorder=2)
+    plt.plot(source_time_s_history, projected_dest_ticks_per_source_ticks_history, label="Projected", zorder=0)
     plt.xlabel("Time (s)")
-    plt.ylabel("Samples Per Nominal Sample")
-    plt.ylim(bottom=0.999, top=1.001)
-    ax.ticklabel_format(style='plain', useOffset=False, axis='y')
-
-    ax = plt.subplot(1, 3, 2)
-    plt.title("Projected Local Time Error")
-    plt.plot(local_times_s, projected_local_time_errors)
-    plt.xlabel("Time (s)")
-    plt.ylabel("Sample Error Per Nominal Sample")
-    plt.ylim(bottom=-abs_max_projected_local_time_error, top=abs_max_projected_local_time_error)
-    ax.ticklabel_format(style='plain', useOffset=False, axis='y')
-
-    ax = plt.subplot(1, 3, 3)
-    plt.title("Actual vs Estimated Sample Rates")
-    plt.plot(local_times_s, actual_sample_rates, label="Actual")
-    plt.plot(local_times_s, estimated_sample_rates, label="Estimated")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Sample Rate (Hz)")
+    plt.ylabel("Dest Ns per Source Ns")
     ax.ticklabel_format(style='plain', useOffset=False, axis='y')
     plt.legend()
+
+    ax = plt.subplot(1, 2, 2)
+    plt.title("Projection Error")
+    plt.plot(source_time_s_history, projected_dest_time_error_ns_history)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Error (ns)")
+    ax.ticklabel_format(style='plain', useOffset=False, axis='y')
 
     plt.tight_layout()
     plt.show()
@@ -115,4 +112,4 @@ def simulate_batch_with_interrupt(dll, nominal_sample_rate):
 
 if __name__ == "__main__":
     nominal_sample_rate = 48000
-    simulate_batch_with_interrupt(ForwardDelayLockedLoop(nominal_sample_rate), nominal_sample_rate)
+    simulate_batch_with_interrupt(ClockMapper(), nominal_sample_rate)

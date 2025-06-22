@@ -48,6 +48,7 @@ add_subdirectory(third_party)
 
 set(RATL_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 set(RATL_HEADERS
+        ${RATL_INCLUDE_DIR}/ratl/chrono/clock_mapper.hpp
         ${RATL_INCLUDE_DIR}/ratl/chrono/duration_cast.hpp
         ${RATL_INCLUDE_DIR}/ratl/chrono/forward_delay_locked_loop.hpp
         ${RATL_INCLUDE_DIR}/ratl/chrono/reverse_delay_locked_loop.hpp

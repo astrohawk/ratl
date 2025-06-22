@@ -28,10 +28,10 @@ class ClockDriftModel:
         self.drift_spline = CubicSpline(self.base_times, self.drift_multipliers, bc_type='natural')
 
         # Build integral
-        self._build_integrated_curve()
+        self._build_integrated_curve(num_points)
 
-    def _build_integrated_curve(self, num_samples=10000):
-        self.sampled_base_times = np.linspace(self.t0_ns, self.t1_ns, num_samples)
+    def _build_integrated_curve(self, num_points, num_samples_per_point=1000):
+        self.sampled_base_times = np.linspace(self.t0_ns, self.t1_ns, ((num_points - 1) * num_samples_per_point) + 1)
         drift_values = self.drift_spline(self.sampled_base_times)
         delta_t = np.diff(self.sampled_base_times)
         integrand = (drift_values[:-1] + drift_values[1:]) / 2 * delta_t
