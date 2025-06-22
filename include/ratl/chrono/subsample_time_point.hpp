@@ -39,7 +39,7 @@ public:
     {
     }
 
-    inline subsample_time_point(const sample_time_point<Clock>& sample_time_point) :
+    inline explicit subsample_time_point(const sample_time_point<Clock>& sample_time_point) :
         duration_(sample_time_point.time_since_epoch())
     {
     }
@@ -136,19 +136,19 @@ inline subsample_duration operator-(const sample_time_point<Clock>& a, const sub
 template<typename Clock>
 inline subsample_time_point<Clock> operator-(const subsample_time_point<Clock>& a, const subsample_duration& b)
 {
-    return subsample_time_point(a.time_since_epoch() - b);
+    return subsample_time_point<Clock>(a.time_since_epoch() - b);
 }
 
 template<typename Clock>
 inline subsample_time_point<Clock> operator-(const subsample_time_point<Clock>& a, const sample_duration& b)
 {
-    return subsample_time_point(a.time_since_epoch() - b);
+    return subsample_time_point<Clock>(a.time_since_epoch() - b);
 }
 
 template<typename Clock>
 inline subsample_time_point<Clock> operator-(const sample_time_point<Clock>& a, const subsample_duration& b)
 {
-    return subsample_time_point(a.time_since_epoch() - b);
+    return subsample_time_point<Clock>(a.time_since_epoch() - b);
 }
 
 template<typename Clock>
