@@ -43,7 +43,7 @@ struct time_point_cast_impl<subsample_duration, Clock>
 template<typename Rep, typename Period, typename Clock>
 struct time_point_cast_impl<std::chrono::duration<Rep, Period>, Clock>
 {
-    using type = std::chrono::time_point<std::chrono::duration<Rep, Period>, Clock>;
+    using type = std::chrono::time_point<Clock, std::chrono::duration<Rep, Period>>;
 };
 
 template<typename ToDuration, typename Clock>
@@ -51,14 +51,14 @@ using time_point_cast_impl_t = typename detail::time_point_cast_impl<ToDuration,
 } // namespace detail
 
 template<typename ToDuration, typename Clock>
-inline ToDuration time_point_cast(const sample_time_point<Clock>& time_point)
+inline detail::time_point_cast_impl_t<ToDuration, Clock> time_point_cast(const sample_time_point<Clock>& time_point)
 {
     using ToTimePoint = detail::time_point_cast_impl_t<ToDuration, Clock>;
     return ToTimePoint(duration_cast<ToDuration>(time_point.time_since_epoch()));
 }
 
 template<typename ToDuration, typename Clock>
-inline ToDuration time_point_cast(const subsample_time_point<Clock>& time_point)
+inline detail::time_point_cast_impl_t<ToDuration, Clock> time_point_cast(const subsample_time_point<Clock>& time_point)
 {
     using ToTimePoint = detail::time_point_cast_impl_t<ToDuration, Clock>;
     return ToTimePoint(duration_cast<ToDuration>(time_point.time_since_epoch()));
