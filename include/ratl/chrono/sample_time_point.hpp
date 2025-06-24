@@ -30,6 +30,10 @@ public:
 
     inline sample_time_point() = default;
 
+    inline sample_time_point(const sample_time_point&) = default;
+
+    inline sample_time_point& operator=(const sample_time_point&) = default;
+
     inline explicit sample_time_point(const duration& duration) : duration_{duration} {}
 
     inline duration time_since_epoch() const noexcept

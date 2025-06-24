@@ -35,6 +35,10 @@ public:
     {
     }
 
+    inline subsample_duration(const subsample_duration&) = default;
+
+    inline subsample_duration& operator=(const subsample_duration&) = default;
+
     inline subsample_duration(double duration, std::size_t sample_rate) :
         sample_count_(static_cast<samples_rep>(duration)),
         sample_fraction_(

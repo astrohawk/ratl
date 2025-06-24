@@ -27,6 +27,10 @@ public:
 
     inline sample_duration() = default;
 
+    inline sample_duration(const sample_duration&) = default;
+
+    inline sample_duration& operator=(const sample_duration&) = default;
+
     inline sample_duration(samples_rep sample_count, std::size_t sample_rate) :
         sample_count_(sample_count), sample_rate_(sample_rate)
     {

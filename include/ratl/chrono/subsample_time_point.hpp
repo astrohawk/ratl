@@ -31,6 +31,10 @@ public:
 
     inline subsample_time_point() = default;
 
+    inline subsample_time_point(const subsample_time_point&) = default;
+
+    inline subsample_time_point& operator=(const subsample_time_point&) = default;
+
     inline explicit subsample_time_point(const duration& duration) : duration_{duration} {}
 
     template<typename Duration>
@@ -42,6 +46,12 @@ public:
     inline explicit subsample_time_point(const sample_time_point<Clock>& sample_time_point) :
         duration_(sample_time_point.time_since_epoch())
     {
+    }
+
+    inline subsample_time_point& operator=(const sample_time_point<Clock>& sample_time_point)
+    {
+        duration_ = sample_time_point.time_since_epoch();
+        return *this;
     }
 
     inline duration time_since_epoch() const noexcept
