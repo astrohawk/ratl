@@ -62,6 +62,34 @@ public:
         return *this;
     }
 
+    inline sample_duration& operator*=(samples_rep b)
+    {
+        sample_count_ *= b;
+        return *this;
+    }
+
+    inline sample_duration& operator/=(samples_rep b)
+    {
+        sample_count_ /= b;
+        return *this;
+    }
+
+    inline sample_duration& operator%=(samples_rep b)
+    {
+        sample_count_ %= b;
+        return *this;
+    }
+
+    inline sample_duration& operator%=(const sample_duration& b)
+    {
+        if (sample_rate_ != b.sample_rate_)
+        {
+            throw std::invalid_argument("sample rates are different");
+        }
+        sample_count_ %= b.sample_count_;
+        return *this;
+    }
+
 private:
     samples_rep sample_count_{};
     std::size_t sample_rate_{};
@@ -139,6 +167,52 @@ inline sample_duration operator-(const sample_duration& a, const sample_duration
     auto tmp = a;
     tmp -= b;
     return tmp;
+}
+
+inline sample_duration operator*(const sample_duration& a, sample_duration::samples_rep b)
+{
+    auto tmp = a;
+    tmp *= b;
+    return tmp;
+}
+
+inline sample_duration operator*(sample_duration::samples_rep a, const sample_duration& b)
+{
+    auto tmp = b;
+    tmp *= a;
+    return tmp;
+}
+
+inline sample_duration operator/(const sample_duration& a, sample_duration::samples_rep b)
+{
+    auto tmp = a;
+    tmp /= b;
+    return tmp;
+}
+
+inline sample_duration::samples_rep operator/(const sample_duration& a, const sample_duration& b)
+{
+    if (a.sample_rate() != b.sample_rate())
+    {
+        throw std::invalid_argument("sample rates are different");
+    }
+    return a.sample_count() / b.sample_count();
+}
+
+inline sample_duration operator%(const sample_duration& a, sample_duration::samples_rep b)
+{
+    auto tmp = a;
+    tmp %= b;
+    return tmp;
+}
+
+inline sample_duration::samples_rep operator%(const sample_duration& a, const sample_duration& b)
+{
+    if (a.sample_rate() != b.sample_rate())
+    {
+        throw std::invalid_argument("sample rates are different");
+    }
+    return a.sample_count() % b.sample_count();
 }
 
 inline bool operator==(const sample_duration& a, const sample_duration& b)

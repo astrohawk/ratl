@@ -14,6 +14,7 @@
 
 // other includes
 #include <chrono>
+#include <climits>
 #include <cmath>
 #include <stdexcept>
 
@@ -38,8 +39,7 @@ public:
         sample_count_(static_cast<samples_rep>(duration)),
         sample_fraction_(
             static_cast<sample_fraction_rep>(std::round(
-                (duration - static_cast<double>(sample_count_)) *
-                static_cast<double>(std::numeric_limits<sample_fraction_rep>::max())))),
+                (duration - static_cast<double>(sample_count_)) * static_cast<double>(sample_fraction_unity)))),
         sample_rate_(sample_rate)
     {
     }
@@ -62,8 +62,7 @@ public:
     inline double subsample_count() const noexcept
     {
         return static_cast<double>(sample_count_) +
-               (static_cast<double>(sample_fraction_) /
-                static_cast<double>(std::numeric_limits<sample_fraction_rep>::max()));
+               (static_cast<double>(sample_fraction_) / static_cast<double>(sample_fraction_unity));
     }
 
     inline std::size_t sample_rate() const noexcept
@@ -73,10 +72,6 @@ public:
 
     subsample_duration& operator+=(const subsample_duration& other)
     {
-        using temp_sample_fraction_rep = std::uint64_t;
-        static constexpr auto max_temp_sample_fraction =
-            static_cast<temp_sample_fraction_rep>(std::numeric_limits<sample_fraction_rep>::max());
-
         if (sample_rate_ != other.sample_rate_)
         {
             throw std::invalid_argument("sample rates are different");
@@ -84,10 +79,10 @@ public:
         sample_count_ += other.sample_count_;
         auto temp_sample_fraction = static_cast<temp_sample_fraction_rep>(sample_fraction_);
         temp_sample_fraction += static_cast<temp_sample_fraction_rep>(other.sample_fraction_);
-        if (temp_sample_fraction > max_temp_sample_fraction)
+        if (temp_sample_fraction > sample_fraction_unity)
         {
             sample_count_ += 1;
-            temp_sample_fraction -= max_temp_sample_fraction;
+            temp_sample_fraction -= sample_fraction_unity;
         }
         sample_fraction_ = static_cast<sample_fraction_rep>(temp_sample_fraction);
         return *this;
@@ -95,10 +90,6 @@ public:
 
     subsample_duration& operator-=(const subsample_duration& other)
     {
-        using temp_sample_fraction_rep = std::int64_t;
-        static constexpr auto max_temp_sample_fraction =
-            static_cast<temp_sample_fraction_rep>(std::numeric_limits<sample_fraction_rep>::max());
-
         if (sample_rate_ != other.sample_rate_)
         {
             throw std::invalid_argument("sample rates are different");
@@ -109,13 +100,56 @@ public:
         if (temp_sample_fraction < 0)
         {
             sample_count_ -= 1;
-            temp_sample_fraction += max_temp_sample_fraction;
+            temp_sample_fraction += sample_fraction_unity;
         }
         sample_fraction_ = static_cast<sample_fraction_rep>(temp_sample_fraction);
         return *this;
     }
 
+    inline subsample_duration& operator*=(samples_rep b)
+    {
+        sample_count_ *= b;
+        auto temp_sample_fraction = static_cast<temp_sample_fraction_rep>(sample_fraction_) * b;
+        if (temp_sample_fraction > sample_fraction_unity)
+        {
+            sample_count_ += temp_sample_fraction / sample_fraction_unity;
+            temp_sample_fraction = temp_sample_fraction % sample_fraction_unity;
+        }
+        sample_fraction_ = static_cast<sample_fraction_rep>(temp_sample_fraction);
+        return *this;
+    }
+
+    inline subsample_duration& operator*=(double b)
+    {
+        *this = subsample_duration(subsample_count() * b, sample_rate_);
+        return *this;
+    }
+
+    inline subsample_duration& operator/=(samples_rep b)
+    {
+        auto temp_sample_count = sample_count_ / b;
+        auto temp_sample_count_remainder = sample_count_ % b;
+        auto temp_sample_fraction = static_cast<temp_sample_fraction_rep>(sample_fraction_);
+        if (temp_sample_count_remainder > 0)
+        {
+            temp_sample_fraction += sample_fraction_unity * temp_sample_count_remainder;
+        }
+        sample_count_ = temp_sample_count;
+        sample_fraction_ = static_cast<sample_fraction_rep>(temp_sample_fraction / b);
+        return *this;
+    }
+
+    inline subsample_duration& operator/=(double b)
+    {
+        *this = subsample_duration(subsample_count() / b, sample_rate_);
+        return *this;
+    }
+
 private:
+    using temp_sample_fraction_rep = std::int64_t;
+    static constexpr auto sample_fraction_unity = static_cast<temp_sample_fraction_rep>(1)
+                                                  << (sizeof(sample_fraction_rep) * CHAR_BIT);
+
     samples_rep sample_count_{};
     sample_fraction_rep sample_fraction_{};
     std::size_t sample_rate_{};
@@ -209,6 +243,57 @@ inline subsample_duration operator-(const subsample_duration& a, const subsample
     auto tmp = a;
     tmp -= b;
     return tmp;
+}
+
+inline subsample_duration operator*(const subsample_duration& a, sample_duration::samples_rep b)
+{
+    auto tmp = a;
+    tmp *= b;
+    return tmp;
+}
+
+inline subsample_duration operator*(const subsample_duration& a, double b)
+{
+    auto tmp = a;
+    tmp *= b;
+    return tmp;
+}
+
+inline subsample_duration operator*(sample_duration::samples_rep a, const subsample_duration& b)
+{
+    auto tmp = b;
+    tmp *= a;
+    return tmp;
+}
+
+inline subsample_duration operator*(double a, const subsample_duration& b)
+{
+    auto tmp = b;
+    tmp *= a;
+    return tmp;
+}
+
+inline subsample_duration operator/(const subsample_duration& a, sample_duration::samples_rep b)
+{
+    auto tmp = a;
+    tmp /= b;
+    return tmp;
+}
+
+inline subsample_duration operator/(const subsample_duration& a, double b)
+{
+    auto tmp = a;
+    tmp /= b;
+    return tmp;
+}
+
+inline double operator/(const subsample_duration& a, const subsample_duration& b)
+{
+    if (a.sample_rate() != b.sample_rate())
+    {
+        throw std::invalid_argument("sample rates are different");
+    }
+    return a.subsample_count() / b.subsample_count();
 }
 
 inline bool operator==(const subsample_duration& a, const subsample_duration& b)
