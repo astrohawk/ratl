@@ -29,18 +29,18 @@ public:
 
     inline subsample_duration() = default;
 
-    inline subsample_duration(double duration, std::size_t sample_rate) :
-        sample_count_(static_cast<samples_rep>(duration)),
-        sample_fraction_(static_cast<sample_fraction_rep>(std::round(
-            (duration - static_cast<double>(sample_count_)) *
-            static_cast<double>(std::numeric_limits<sample_fraction_rep>::max())))),
-        sample_rate_(sample_rate)
+    inline subsample_duration(samples_rep sample_count, sample_fraction_rep sample_fraction, std::size_t sample_rate) :
+        sample_count_{sample_count}, sample_fraction_{sample_fraction}, sample_rate_{sample_rate}
     {
     }
 
-    template<typename Rep, typename Period>
-    inline subsample_duration(const std::chrono::duration<Rep, Period>& duration, std::size_t sample_rate) :
-        subsample_duration(make_subsample_duration(duration, sample_rate))
+    inline subsample_duration(double duration, std::size_t sample_rate) :
+        sample_count_(static_cast<samples_rep>(duration)),
+        sample_fraction_(
+            static_cast<sample_fraction_rep>(std::round(
+                (duration - static_cast<double>(sample_count_)) *
+                static_cast<double>(std::numeric_limits<sample_fraction_rep>::max())))),
+        sample_rate_(sample_rate)
     {
     }
 
@@ -93,22 +93,22 @@ public:
         return *this;
     }
 
-    inline subsample_duration& operator+=(const sample_duration& other)
-    {
-        if (sample_rate_ != other.sample_rate())
-        {
-            throw std::invalid_argument("sample rates are different");
-        }
-        sample_count_ += other.sample_count();
-        return *this;
-    }
-
-    template<typename Rep, typename Period>
-    inline subsample_duration& operator+=(const std::chrono::duration<Rep, Period>& other)
-    {
-        *this += subsample_duration(other, sample_rate_);
-        return *this;
-    }
+//    inline subsample_duration& operator+=(const sample_duration& other)
+//    {
+//        if (sample_rate_ != other.sample_rate())
+//        {
+//            throw std::invalid_argument("sample rates are different");
+//        }
+//        sample_count_ += other.sample_count();
+//        return *this;
+//    }
+//
+//    template<typename Rep, typename Period>
+//    inline subsample_duration& operator+=(const std::chrono::duration<Rep, Period>& other)
+//    {
+//        *this += subsample_duration(other, sample_rate_);
+//        return *this;
+//    }
 
     subsample_duration& operator-=(const subsample_duration& other)
     {
@@ -132,78 +132,141 @@ public:
         return *this;
     }
 
-    inline subsample_duration& operator-=(const sample_duration& other)
-    {
-        if (sample_rate_ != other.sample_rate())
-        {
-            throw std::invalid_argument("sample rates are different");
-        }
-        sample_count_ -= other.sample_count();
-        return *this;
-    }
-
-    template<typename Rep, typename Period>
-    inline subsample_duration& operator-=(const std::chrono::duration<Rep, Period>& other)
-    {
-        *this -= subsample_duration(other, sample_rate_);
-        return *this;
-    }
+//    inline subsample_duration& operator-=(const sample_duration& other)
+//    {
+//        if (sample_rate_ != other.sample_rate())
+//        {
+//            throw std::invalid_argument("sample rates are different");
+//        }
+//        sample_count_ -= other.sample_count();
+//        return *this;
+//    }
+//
+//    template<typename Rep, typename Period>
+//    inline subsample_duration& operator-=(const std::chrono::duration<Rep, Period>& other)
+//    {
+//        *this -= subsample_duration(other, sample_rate_);
+//        return *this;
+//    }
 
 private:
-    inline subsample_duration(samples_rep sample_count, sample_fraction_rep sample_fraction, std::size_t sample_rate) :
-        sample_count_{sample_count}, sample_fraction_{sample_fraction}, sample_rate_{sample_rate}
-    {
-    }
-
-    template<typename Rep, typename Period>
-    static subsample_duration make_subsample_duration(
-        const std::chrono::duration<Rep, Period>& duration, std::size_t sample_rate)
-    {
-        static_assert(
-            (Period::num & std::numeric_limits<std::uint32_t>::max()) == Period::num,
-            "overflow risk as duration period ratio numerator is too large");
-        static_assert(
-            (Period::den & std::numeric_limits<std::uint32_t>::max()) == Period::den,
-            "overflow risk as duration period ratio denominator is too large");
-
-        using unscaled_sample_fraction_rep = std::uint64_t;
-
-        static constexpr auto sample_scaler_num = static_cast<samples_rep>(Period::num);
-        static constexpr auto sample_scaler_den = static_cast<samples_rep>(Period::den);
-
-        static constexpr auto unscaled_sample_fraction_num = static_cast<unscaled_sample_fraction_rep>(Period::num);
-        static constexpr auto unscaled_sample_fraction_den = static_cast<unscaled_sample_fraction_rep>(Period::den);
-        static constexpr auto unscaled_sample_fraction_max = static_cast<unscaled_sample_fraction_rep>(
-            std::numeric_limits<subsample_duration::sample_fraction_rep>::max());
-
-        auto duration_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
-        auto duration_subseconds_remainder =
-            duration - std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(duration_seconds);
-        auto sample_count_seconds =
-            static_cast<samples_rep>(duration_seconds.count()) * static_cast<samples_rep>(sample_rate);
-        auto sample_count_subseconds_remainder_unscaled =
-            static_cast<unscaled_sample_fraction_rep>(duration_subseconds_remainder.count()) *
-            static_cast<unscaled_sample_fraction_rep>(sample_rate);
-        auto sample_count_subseconds_remainder =
-            (static_cast<samples_rep>(sample_count_subseconds_remainder_unscaled) * sample_scaler_num) /
-            sample_scaler_den;
-        auto sample_count = sample_count_seconds + sample_count_subseconds_remainder;
-
-        auto sample_fraction_unscaled =
-            sample_count_subseconds_remainder_unscaled -
-            static_cast<unscaled_sample_fraction_rep>(
-                (sample_count_subseconds_remainder * sample_scaler_den) / sample_scaler_num);
-        auto sample_fraction = static_cast<sample_fraction_rep>(
-            ((sample_fraction_unscaled * unscaled_sample_fraction_max) / unscaled_sample_fraction_den) *
-            unscaled_sample_fraction_num);
-
-        return {sample_count, sample_fraction, sample_rate};
-    }
-
     samples_rep sample_count_{};
     sample_fraction_rep sample_fraction_{};
     std::size_t sample_rate_{};
 };
+
+namespace detail
+{
+inline sample_duration convert_to_sample_duration(const subsample_duration& subsample_duration)
+{
+    return sample_duration{subsample_duration.sample_count(), subsample_duration.sample_rate()};
+}
+
+template<typename Rep, typename Period>
+inline subsample_duration convert_to_subsample_duration(
+    const std::chrono::duration<Rep, Period>& duration, std::size_t sample_rate)
+{
+    static_assert(
+        (Period::num & std::numeric_limits<std::uint32_t>::max()) == Period::num,
+        "overflow risk as duration period ratio numerator is too large");
+    static_assert(
+        (Period::den & std::numeric_limits<std::uint32_t>::max()) == Period::den,
+        "overflow risk as duration period ratio denominator is too large");
+
+    using unscaled_sample_fraction_rep = std::uint64_t;
+
+    static constexpr auto sample_scaler_num = static_cast<subsample_duration::samples_rep>(Period::num);
+    static constexpr auto sample_scaler_den = static_cast<subsample_duration::samples_rep>(Period::den);
+
+    static constexpr auto unscaled_sample_fraction_num = static_cast<unscaled_sample_fraction_rep>(Period::num);
+    static constexpr auto unscaled_sample_fraction_den = static_cast<unscaled_sample_fraction_rep>(Period::den);
+    static constexpr auto unscaled_sample_fraction_max =
+        static_cast<unscaled_sample_fraction_rep>(std::numeric_limits<subsample_duration::sample_fraction_rep>::max());
+
+    auto duration_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+    auto duration_subseconds_remainder =
+        duration - std::chrono::duration_cast<std::chrono::duration<Rep, Period>>(duration_seconds);
+    auto sample_count_seconds = static_cast<subsample_duration::samples_rep>(duration_seconds.count()) *
+                                static_cast<subsample_duration::samples_rep>(sample_rate);
+    auto sample_count_subseconds_remainder_unscaled =
+        static_cast<unscaled_sample_fraction_rep>(duration_subseconds_remainder.count()) *
+        static_cast<unscaled_sample_fraction_rep>(sample_rate);
+    auto sample_count_subseconds_remainder =
+        (static_cast<subsample_duration::samples_rep>(sample_count_subseconds_remainder_unscaled) * sample_scaler_num) /
+        sample_scaler_den;
+    auto sample_count = sample_count_seconds + sample_count_subseconds_remainder;
+
+    auto sample_fraction_unscaled = sample_count_subseconds_remainder_unscaled -
+                                    static_cast<unscaled_sample_fraction_rep>(
+                                        (sample_count_subseconds_remainder * sample_scaler_den) / sample_scaler_num);
+    auto sample_fraction = static_cast<subsample_duration::sample_fraction_rep>(
+        ((sample_fraction_unscaled * unscaled_sample_fraction_max) / unscaled_sample_fraction_den) *
+        unscaled_sample_fraction_num);
+
+    return subsample_duration{sample_count, sample_fraction, sample_rate};
+}
+
+inline subsample_duration convert_to_subsample_duration(const sample_duration& sample_duration)
+{
+    return sample_duration;
+}
+
+template<typename Rep, typename Period>
+inline std::chrono::duration<Rep, Period> convert_to_duration(const subsample_duration& subsample_duration)
+{
+    using unscaled_sample_fraction_rep = std::uint64_t;
+
+    static constexpr auto unscaled_sample_fraction_num = static_cast<unscaled_sample_fraction_rep>(Period::num);
+    static constexpr auto unscaled_sample_fraction_den = static_cast<unscaled_sample_fraction_rep>(Period::den);
+    static constexpr auto unscaled_sample_fraction_max =
+        static_cast<unscaled_sample_fraction_rep>(std::numeric_limits<subsample_duration::sample_fraction_rep>::max());
+
+    auto fractional_duration = std::chrono::duration<Rep, Period>(static_cast<Rep>(
+        ((static_cast<unscaled_sample_fraction_rep>(subsample_duration.sample_fraction()) *
+          unscaled_sample_fraction_den) /
+         (static_cast<unscaled_sample_fraction_rep>(subsample_duration.sample_rate()) * unscaled_sample_fraction_max)) /
+        unscaled_sample_fraction_num));
+
+    return convert_to_duration<Rep, Period>(convert_to_sample_duration(subsample_duration)) + fractional_duration;
+}
+} // namespace detail
+
+//template<typename Rep, typename Period>
+//inline std::chrono::duration<Rep, Period> operator+(
+//    const std::chrono::duration<Rep, Period>& a, const subsample_duration& b)
+//{
+//    return a + detail::convert_to_duration<Rep, Period>(b);
+//}
+//
+//template<typename Rep, typename Period>
+//inline subsample_duration operator+(const sample_duration& a, const std::chrono::duration<Rep, Period>& b)
+//{
+//    auto tmp = subsample_duration(a);
+//    tmp += b;
+//    return tmp;
+//}
+//
+//inline subsample_duration operator+(const sample_duration& a, const subsample_duration& b)
+//{
+//    auto tmp = b;
+//    tmp += a;
+//    return tmp;
+//}
+//
+//template<typename Rep, typename Period>
+//inline subsample_duration operator+(const subsample_duration& a, const std::chrono::duration<Rep, Period>& b)
+//{
+//    auto tmp = a;
+//    tmp += b;
+//    return tmp;
+//}
+//
+//inline subsample_duration operator+(const subsample_duration& a, const sample_duration& b)
+//{
+//    auto tmp = a;
+//    tmp += b;
+//    return tmp;
+//}
 
 inline subsample_duration operator+(const subsample_duration& a, const subsample_duration& b)
 {
@@ -212,101 +275,46 @@ inline subsample_duration operator+(const subsample_duration& a, const subsample
     return tmp;
 }
 
-inline subsample_duration operator+(const subsample_duration& a, const sample_duration& b)
-{
-    auto tmp = a;
-    tmp += b;
-    return tmp;
-}
-
-inline subsample_duration operator+(const sample_duration& a, const subsample_duration& b)
-{
-    auto tmp = b;
-    tmp += a;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator+(const subsample_duration& a, const std::chrono::duration<Rep, Period>& b)
-{
-    auto tmp = a;
-    tmp += b;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator+(const std::chrono::duration<Rep, Period>& a, const subsample_duration& b)
-{
-    auto tmp = b;
-    tmp += a;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator+(const sample_duration& a, const std::chrono::duration<Rep, Period>& b)
-{
-    auto tmp = subsample_duration(a);
-    tmp += b;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator+(const std::chrono::duration<Rep, Period>& a, const sample_duration& b)
-{
-    auto tmp = subsample_duration(b);
-    tmp += a;
-    return tmp;
-}
+//template<typename Rep, typename Period>
+//inline std::chrono::duration<Rep, Period> operator-(
+//    const std::chrono::duration<Rep, Period>& a, const subsample_duration& b)
+//{
+//    return a - detail::convert_to_duration<Rep, Period>(b);
+//}
+//
+//template<typename Rep, typename Period>
+//inline subsample_duration operator-(const sample_duration& a, const std::chrono::duration<Rep, Period>& b)
+//{
+//    auto tmp = subsample_duration(a);
+//    tmp -= b;
+//    return tmp;
+//}
+//
+//inline subsample_duration operator-(const sample_duration& a, const subsample_duration& b)
+//{
+//    auto tmp = subsample_duration(a);
+//    tmp -= b;
+//    return tmp;
+//}
+//
+//template<typename Rep, typename Period>
+//inline subsample_duration operator-(const subsample_duration& a, const std::chrono::duration<Rep, Period>& b)
+//{
+//    auto tmp = a;
+//    tmp -= b;
+//    return tmp;
+//}
+//
+//inline subsample_duration operator-(const subsample_duration& a, const sample_duration& b)
+//{
+//    auto tmp = a;
+//    tmp -= b;
+//    return tmp;
+//}
 
 inline subsample_duration operator-(const subsample_duration& a, const subsample_duration& b)
 {
     auto tmp = a;
-    tmp -= b;
-    return tmp;
-}
-
-inline subsample_duration operator-(const subsample_duration& a, const sample_duration& b)
-{
-    auto tmp = a;
-    tmp -= b;
-    return tmp;
-}
-
-inline subsample_duration operator-(const sample_duration& a, const subsample_duration& b)
-{
-    auto tmp = subsample_duration(a);
-    tmp -= b;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator-(const subsample_duration& a, const std::chrono::duration<Rep, Period>& b)
-{
-    auto tmp = a;
-    tmp -= b;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator-(const std::chrono::duration<Rep, Period>& a, const subsample_duration& b)
-{
-    auto tmp = subsample_duration(a);
-    tmp -= b;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator-(const sample_duration& a, const std::chrono::duration<Rep, Period>& b)
-{
-    auto tmp = subsample_duration(a);
-    tmp -= b;
-    return tmp;
-}
-
-template<typename Rep, typename Period>
-inline subsample_duration operator-(const std::chrono::duration<Rep, Period>& a, const sample_duration& b)
-{
-    auto tmp = subsample_duration(a);
     tmp -= b;
     return tmp;
 }
