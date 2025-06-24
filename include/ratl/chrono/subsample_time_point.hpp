@@ -55,33 +55,7 @@ public:
         return *this;
     }
 
-    inline subsample_time_point& operator+=(const sample_duration& other)
-    {
-        duration_ += other;
-        return *this;
-    }
-
-    template<typename Rep, typename Period>
-    inline subsample_time_point& operator+=(const std::chrono::duration<Rep, Period>& other)
-    {
-        duration_ += other;
-        return *this;
-    }
-
     inline subsample_time_point& operator-=(const duration& other)
-    {
-        duration_ -= other;
-        return *this;
-    }
-
-    inline subsample_time_point& operator-=(const sample_duration& other)
-    {
-        duration_ -= other;
-        return *this;
-    }
-
-    template<typename Rep, typename Period>
-    inline subsample_time_point& operator-=(const std::chrono::duration<Rep, Period>& other)
     {
         duration_ -= other;
         return *this;
@@ -122,72 +96,6 @@ inline std::chrono::time_point<Clock, Duration> convert_to_time_point(
 }
 } // namespace detail
 
-//template<typename Clock, typename Duration>
-//inline subsample_time_point<Clock> operator+(
-//    const sample_duration& a, const std::chrono::time_point<Clock, Duration>& b)
-//{
-//    return subsample_time_point<Clock>(a + b.time_since_epoch());
-//}
-//
-//template<typename Clock, typename Duration>
-//inline std::chrono::time_point<Clock, Duration> operator+(
-//    const std::chrono::time_point<Clock, Duration>& a, const subsample_duration& b)
-//{
-//    return std::chrono::time_point<Clock, Duration>(a.time_since_epoch() + b);
-//}
-//
-//template<typename Clock, typename Duration>
-//inline subsample_time_point<Clock> operator+(
-//    const subsample_duration& a, const std::chrono::time_point<Clock, Duration>& b)
-//{
-//    return subsample_time_point<Clock>(a + b.time_since_epoch());
-//}
-//
-//template<typename Clock, typename Rep, typename Period>
-//inline subsample_time_point<Clock> operator+(
-//    const sample_time_point<Clock>& a, const std::chrono::duration<Rep, Period>& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() + b);
-//}
-//
-//template<typename Clock>
-//inline subsample_time_point<Clock> operator+(const sample_time_point<Clock>& a, const subsample_duration& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() + b);
-//}
-//
-//template<typename Clock>
-//inline subsample_time_point<Clock> operator+(const subsample_duration& a, const sample_time_point<Clock>& b)
-//{
-//    return subsample_time_point<Clock>(a + b.time_since_epoch());
-//}
-//
-//template<typename Clock, typename Rep, typename Period>
-//inline subsample_time_point<Clock> operator+(
-//    const subsample_time_point<Clock>& a, const std::chrono::duration<Rep, Period>& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() + b);
-//}
-//
-//template<typename Clock, typename Rep, typename Period>
-//inline std::chrono::time_point<Clock, std::chrono::duration<Rep, Period>> operator+(
-//    const std::chrono::duration<Rep, Period>& a, const subsample_time_point<Clock>& b)
-//{
-//    return std::chrono::time_point<Clock, std::chrono::duration<Rep, Period>>(a + b.time_since_epoch());
-//}
-//
-//template<typename Clock>
-//inline subsample_time_point<Clock> operator+(const subsample_time_point<Clock>& a, const sample_duration& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() + b);
-//}
-//
-//template<typename Clock>
-//inline subsample_time_point<Clock> operator+(const sample_duration& a, const subsample_time_point<Clock>& b)
-//{
-//    return subsample_time_point<Clock>(a + b.time_since_epoch());
-//}
-
 template<typename Clock>
 inline subsample_time_point<Clock> operator+(const subsample_time_point<Clock>& a, const subsample_duration& b)
 {
@@ -199,66 +107,6 @@ inline subsample_time_point<Clock> operator+(const subsample_duration& a, const 
 {
     return subsample_time_point<Clock>(a + b.time_since_epoch());
 }
-
-//template<typename Clock, typename Duration>
-//inline std::chrono::time_point<Clock, Duration> operator-(const std::chrono::time_point<Clock, Duration>& a, const subsample_duration& b)
-//{
-//    return std::chrono::time_point<Clock, Duration>(a.time_since_epoch() - b);
-//}
-//
-//template<typename Clock, typename Duration>
-//inline Duration operator-(const std::chrono::time_point<Clock, Duration>& a, const subsample_time_point<Clock>& b)
-//{
-//    return a.time_since_epoch() - b.time_since_epoch();
-//}
-//
-//template<typename Clock, typename Rep, typename Period>
-//inline subsample_time_point<Clock> operator-(const sample_time_point<Clock>& a, const std::chrono::duration<Rep, Period>& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() - b);
-//}
-//
-//template<typename Clock, typename Rep, typename Period>
-//inline subsample_time_point<Clock> operator-(const sample_time_point<Clock>& a, const std::chrono::time_point<Clock, std::chrono::duration<Rep, Period>>& b)
-//{
-//    return a.time_since_epoch() - b.time_since_epoch();
-//}
-//
-//template<typename Clock>
-//inline subsample_time_point<Clock> operator-(const sample_time_point<Clock>& a, const subsample_duration& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() - b);
-//}
-//
-//template<typename Clock>
-//inline subsample_duration operator-(const sample_time_point<Clock>& a, const subsample_time_point<Clock>& b)
-//{
-//    return a.time_since_epoch() - b.time_since_epoch();
-//}
-//
-//template<typename Clock, typename Rep, typename Period>
-//inline subsample_time_point<Clock> operator-(const subsample_time_point<Clock>& a, const std::chrono::duration<Rep, Period>& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() - b);
-//}
-//
-//template<typename Clock, typename Rep, typename Period>
-//inline subsample_duration operator-(const subsample_time_point<Clock>& a, const std::chrono::time_point<Clock, std::chrono::duration<Rep, Period>>& b)
-//{
-//    return a.time_since_epoch() - b.time_since_epoch();
-//}
-//
-//template<typename Clock>
-//inline subsample_time_point<Clock> operator-(const subsample_time_point<Clock>& a, const sample_duration& b)
-//{
-//    return subsample_time_point<Clock>(a.time_since_epoch() - b);
-//}
-//
-//template<typename Clock>
-//inline subsample_duration operator-(const subsample_time_point<Clock>& a, const sample_time_point<Clock>& b)
-//{
-//    return a.time_since_epoch() - b.time_since_epoch();
-//}
 
 template<typename Clock>
 inline subsample_time_point<Clock> operator-(const subsample_time_point<Clock>& a, const subsample_duration& b)

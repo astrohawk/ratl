@@ -127,26 +127,12 @@ inline std::chrono::duration<Rep, Period> convert_to_duration(const sample_durat
 }
 } // namespace detail
 
-//template<typename Rep, typename Period>
-//inline std::chrono::duration<Rep, Period> operator+(
-//    const std::chrono::duration<Rep, Period>& a, const sample_duration& b)
-//{
-//    return a + detail::convert_to_duration<Rep, Period>(b);
-//}
-
 inline sample_duration operator+(const sample_duration& a, const sample_duration& b)
 {
     auto tmp = a;
     tmp += b;
     return tmp;
 }
-
-//template<typename Rep, typename Period>
-//inline std::chrono::duration<Rep, Period> operator-(
-//    const std::chrono::duration<Rep, Period>& a, const sample_duration& b)
-//{
-//    return a - detail::convert_to_duration<Rep, Period>(b);
-//}
 
 inline sample_duration operator-(const sample_duration& a, const sample_duration& b)
 {
