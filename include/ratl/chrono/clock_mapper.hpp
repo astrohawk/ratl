@@ -45,6 +45,7 @@ public:
         {
             throw std::invalid_argument{"end source time of the projection is before start source time"};
         }
+
         if (current_source_time == projection_start_source_time)
         {
             throw std::invalid_argument{"current source time cannot be equal to start source time of the projection"};
