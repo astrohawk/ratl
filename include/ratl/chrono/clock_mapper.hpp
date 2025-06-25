@@ -43,7 +43,11 @@ public:
     {
         if (projection_end_source_time < projection_start_source_time)
         {
-            throw std::invalid_argument{"projection end sample time is before projection start sample time"};
+            throw std::invalid_argument{"projection end source time is before projection start source time"};
+        }
+        if (current_source_time == projection_start_source_time)
+        {
+            throw std::invalid_argument{"current source time cannot be equal to projection start source time"};
         }
 
         if (projection_end_dest_time_ == dest_time_point{})
@@ -150,7 +154,7 @@ private:
         auto actual_dest_duration = static_cast<double>((current_dest_time - projection_end_dest_time_).count());
         auto dest_duration_error = actual_dest_duration - projected_dest_duration;
 
-        return dest_duration_error / clock_projection_source_duration;
+        return dest_duration_error / std::abs(clock_projection_source_duration);
     }
 
     source_time_point previous_projection_end_source_time_{};
