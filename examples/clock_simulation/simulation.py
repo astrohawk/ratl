@@ -1,4 +1,3 @@
-import math
 import sys
 
 import numpy as np
@@ -11,7 +10,7 @@ import ratl_chrono
 
 
 def simulate_batch_with_interrupt(clock_mapper, nominal_sample_rate):
-    simulation_duration_ns = ratl_chrono.NsDuration(int(100 * 1e9))
+    simulation_duration_ns = ratl_chrono.NsDuration(int(2 * 60 * 1e9))
     samples_per_batch = ratl_chrono.SampleDuration(480, nominal_sample_rate)
 
     clock_drift_point_interval_ns = ratl_chrono.NsDuration(int(1e9))
@@ -21,10 +20,12 @@ def simulate_batch_with_interrupt(clock_mapper, nominal_sample_rate):
     interrupt_duration_base_ns = ratl_chrono.NsDuration(int(1e7))
     interrupt_duration_jitter_range_ns = (ratl_chrono.NsDuration(int(-1e5)), ratl_chrono.NsDuration(int(1e7)))
 
-    initial_source_time_samples = ratl_chrono.SampleTimePoint(ratl_chrono.SampleDuration(int(1e12), nominal_sample_rate))
+    initial_source_time_samples = ratl_chrono.SampleTimePoint(
+        ratl_chrono.SampleDuration(int(1e12), nominal_sample_rate))
     initial_dest_time_ns = ratl_chrono.NsTimePoint(ratl_chrono.NsDuration(int(1e14)))
 
-    clock_drift_duration_ns = (simulation_duration_ns + interrupt_duration_base_ns + interrupt_duration_jitter_range_ns[1]) * 1.2
+    clock_drift_duration_ns = (simulation_duration_ns + interrupt_duration_base_ns + interrupt_duration_jitter_range_ns[
+        1]) * 1.2
     clock_drift_num_points = max(clock_drift_duration_ns / clock_drift_point_interval_ns, 2)
     clock_drift_model = ClockDriftModel(duration_ns=clock_drift_duration_ns.count(), num_points=clock_drift_num_points,
                                         drift_range_ppb=clock_drift_range_ppb, jitter_ns=clock_drift_jitter_ns.count())
