@@ -105,11 +105,6 @@ public:
     }
 
 private:
-    static constexpr double NominalDestTicksPerSourceTicks = (static_cast<double>(source_clock_duration::period::num) *
-                                                              static_cast<double>(dest_clock_duration::period::den)) /
-                                                             (static_cast<double>(source_clock_duration::period::den) *
-                                                              static_cast<double>(dest_clock_duration::period::num));
-
     class dll_filter_coefficients
     {
         class DummyTag
@@ -157,6 +152,11 @@ private:
 
         return dest_duration_error / std::abs(clock_projection_source_duration);
     }
+
+    static constexpr double NominalDestTicksPerSourceTicks = (static_cast<double>(source_clock_duration::period::num) *
+                                                              static_cast<double>(dest_clock_duration::period::den)) /
+                                                             (static_cast<double>(source_clock_duration::period::den) *
+                                                              static_cast<double>(dest_clock_duration::period::num));
 
     source_time_point previous_projection_end_source_time_{};
     dest_time_point projection_end_dest_time_{};
