@@ -4,12 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ClockDriftModel import ClockDriftModel
 
-print(sys.argv[1])
 sys.path.insert(0, sys.argv[1])
 import ratl_chrono
 
 
-def simulate_batch_with_interrupt(clock_mapper, nominal_sample_rate):
+def simulate_batch_with_interrupt(clock_mapper):
+    nominal_sample_rate = 48000
     simulation_duration_ns = ratl_chrono.NsDuration(int(2 * 60 * 1e9))
     samples_per_batch = ratl_chrono.SampleDuration(480, nominal_sample_rate)
 
@@ -17,8 +17,10 @@ def simulate_batch_with_interrupt(clock_mapper, nominal_sample_rate):
     clock_drift_range_ppb = (-1000, 3000)
     clock_drift_jitter_ns = ratl_chrono.NsDuration(100)
 
-    interrupt_duration_base_ns = ratl_chrono.NsDuration(int(1e7))
-    interrupt_duration_jitter_range_ns = (ratl_chrono.NsDuration(int(-1e5)), ratl_chrono.NsDuration(int(1e7)))
+    batch_source_time_start_offset_samples = ratl_chrono.SampleDuration(samples_per_batch.sample_count(),
+                                                                        nominal_sample_rate)
+    interrupt_duration_base_ns = ratl_chrono.NsDuration(int(1e5))
+    interrupt_duration_jitter_range_ns = (ratl_chrono.NsDuration(int(-1e3)), ratl_chrono.NsDuration(int(1e4)))
 
     initial_source_time_samples = ratl_chrono.SampleTimePoint(
         ratl_chrono.SampleDuration(int(1e12), nominal_sample_rate))
@@ -44,42 +46,49 @@ def simulate_batch_with_interrupt(clock_mapper, nominal_sample_rate):
                                      interrupt_duration_jitter_range_ns[1].count())))
         interrupt_duration_ns = interrupt_duration_base_ns + interrupt_duration_jitter_ns
 
-        batch_source_time_begin_samples = batch_num * samples_per_batch
+        batch_source_time_now_samples = batch_num * samples_per_batch
+        batch_source_time_begin_samples = batch_source_time_now_samples + batch_source_time_start_offset_samples
         batch_source_time_end_samples = batch_source_time_begin_samples + samples_per_batch
-        batch_source_time_now_subsamples = batch_source_time_end_samples + ratl_chrono.SubsampleDuration.from_duration(
+        batch_source_time_interrupt_subsamples = batch_source_time_now_samples + ratl_chrono.SubsampleDuration.from_duration(
             interrupt_duration_ns, nominal_sample_rate)
 
+        batch_source_time_now_ns = ratl_chrono.NsDuration.from_sample_duration(batch_source_time_now_samples)
         batch_source_time_begin_ns = ratl_chrono.NsDuration.from_sample_duration(batch_source_time_begin_samples)
         batch_source_time_end_ns = ratl_chrono.NsDuration.from_sample_duration(batch_source_time_end_samples)
-        batch_source_time_now_ns = ratl_chrono.NsDuration.from_sample_duration(
-            ratl_chrono.SampleDuration.from_subsample_duration(batch_source_time_now_subsamples))
+        batch_source_time_interrupt_ns = ratl_chrono.NsDuration.from_sample_duration(
+            ratl_chrono.SampleDuration.from_subsample_duration(batch_source_time_interrupt_subsamples))
 
+        batch_dest_time_now_ns = ratl_chrono.NsDuration(int(
+            clock_drift_model.to_other_clock(
+                ratl_chrono.NsDuration.from_sample_duration(batch_source_time_now_samples).count())))
         batch_dest_time_begin_ns = ratl_chrono.NsDuration(int(
             clock_drift_model.to_other_clock(
                 ratl_chrono.NsDuration.from_sample_duration(batch_source_time_begin_samples).count())))
         batch_dest_time_end_ns = ratl_chrono.NsDuration(int(
             clock_drift_model.to_other_clock(
                 ratl_chrono.NsDuration.from_sample_duration(batch_source_time_end_samples).count())))
-        batch_dest_time_now_ns = ratl_chrono.NsDuration(int(
+        batch_dest_time_interrupt_ns = ratl_chrono.NsDuration(int(
             clock_drift_model.to_other_clock(
-                ratl_chrono.NsDuration.from_subsample_duration(batch_source_time_now_subsamples).count())))
+                ratl_chrono.NsDuration.from_subsample_duration(batch_source_time_interrupt_subsamples).count())))
 
+        source_time_now_ns = initial_source_time_ns + batch_source_time_now_ns
         source_time_begin_ns = initial_source_time_ns + batch_source_time_begin_ns
         source_time_end_ns = initial_source_time_ns + batch_source_time_end_ns
-        source_time_now_ns = initial_source_time_ns + batch_source_time_now_ns
+        source_time_interrupt_ns = initial_source_time_ns + batch_source_time_interrupt_ns
 
+        dest_time_now_ns = initial_dest_time_ns + batch_dest_time_now_ns
         dest_time_begin_ns = initial_dest_time_ns + batch_dest_time_begin_ns
         dest_time_end_ns = initial_dest_time_ns + batch_dest_time_end_ns
-        dest_time_now_ns = initial_dest_time_ns + batch_dest_time_now_ns
+        dest_time_interrupt_ns = initial_dest_time_ns + batch_dest_time_interrupt_ns
 
-        projected_dest_time_begin_ns, projected_dest_time_end_ns = clock_mapper.get_projected_time(
-            source_time_begin_ns, source_time_end_ns, source_time_now_ns, dest_time_now_ns
+        projected_dest_time_begin_ns, projected_dest_time_end_ns = clock_mapper.projected_time(
+            source_time_begin_ns, source_time_end_ns, source_time_interrupt_ns, dest_time_interrupt_ns
         )
 
-        source_time_s = batch_source_time_begin_ns.count() / 1e9
+        source_time_s = batch_source_time_now_ns.count() / 1e9
         actual_dest_ticks_per_source_ticks = clock_drift_model.drift_multiplier(
             (dest_time_begin_ns - initial_dest_time_ns).count())
-        estimated_dest_ticks_per_source_ticks = clock_mapper.get_estimated_dest_ticks_per_source_ticks()
+        estimated_dest_ticks_per_source_ticks = clock_mapper.estimated_dest_ticks_per_source_ticks()
         projected_dest_ticks_per_source_ticks = (projected_dest_time_end_ns - projected_dest_time_begin_ns).count() / (
                 source_time_end_ns - source_time_begin_ns).count()
         projected_dest_time_error_ns = (projected_dest_time_end_ns - dest_time_end_ns).count()
@@ -115,5 +124,4 @@ def simulate_batch_with_interrupt(clock_mapper, nominal_sample_rate):
 
 
 if __name__ == "__main__":
-    nominal_sample_rate = 48000
-    simulate_batch_with_interrupt(ratl_chrono.ClockMapper(), nominal_sample_rate)
+    simulate_batch_with_interrupt(ratl_chrono.ClockMapper())
