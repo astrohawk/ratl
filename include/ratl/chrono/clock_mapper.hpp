@@ -43,11 +43,11 @@ public:
     {
         if (projection_end_source_time < projection_start_source_time)
         {
-            throw std::invalid_argument{"projection end source time is before projection start source time"};
+            throw std::invalid_argument{"end source time of the projection is before start source time"};
         }
         if (current_source_time == projection_start_source_time)
         {
-            throw std::invalid_argument{"current source time cannot be equal to projection start source time"};
+            throw std::invalid_argument{"current source time cannot be equal to start source time of the projection"};
         }
 
         if (projection_end_dest_time_ == dest_time_point{})
@@ -68,8 +68,8 @@ public:
 
         if (projection_start_source_time != previous_projection_end_source_time_)
         {
-            throw std::invalid_argument{
-                "projection sample time is not equal to the sample time of the end of the previous projection"};
+            throw std::invalid_argument{"start source time of the current projection is not equal to the end source "
+                                        "time of the previous projection"};
         }
 
         if (projection_end_source_time == previous_projection_end_source_time_)
