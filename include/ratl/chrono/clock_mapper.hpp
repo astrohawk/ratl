@@ -33,75 +33,71 @@ public:
     using dest_time_point = typename DestClock::time_point;
     using dest_clock_duration = typename dest_time_point::duration;
 
-    inline explicit clock_mapper() : estimated_dest_ticks_per_source_ticks_{NominalDestTicksPerSourceTicks} {}
+    inline explicit clock_mapper() : estimated_rate_{NominalRate} {}
 
     std::tuple<dest_time_point, dest_time_point> get_projected_time(
-        const source_time_point& projection_start_source_time,
-        const source_time_point& projection_end_source_time,
+        const source_time_point& start_source_time,
+        const source_time_point& end_source_time,
         const source_time_point& current_source_time,
         const dest_time_point& current_dest_time)
     {
-        if (projection_end_source_time < projection_start_source_time)
+        if (end_source_time < start_source_time)
         {
             throw std::invalid_argument{"end source time of the projection is before start source time"};
         }
 
-        if (current_source_time == projection_start_source_time)
+        if (current_source_time == start_source_time)
         {
             throw std::invalid_argument{"current source time cannot be equal to start source time of the projection"};
         }
 
-        if (projection_end_dest_time_ == dest_time_point{})
+        if (previous_estimated_end_dest_time_ == dest_time_point{})
         {
-            auto projection_start_dest_time =
+            auto estimated_start_dest_time =
                 current_dest_time +
                 dest_clock_duration{static_cast<typename dest_clock_duration::rep>(std::llround(
-                    static_cast<double>((projection_start_source_time - current_source_time).count()) *
-                    estimated_dest_ticks_per_source_ticks_))};
-            projection_end_dest_time_ =
+                    static_cast<double>((start_source_time - current_source_time).count()) * estimated_rate_))};
+            previous_estimated_end_dest_time_ =
                 current_dest_time +
                 dest_clock_duration{static_cast<typename dest_clock_duration::rep>(std::llround(
-                    static_cast<double>((projection_end_source_time - current_source_time).count()) *
-                    estimated_dest_ticks_per_source_ticks_))};
-            previous_projection_end_source_time_ = projection_end_source_time;
-            return {projection_start_dest_time, projection_end_dest_time_};
+                    static_cast<double>((end_source_time - current_source_time).count()) * estimated_rate_))};
+            previous_end_source_time_ = end_source_time;
+            return {estimated_start_dest_time, previous_estimated_end_dest_time_};
         }
 
-        if (projection_start_source_time != previous_projection_end_source_time_)
+        if (start_source_time != previous_end_source_time_)
         {
             throw std::invalid_argument{"start source time of the current projection is not equal to the end source "
                                         "time of the previous projection"};
         }
 
-        if (projection_end_source_time == previous_projection_end_source_time_)
+        if (end_source_time == previous_end_source_time_)
         {
-            return {projection_end_dest_time_, projection_end_dest_time_};
+            return {previous_estimated_end_dest_time_, previous_estimated_end_dest_time_};
         }
 
-        auto dest_ticks_per_source_ticks_error =
-            calculate_dest_ticks_per_source_ticks_error(current_source_time, current_dest_time);
+        auto rate_error = calculate_rate_error(current_source_time, current_dest_time);
 
-        auto projection_start_dest_time = projection_end_dest_time_;
-        auto projection_source_duration =
-            static_cast<double>((projection_end_source_time - previous_projection_end_source_time_).count());
-        auto filter_coefficients = dll_filter_coefficients{projection_source_duration};
-        auto projection_end_dest_time_delta =
-            dest_clock_duration{static_cast<typename dest_clock_duration::rep>(std::llround(
-                ((filter_coefficients.get_b() * dest_ticks_per_source_ticks_error) +
-                 estimated_dest_ticks_per_source_ticks_) *
-                projection_source_duration))};
-        auto dest_ticks_per_source_ticks_delta = filter_coefficients.get_c() * dest_ticks_per_source_ticks_error;
+        auto estimated_start_dest_time = previous_estimated_end_dest_time_;
 
-        previous_projection_end_source_time_ = projection_end_source_time;
-        projection_end_dest_time_ += projection_end_dest_time_delta;
-        estimated_dest_ticks_per_source_ticks_ += dest_ticks_per_source_ticks_delta;
+        auto source_duration = static_cast<double>((end_source_time - previous_end_source_time_).count());
+        auto filter_coefficients = dll_filter_coefficients{source_duration};
 
-        return {projection_start_dest_time, projection_end_dest_time_};
+        auto rate_delta = filter_coefficients.get_c() * rate_error;
+        estimated_rate_ += rate_delta;
+
+        previous_end_source_time_ = end_source_time;
+
+        auto estimated_dest_duration = dest_clock_duration{static_cast<typename dest_clock_duration::rep>(
+            std::llround(source_duration * (estimated_rate_ + (filter_coefficients.get_b() * rate_error))))};
+        previous_estimated_end_dest_time_ += estimated_dest_duration;
+
+        return {estimated_start_dest_time, previous_estimated_end_dest_time_};
     }
 
-    inline double get_estimated_dest_ticks_per_source_ticks() const noexcept
+    inline double get_estimated_rate() const noexcept
     {
-        return estimated_dest_ticks_per_source_ticks_;
+        return estimated_rate_;
     }
 
 private:
@@ -141,26 +137,26 @@ private:
         double c_;
     };
 
-    double calculate_dest_ticks_per_source_ticks_error(
+    double calculate_rate_error(
         const source_time_point& current_source_time, const dest_time_point& current_dest_time) const
     {
-        auto clock_projection_source_duration =
-            static_cast<double>((current_source_time - previous_projection_end_source_time_).count());
-        auto projected_dest_duration = clock_projection_source_duration * estimated_dest_ticks_per_source_ticks_;
-        auto actual_dest_duration = static_cast<double>((current_dest_time - projection_end_dest_time_).count());
+        auto clock_source_duration = static_cast<double>((current_source_time - previous_end_source_time_).count());
+        auto projected_dest_duration = clock_source_duration * estimated_rate_;
+        auto actual_dest_duration =
+            static_cast<double>((current_dest_time - previous_estimated_end_dest_time_).count());
         auto dest_duration_error = actual_dest_duration - projected_dest_duration;
 
-        return dest_duration_error / std::abs(clock_projection_source_duration);
+        return dest_duration_error / std::abs(clock_source_duration);
     }
 
-    static constexpr double NominalDestTicksPerSourceTicks = (static_cast<double>(source_clock_duration::period::num) *
-                                                              static_cast<double>(dest_clock_duration::period::den)) /
-                                                             (static_cast<double>(source_clock_duration::period::den) *
-                                                              static_cast<double>(dest_clock_duration::period::num));
+    static constexpr double NominalRate = (static_cast<double>(source_clock_duration::period::num) *
+                                           static_cast<double>(dest_clock_duration::period::den)) /
+                                          (static_cast<double>(source_clock_duration::period::den) *
+                                           static_cast<double>(dest_clock_duration::period::num));
 
-    source_time_point previous_projection_end_source_time_{};
-    dest_time_point projection_end_dest_time_{};
-    double estimated_dest_ticks_per_source_ticks_;
+    source_time_point previous_end_source_time_{};
+    dest_time_point previous_estimated_end_dest_time_{};
+    double estimated_rate_;
 };
 
 } // namespace chrono

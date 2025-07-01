@@ -431,12 +431,11 @@ PYBIND11_MODULE(ratl_chrono, m)
             py::arg("projection_end_source_time"),
             py::arg("current_source_time"),
             py::arg("current_dest_time"))
-        .def("estimated_dest_ticks_per_source_ticks", &ClockMapper::get_estimated_dest_ticks_per_source_ticks)
+        .def("estimated_rate", &ClockMapper::get_estimated_rate)
         .def(
             "__repr__",
             [](const ClockMapper& self)
             {
-                return "ClockMapper(estimated_dest_ticks_per_source_ticks=" +
-                       std::to_string(self.get_estimated_dest_ticks_per_source_ticks()) + ")";
+                return "ClockMapper(estimated_rate=" + std::to_string(self.get_estimated_rate()) + ")";
             });
 }
