@@ -27,7 +27,7 @@ class ReferenceClockMapper:
         if end_source_time == self.previous_end_source_time_:
             return self.previous_estimated_end_dest_time_, self.previous_estimated_end_dest_time_
 
-        rate_error = self._calculate_rate_error(current_source_time, current_dest_time)
+        dest_duration_error, rate_error = self._calculate_errors(current_source_time, current_dest_time)
 
         estimated_start_dest_time = copy.deepcopy(self.previous_estimated_end_dest_time_)
 
@@ -39,7 +39,7 @@ class ReferenceClockMapper:
 
         self.previous_end_source_time_ = end_source_time
 
-        estimated_dest_duration = source_duration * (self.estimated_rate_ + (filter_coefficients.b * rate_error))
+        estimated_dest_duration = (source_duration * self.estimated_rate_) + (dest_duration_error * filter_coefficients.b)
         self.previous_estimated_end_dest_time_ += estimated_dest_duration
 
         return estimated_start_dest_time, self.previous_estimated_end_dest_time_
@@ -47,13 +47,13 @@ class ReferenceClockMapper:
     def estimated_rate(self):
         return self.estimated_rate_
 
-    def _calculate_rate_error(self, current_source_time, current_dest_time):
+    def _calculate_errors(self, current_source_time, current_dest_time):
         error_source_duration = current_source_time - self.previous_end_source_time_
         assert error_source_duration.count() != 0
         estimated_dest_error_duration = error_source_duration * self.estimated_rate_
         actual_dest_error_duration = current_dest_time - self.previous_estimated_end_dest_time_
-        error_dest_duration_error = actual_dest_error_duration - estimated_dest_error_duration
-        return error_dest_duration_error.count() / abs(error_source_duration.count())
+        error_dest_error_duration = actual_dest_error_duration - estimated_dest_error_duration
+        return error_dest_error_duration, error_dest_error_duration.count() / abs(error_source_duration.count())
 
     class FilterCoefficients:
         BANDWIDTH = 1 / 8

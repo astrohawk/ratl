@@ -76,7 +76,9 @@ public:
             return {previous_estimated_end_dest_time_, previous_estimated_end_dest_time_};
         }
 
-        auto rate_error = calculate_rate_error(current_source_time, current_dest_time);
+        auto errors = calculate_errors(current_source_time, current_dest_time);
+        auto dest_duration_error = std::get<0>(errors);
+        auto rate_error = std::get<1>(errors);
 
         auto estimated_start_dest_time = previous_estimated_end_dest_time_;
 
@@ -89,7 +91,7 @@ public:
         previous_end_source_time_ = end_source_time;
 
         auto estimated_dest_duration = dest_clock_duration{static_cast<typename dest_clock_duration::rep>(
-            std::llround(source_duration * (estimated_rate_ + (filter_coefficients.get_b() * rate_error))))};
+            std::llround(source_duration * estimated_rate_) + (filter_coefficients.get_b() * dest_duration_error))};
         previous_estimated_end_dest_time_ += estimated_dest_duration;
 
         return {estimated_start_dest_time, previous_estimated_end_dest_time_};
@@ -137,16 +139,15 @@ private:
         double c_;
     };
 
-    double calculate_rate_error(
+    std::tuple<double, double> calculate_errors(
         const source_time_point& current_source_time, const dest_time_point& current_dest_time) const
     {
-        auto clock_source_duration = static_cast<double>((current_source_time - previous_end_source_time_).count());
-        auto projected_dest_duration = clock_source_duration * estimated_rate_;
+        auto source_duration = static_cast<double>((current_source_time - previous_end_source_time_).count());
+        auto estimated_dest_duration = source_duration * estimated_rate_;
         auto actual_dest_duration =
             static_cast<double>((current_dest_time - previous_estimated_end_dest_time_).count());
-        auto dest_duration_error = actual_dest_duration - projected_dest_duration;
-
-        return dest_duration_error / std::abs(clock_source_duration);
+        auto dest_duration_error = actual_dest_duration - estimated_dest_duration;
+        return {dest_duration_error, dest_duration_error / std::abs(source_duration)};
     }
 
     static constexpr double NominalRate = (static_cast<double>(source_clock_duration::period::num) *
