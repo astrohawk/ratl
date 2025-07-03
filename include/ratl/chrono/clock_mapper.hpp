@@ -85,8 +85,8 @@ public:
         auto source_duration = static_cast<double>((end_source_time - previous_end_source_time_).count());
         auto filter_coefficients = dll_filter_coefficients{source_duration};
 
-        auto rate_delta = filter_coefficients.get_c() * rate_error;
-        estimated_rate_ += rate_delta;
+        auto estimated_rate_delta = filter_coefficients.get_c() * rate_error;
+        estimated_rate_ += estimated_rate_delta;
 
         previous_end_source_time_ = end_source_time;
 

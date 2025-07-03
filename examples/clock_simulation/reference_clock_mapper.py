@@ -34,8 +34,8 @@ class ReferenceClockMapper:
         source_duration = end_source_time - self.previous_end_source_time_
         filter_coefficients = self.FilterCoefficients(source_duration)
 
-        rate_delta = filter_coefficients.c * rate_error
-        self.estimated_rate_ += rate_delta
+        estimated_rate_delta = filter_coefficients.c * rate_error
+        self.estimated_rate_ += estimated_rate_delta
 
         self.previous_end_source_time_ = end_source_time
 
