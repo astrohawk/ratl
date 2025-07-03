@@ -91,7 +91,7 @@ public:
         previous_end_source_time_ = end_source_time;
 
         auto estimated_dest_duration = dest_clock_duration{static_cast<typename dest_clock_duration::rep>(
-            std::llround(source_duration * estimated_rate_) + (filter_coefficients.get_b() * dest_duration_error))};
+            std::llround((source_duration * estimated_rate_) + (filter_coefficients.get_b() * dest_duration_error)))};
         previous_estimated_end_dest_time_ += estimated_dest_duration;
 
         return {estimated_start_dest_time, previous_estimated_end_dest_time_};
