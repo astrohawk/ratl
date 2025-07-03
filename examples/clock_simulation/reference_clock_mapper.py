@@ -48,12 +48,12 @@ class ReferenceClockMapper:
         return self.estimated_rate_
 
     def _calculate_errors(self, current_source_time, current_dest_time):
-        error_source_duration = current_source_time - self.previous_end_source_time_
-        assert error_source_duration.count() != 0
-        estimated_dest_error_duration = error_source_duration * self.estimated_rate_
-        actual_dest_error_duration = current_dest_time - self.previous_estimated_end_dest_time_
-        error_dest_error_duration = actual_dest_error_duration - estimated_dest_error_duration
-        return error_dest_error_duration, error_dest_error_duration.count() / abs(error_source_duration.count())
+        source_duration = current_source_time - self.previous_end_source_time_
+        assert source_duration.count() != 0
+        estimated_dest_duration = source_duration * self.estimated_rate_
+        actual_dest_duration = current_dest_time - self.previous_estimated_end_dest_time_
+        dest_duration_error = actual_dest_duration - estimated_dest_duration
+        return dest_duration_error, dest_duration_error.count() / abs(source_duration.count())
 
     class FilterCoefficients:
         BANDWIDTH = 1 / 8
